@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Caregiver Dashboard | RGMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+    <header class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-950">Caregiver Dashboard</h1>
+                <p class="text-slate-500 text-sm">Welcome, {{ request.user.username }}</p>
+            </div>
+
+            <a href="{% url 'logout' %}"
+               class="bg-slate-900 text-white px-5 py-3 rounded-xl font-semibold hover:bg-slate-800">
+                Logout
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 rounded-lg bg-green-100 border border-green-300 text-green-800 px-4 py-3">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-2xl shadow p-6 border">
+                <p class="text-slate-500">Assigned Patients</p>
+                <h2 class="text-4xl font-bold text-blue-950 mt-2">
+                    {{ assigned_patients.count }}
+                </h2>
+            </div>
+
+            <a href="{% url 'add_vital_reading' %}"
+               class="bg-blue-950 text-white rounded-2xl shadow p-6 border hover:bg-blue-900">
+                <p class="text-blue-100">Quick Action</p>
+                <h2 class="text-2xl font-bold mt-2">Add Vital Reading</h2>
+            </a>
+
+            <div class="bg-white rounded-2xl shadow p-6 border">
+                <p class="text-slate-500">Recent Entries</p>
+                <h2 class="text-4xl font-bold text-blue-950 mt-2">
+                    {{ recent_readings.count }}
+                </h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <section class="bg-white rounded-2xl shadow p-6 border">
+                <h2 class="text-2xl font-bold text-blue-950 mb-4">
+                    My Assigned Patients
+                </h2>
+
+                {% if assigned_patients %}
+                    <div class="space-y-4">
+                        {% for patient in assigned_patients %}
+                            <div class="border border-slate-200 rounded-xl p-4">
+                                <h3 class="font-bold text-slate-900">
+                                    {{ patient.full_name }}
+                                </h3>
+                                <p class="text-sm text-slate-500">
+                                    {{ patient.get_care_type_display }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-slate-500">
+                        No patient has been assigned to you yet.
+                    </p>
+                {% endif %}
+            </section>
+
+            <section class="bg-white rounded-2xl shadow p-6 border">
+                <h2 class="text-2xl font-bold text-blue-950 mb-4">
+                    Recent Readings
+                </h2>
+
+                {% if recent_readings %}
+                    <div class="space-y-4">
+                        {% for reading in recent_readings %}
+                            <div class="border border-slate-200 rounded-xl p-4">
+                                <h3 class="font-bold text-slate-900">
+                                    {{ reading.patient.full_name }}
+                                </h3>
+
+                                <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
+                                    <p>BP: <strong>{{ reading.systolic_bp }}/{{ reading.diastolic_bp }}</strong></p>
+                                    <p>Pulse: <strong>{{ reading.pulse_rate }}</strong></p>
+                                    <p>FBS: <strong>{{ reading.fasting_blood_sugar|default:"N/A" }}</strong></p>
+                                    <p>RBS: <strong>{{ reading.random_blood_sugar|default:"N/A" }}</strong></p>
+                                </div>
+
+                                <p class="text-xs text-slate-500 mt-3">
+                                    {{ reading.created_at }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-slate-500">
+                        No readings submitted yet.
+                    </p>
+                {% endif %}
+            </section>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

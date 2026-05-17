@@ -1,12 +1,56 @@
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
 from .forms import VitalReadingForm
 from .models import Patient, VitalReading, Alert
 
 
-def dashboard(request):
+def landing_page(request):
+    return render(request, 'monitoring/landing.html')
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect_user_by_role(request.user)
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect_user_by_role(user)
+
+        messages.error(request, 'Invalid username or password.')
+
+    return render(request, 'monitoring/login.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('landing')
+
+
+def redirect_user_by_role(user):
+    if user.is_superuser:
+        return redirect('doctor_dashboard')
+
+    if user.groups.filter(name='Doctors').exists():
+        return redirect('doctor_dashboard')
+
+    if user.groups.filter(name='Caregivers').exists():
+        return redirect('caregiver_dashboard')
+
+    return redirect('landing')
+
+
+@login_required
+def doctor_dashboard(request):
     total_patients = Patient.objects.count()
     total_readings = VitalReading.objects.count()
 
@@ -29,13 +73,26 @@ def dashboard(request):
         status='unreviewed'
     ).order_by('-created_at')[:10]
 
-    return render(request, 'monitoring/dashboard.html', {
+    return render(request, 'monitoring/doctor_dashboard.html', {
         'total_patients': total_patients,
         'total_readings': total_readings,
         'critical_alerts_count': critical_alerts_count,
         'warning_alerts_count': warning_alerts_count,
         'latest_readings': latest_readings,
         'urgent_alerts': urgent_alerts,
+    })
+
+
+@login_required
+def caregiver_dashboard(request):
+    assigned_patients = Patient.objects.filter(assigned_caregiver=request.user)
+    recent_readings = VitalReading.objects.filter(
+        patient__assigned_caregiver=request.user
+    ).select_related('patient').order_by('-created_at')[:5]
+
+    return render(request, 'monitoring/caregiver_dashboard.html', {
+        'assigned_patients': assigned_patients,
+        'recent_readings': recent_readings,
     })
 
 
@@ -79,6 +136,7 @@ def create_alert_for_reading(reading):
         )
 
 
+@login_required
 def add_vital_reading(request):
     if request.method == 'POST':
         form = VitalReadingForm(request.POST)
@@ -88,27 +146,26 @@ def add_vital_reading(request):
             create_alert_for_reading(reading)
 
             messages.success(request, 'Vital reading submitted successfully.')
-            return redirect('add_vital_reading')
+            return redirect('caregiver_dashboard')
     else:
         form = VitalReadingForm()
 
     return render(request, 'monitoring/add_vital_reading.html', {
         'form': form
     })
-    
+
+
+@login_required
 def mark_alert_reviewed(request, alert_id):
     alert = get_object_or_404(Alert, id=alert_id)
 
     if request.method == 'POST':
         alert.status = 'reviewed'
         alert.reviewed_at = timezone.now()
-
-        if request.user.is_authenticated:
-            alert.reviewed_by = request.user
-
+        alert.reviewed_by = request.user
         alert.save()
 
         messages.success(request, 'Alert marked as reviewed.')
-        return redirect('home')
+        return redirect('doctor_dashboard')
 
-    return redirect('home')
+    return redirect('doctor_dashboard')
