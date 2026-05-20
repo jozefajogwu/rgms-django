@@ -10,6 +10,7 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8">
 
+        <!-- Header -->
         <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
                 <h1 class="text-4xl font-bold text-blue-950">
@@ -20,12 +21,29 @@
                 </p>
             </div>
 
-            <a href="{% url 'add_vital_reading' %}"
-               class="bg-blue-950 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-900 transition">
-                Add Vital Reading
-            </a>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="{% url 'add_vital_reading' %}"
+                   class="bg-blue-950 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-900 transition text-center">
+                    Add Vital Reading
+                </a>
+
+                <a href="{% url 'logout' %}"
+                   class="bg-white border border-gray-300 text-gray-800 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition text-center">
+                    Logout
+                </a>
+            </div>
         </div>
 
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 rounded-lg bg-green-100 border border-green-300 text-green-800 px-4 py-3">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Stat Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 
             <div class="bg-white rounded-2xl shadow p-6">
@@ -58,8 +76,10 @@
 
         </div>
 
+        <!-- Dashboard Content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
+            <!-- Urgent Alerts -->
             <div class="bg-white rounded-2xl shadow p-6">
                 <h2 class="text-2xl font-bold text-blue-950 mb-4">
                     Urgent Alerts
@@ -103,6 +123,14 @@
                                 <p class="text-xs text-gray-500 mt-2">
                                     {{ alert.created_at }}
                                 </p>
+
+                                <form method="POST" action="{% url 'mark_alert_reviewed' alert.id %}" class="mt-4">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="bg-blue-950 hover:bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold transition">
+                                        Mark as Reviewed
+                                    </button>
+                                </form>
                             </div>
                         {% endfor %}
                     </div>
@@ -113,6 +141,7 @@
                 {% endif %}
             </div>
 
+            <!-- Latest Vital Readings -->
             <div class="bg-white rounded-2xl shadow p-6">
                 <h2 class="text-2xl font-bold text-blue-950 mb-4">
                     Latest Vital Readings
@@ -131,21 +160,56 @@
                                         <span class="text-gray-500">BP:</span>
                                         <strong>{{ reading.systolic_bp }}/{{ reading.diastolic_bp }}</strong>
                                     </p>
-
                                     <p>
                                         <span class="text-gray-500">Pulse:</span>
                                         <strong>{{ reading.pulse_rate }}</strong>
                                     </p>
-
+                                    <p>
+                                        <span class="text-gray-500">SpO2:</span>
+                                        <strong>{{ reading.oxygen_saturation|default:"N/A" }}%</strong>
+                                    </p>
                                     <p>
                                         <span class="text-gray-500">FBS:</span>
                                         <strong>{{ reading.fasting_blood_sugar|default:"N/A" }}</strong>
                                     </p>
-
                                     <p>
                                         <span class="text-gray-500">RBS:</span>
                                         <strong>{{ reading.random_blood_sugar|default:"N/A" }}</strong>
                                     </p>
+                                </div>
+
+                                {% if reading.symptoms %}
+                                    <p class="text-sm text-gray-700 mt-3">
+                                        <span class="text-gray-500">Symptoms:</span>
+                                        {{ reading.symptoms }}
+                                    </p>
+                                {% endif %}
+
+                                <!-- Urinalysis Section -->
+                                <div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-4">
+                                    <h4 class="font-bold text-blue-950 mb-3">
+                                        Urinalysis
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-3 text-sm">
+                                        <p><span class="text-gray-500">Glucose:</span>
+                                            <strong>{{ reading.get_urine_glucose_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Protein:</span>
+                                            <strong>{{ reading.get_urine_protein_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Acetone/Ketone:</span>
+                                            <strong>{{ reading.get_urine_acetone_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Bilirubin:</span>
+                                            <strong>{{ reading.get_urine_bilirubin_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Urobilinogen:</span>
+                                            <strong>{{ reading.get_urine_urobilinogen_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Nitrite:</span>
+                                            <strong>{{ reading.get_urine_nitrite_display }}</strong>
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <p class="text-xs text-gray-500 mt-3">

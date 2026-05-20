@@ -8,21 +8,24 @@
 
 <body class="bg-gray-100 min-h-screen">
 
-    <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto px-4 py-8">
 
+        <!-- Back link -->
         <div class="mb-6">
             <a href="{% url 'caregiver_dashboard' %}" class="text-blue-700 font-medium">
                 ← Back to Caregiver Dashboard
             </a>
         </div>
 
+        <!-- Form Card -->
         <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+
             <h1 class="text-3xl font-bold text-blue-950 mb-2">
                 Caregiver Vital Entry
             </h1>
 
             <p class="text-gray-600 mb-8">
-                Enter the patient’s blood pressure, blood sugar, pulse, symptoms, and notes.
+                Enter the patient’s blood pressure, blood sugar, pulse, SpO2, urinalysis result, symptoms, and notes.
             </p>
 
             {% if messages %}
@@ -36,24 +39,32 @@
             <form method="POST" class="space-y-6">
                 {% csrf_token %}
 
+                <!-- Patient -->
                 <div>
                     <label class="block text-lg font-semibold text-gray-800 mb-2">
                         Patient
                     </label>
                     {{ form.patient }}
+
                     {% if form.patient.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ form.patient.errors.0 }}</p>
+                        <p class="text-red-600 text-sm mt-1">
+                            {{ form.patient.errors.0 }}
+                        </p>
                     {% endif %}
                 </div>
 
+                <!-- Blood Sugar -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-lg font-semibold text-gray-800 mb-2">
                             Fasting Blood Sugar
                         </label>
                         {{ form.fasting_blood_sugar }}
+
                         {% if form.fasting_blood_sugar.errors %}
-                            <p class="text-red-600 text-sm mt-1">{{ form.fasting_blood_sugar.errors.0 }}</p>
+                            <p class="text-red-600 text-sm mt-1">
+                                {{ form.fasting_blood_sugar.errors.0 }}
+                            </p>
                         {% endif %}
                     </div>
 
@@ -62,20 +73,27 @@
                             Random Blood Sugar
                         </label>
                         {{ form.random_blood_sugar }}
+
                         {% if form.random_blood_sugar.errors %}
-                            <p class="text-red-600 text-sm mt-1">{{ form.random_blood_sugar.errors.0 }}</p>
+                            <p class="text-red-600 text-sm mt-1">
+                                {{ form.random_blood_sugar.errors.0 }}
+                            </p>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- BP, Pulse, SpO2 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
                         <label class="block text-lg font-semibold text-gray-800 mb-2">
                             Systolic BP
                         </label>
                         {{ form.systolic_bp }}
+
                         {% if form.systolic_bp.errors %}
-                            <p class="text-red-600 text-sm mt-1">{{ form.systolic_bp.errors.0 }}</p>
+                            <p class="text-red-600 text-sm mt-1">
+                                {{ form.systolic_bp.errors.0 }}
+                            </p>
                         {% endif %}
                     </div>
 
@@ -84,8 +102,11 @@
                             Diastolic BP
                         </label>
                         {{ form.diastolic_bp }}
+
                         {% if form.diastolic_bp.errors %}
-                            <p class="text-red-600 text-sm mt-1">{{ form.diastolic_bp.errors.0 }}</p>
+                            <p class="text-red-600 text-sm mt-1">
+                                {{ form.diastolic_bp.errors.0 }}
+                            </p>
                         {% endif %}
                     </div>
 
@@ -94,32 +115,148 @@
                             Pulse Rate
                         </label>
                         {{ form.pulse_rate }}
+
                         {% if form.pulse_rate.errors %}
-                            <p class="text-red-600 text-sm mt-1">{{ form.pulse_rate.errors.0 }}</p>
+                            <p class="text-red-600 text-sm mt-1">
+                                {{ form.pulse_rate.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-lg font-semibold text-gray-800 mb-2">
+                            SpO2 (%)
+                        </label>
+                        {{ form.oxygen_saturation }}
+
+                        {% if form.oxygen_saturation.errors %}
+                            <p class="text-red-600 text-sm mt-1">
+                                {{ form.oxygen_saturation.errors.0 }}
+                            </p>
                         {% endif %}
                     </div>
                 </div>
 
+                <!-- Urinalysis -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h2 class="text-2xl font-bold text-blue-950 mb-2">
+                        Urinalysis Result
+                    </h2>
+
+                    <p class="text-gray-600 mb-6">
+                        Select the result shown on the urine dipstick test.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-800 mb-2">
+                                Urine Glucose
+                            </label>
+                            {{ form.urine_glucose }}
+
+                            {% if form.urine_glucose.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.urine_glucose.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-800 mb-2">
+                                Urine Protein
+                            </label>
+                            {{ form.urine_protein }}
+
+                            {% if form.urine_protein.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.urine_protein.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-800 mb-2">
+                                Acetone / Ketone
+                            </label>
+                            {{ form.urine_acetone }}
+
+                            {% if form.urine_acetone.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.urine_acetone.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-800 mb-2">
+                                Bilirubin
+                            </label>
+                            {{ form.urine_bilirubin }}
+
+                            {% if form.urine_bilirubin.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.urine_bilirubin.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-800 mb-2">
+                                Urobilinogen
+                            </label>
+                            {{ form.urine_urobilinogen }}
+
+                            {% if form.urine_urobilinogen.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.urine_urobilinogen.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-800 mb-2">
+                                Nitrite
+                            </label>
+                            {{ form.urine_nitrite }}
+
+                            {% if form.urine_nitrite.errors %}
+                                <p class="text-red-600 text-sm mt-1">
+                                    {{ form.urine_nitrite.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Symptoms -->
                 <div>
                     <label class="block text-lg font-semibold text-gray-800 mb-2">
                         Symptoms
                     </label>
                     {{ form.symptoms }}
+
                     {% if form.symptoms.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ form.symptoms.errors.0 }}</p>
+                        <p class="text-red-600 text-sm mt-1">
+                            {{ form.symptoms.errors.0 }}
+                        </p>
                     {% endif %}
                 </div>
 
+                <!-- Notes -->
                 <div>
                     <label class="block text-lg font-semibold text-gray-800 mb-2">
                         Notes
                     </label>
                     {{ form.notes }}
+
                     {% if form.notes.errors %}
-                        <p class="text-red-600 text-sm mt-1">{{ form.notes.errors.0 }}</p>
+                        <p class="text-red-600 text-sm mt-1">
+                            {{ form.notes.errors.0 }}
+                        </p>
                     {% endif %}
                 </div>
 
+                <!-- Submit -->
                 <button type="submit"
                     class="w-full bg-blue-950 hover:bg-blue-900 text-white text-xl font-semibold py-4 rounded-xl transition">
                     Submit Vital Reading

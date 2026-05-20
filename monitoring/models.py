@@ -89,11 +89,77 @@ class VitalReading(models.Model):
         validators=[MinValueValidator(30), MaxValueValidator(250)]
     )
 
+    oxygen_saturation = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(50), MaxValueValidator(100)],
+        help_text="SpO2 percentage"
+    )
+
     symptoms = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     report_file = models.FileField(upload_to='reports/', null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Urinalysis fields
+    URINE_RESULT_CHOICES = [
+        ('negative', 'Negative'),
+        ('trace', 'Trace'),
+        ('plus', '+'),
+        ('plus_2', '++'),
+        ('plus_3', '+++'),
+        ('plus_4', '++++'),
+    ]
+
+    NITRITE_CHOICES = [
+        ('negative', 'Negative'),
+        ('positive', 'Positive'),
+    ]
+
+    UROBILINOGEN_CHOICES = [
+        ('weakly_positive', 'Weakly Positive'),
+        ('plus', '+'),
+        ('plus_2', '++'),
+        ('plus_3', '+++'),
+        ('plus_4', '++++'),
+    ]
+
+    urine_glucose = models.CharField(
+        max_length=20,
+        choices=URINE_RESULT_CHOICES,
+        default='negative'
+    )
+
+    urine_protein = models.CharField(
+        max_length=20,
+        choices=URINE_RESULT_CHOICES,
+        default='negative'
+    )
+
+    urine_acetone = models.CharField(
+        max_length=20,
+        choices=URINE_RESULT_CHOICES,
+        default='negative'
+    )
+
+    urine_bilirubin = models.CharField(
+        max_length=20,
+        choices=URINE_RESULT_CHOICES,
+        default='negative'
+    )
+
+    urine_urobilinogen = models.CharField(
+        max_length=30,
+        choices=UROBILINOGEN_CHOICES,
+        default='weakly_positive'
+    )
+
+    urine_nitrite = models.CharField(
+        max_length=20,
+        choices=NITRITE_CHOICES,
+        default='negative'
+    )
 
     def __str__(self):
         return f"{self.patient.full_name} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"

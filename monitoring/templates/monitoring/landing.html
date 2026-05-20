@@ -5,116 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RGMS | Remote Geriatric Monitoring System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,700&family=Lora:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg:        #080d14;
-      --surface:   #0d1520;
-      --surface2:  #111e2e;
-      --border:    rgba(255,255,255,0.07);
-      --accent:    #00e8b0;
-      --accent2:   #0891b2;
-      --warn:      #f97316;
-      --danger:    #ef4444;
-      --text:      #e8eef6;
-      --muted:     #6b8099;
-      --serif:     'DM Serif Display', serif;
-      --sans:      'DM Sans', sans-serif;
-      --mono:      'Space Mono', monospace;
+      --white:      #ffffff;
+      --bg:         #f0f6ff;
+      --bg2:        #e8f0fc;
+      --purple:     #7c3aed;
+      --purple-lt:  #9d5df5;
+      --purple-pale:#f3eeff;
+      --blue:       #3b82f6;
+      --blue-pale:  #eff6ff;
+      --text:       #1a1a2e;
+      --muted:      #64748b;
+      --border:     #e2e8f0;
+      --sans:       'Nunito', sans-serif;
+      --serif:      'Lora', serif;
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg);
+      background: var(--white);
       color: var(--text);
       font-family: var(--sans);
       overflow-x: hidden;
-      min-height: 100vh;
     }
 
-    /* ── GRID OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,232,176,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,232,176,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── NOISE OVERLAY ── */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
-    }
-
-    /* ── GLOW BLOBS ── */
-    .blob {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .blob-1 { width: 600px; height: 600px; background: rgba(0,232,176,0.06); top: -200px; right: -150px; }
-    .blob-2 { width: 500px; height: 500px; background: rgba(8,145,178,0.07); bottom: 200px; left: -100px; }
-
-    /* ── NAV ── */
+    /* ── NAVBAR ── */
     nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
+      position: sticky;
+      top: 0;
       z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 48px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(8,13,20,0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      padding: 0 48px;
+      height: 70px;
     }
 
-    .nav-logo {
+    .logo {
       display: flex;
       align-items: center;
       gap: 10px;
+      font-weight: 800;
+      font-size: 19px;
+      color: var(--text);
+      text-decoration: none;
     }
 
-    .nav-logo-mark {
+    .logo-mark {
       width: 36px;
       height: 36px;
-      background: var(--accent);
-      border-radius: 10px;
+      background: linear-gradient(135deg, #9d5df5, #7c3aed);
+      border-radius: 50%;
       display: grid;
       place-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .nav-logo-mark svg { position: relative; z-index: 1; }
-
-    .nav-logo-text {
-      font-family: var(--mono);
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: var(--text);
-    }
-
-    .nav-logo-text span {
-      color: var(--accent);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 900;
+      box-shadow: 0 4px 14px rgba(124,58,237,0.35);
     }
 
     .nav-links {
@@ -124,1009 +80,1066 @@
     }
 
     .nav-links a {
-      font-size: 13px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
       color: var(--muted);
       text-decoration: none;
-      letter-spacing: 0.04em;
       transition: color 0.2s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0; right: 0;
+      height: 2px;
+      background: var(--purple);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transition: transform 0.2s;
     }
 
     .nav-links a:hover { color: var(--text); }
-    .nav-links a.active { color: var(--accent); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active { color: var(--purple); }
+    .nav-links a.active::after { transform: scaleX(1); }
 
-    .nav-cta {
+    .access-btn {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border: 1px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      border-radius: 6px;
-      font-family: var(--mono);
-      font-size: 12px;
+      gap: 10px;
+      padding: 11px 20px;
+      background: linear-gradient(135deg, #9d5df5, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: var(--sans);
+      font-size: 14px;
       font-weight: 700;
-      letter-spacing: 0.08em;
       text-decoration: none;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      box-shadow: 0 4px 18px rgba(124,58,237,0.3);
+      transition: box-shadow 0.2s, transform 0.2s;
     }
 
-    .nav-cta:hover {
-      background: var(--accent);
-      color: var(--bg);
+    .access-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+    }
+
+    .access-btn .arrow-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
     }
 
     /* ── HERO ── */
     .hero {
-      position: relative;
-      z-index: 1;
-      padding: 180px 48px 100px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
-      max-width: 1400px;
-      margin: 0 auto;
+      min-height: calc(100vh - 70px);
+      max-height: 760px;
+      overflow: hidden;
     }
 
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      color: var(--accent);
-      margin-bottom: 28px;
-      text-transform: uppercase;
+    /* LEFT */
+    .hero-left {
+      background: linear-gradient(160deg, #f8f4ff 0%, #eaf4ff 60%, #f0f6ff 100%);
+      padding: 70px 60px 70px 72px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
 
-    .hero-eyebrow::before {
+    /* decorative blob behind left copy */
+    .hero-left::before {
       content: '';
-      display: block;
-      width: 24px;
-      height: 1px;
-      background: var(--accent);
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(157,93,245,0.10) 0%, transparent 70%);
+      top: -80px; left: -80px;
+      pointer-events: none;
     }
 
-    .hero h1 {
+    .hero-left::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+      bottom: -60px; right: -40px;
+      pointer-events: none;
+    }
+
+    .hero-left h1 {
       font-family: var(--serif);
-      font-size: clamp(44px, 5.5vw, 80px);
-      line-height: 1.05;
-      letter-spacing: -1px;
-      margin-bottom: 28px;
-      color: #fff;
+      font-size: clamp(36px, 4vw, 58px);
+      line-height: 1.12;
+      color: var(--text);
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1;
     }
 
-    .hero h1 em {
-      font-style: italic;
-      color: var(--accent);
-    }
-
-    .hero-desc {
-      font-size: 16px;
-      line-height: 1.8;
+    .hero-left p {
+      font-size: 15.5px;
+      line-height: 1.75;
       color: var(--muted);
-      max-width: 480px;
-      margin-bottom: 44px;
+      max-width: 440px;
+      margin-bottom: 36px;
+      position: relative;
+      z-index: 1;
     }
 
     .hero-actions {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 56px;
+      gap: 14px;
+      margin-bottom: 48px;
+      position: relative;
+      z-index: 1;
     }
 
-    .btn-primary {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 28px;
-      background: var(--accent);
-      color: var(--bg);
-      border: none;
-      border-radius: 6px;
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.2s, transform 0.2s;
-    }
-
-    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
-
-    .btn-ghost {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 28px;
+    .btn-outline {
+      height: 48px;
+      padding: 0 26px;
+      border: 2px solid var(--text);
       background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      text-decoration: none;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
-
-    /* stats row */
-    .hero-stats {
-      display: flex;
-      gap: 40px;
-    }
-
-    .stat {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .stat-value {
-      font-family: var(--mono);
-      font-size: 26px;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .stat-value span { color: var(--accent); }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-    }
-
-    .stat-divider {
-      width: 1px;
-      background: var(--border);
-      height: 40px;
-      align-self: center;
-    }
-
-    /* ── MONITOR PANEL ── */
-    .monitor-panel {
-      position: relative;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--surface);
-      overflow: hidden;
-      min-height: 520px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .panel-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .panel-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .live-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--accent);
-      letter-spacing: 0.08em;
-    }
-
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: pulse-dot 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
-
-    /* vitals grid */
-    .vitals-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: var(--border);
-      flex: 1;
-    }
-
-    .vital-cell {
-      background: var(--surface);
-      padding: 24px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: background 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .vital-cell:hover { background: var(--surface2); }
-
-    .vital-cell.danger { border-left: 3px solid var(--danger); }
-    .vital-cell.warn   { border-left: 3px solid var(--warn); }
-    .vital-cell.ok     { border-left: 3px solid var(--accent); }
-
-    .vital-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      font-size: 16px;
-    }
-
-    .vital-icon.danger-bg { background: rgba(239,68,68,0.12); }
-    .vital-icon.warn-bg   { background: rgba(249,115,22,0.12); }
-    .vital-icon.ok-bg     { background: rgba(0,232,176,0.10); }
-
-    .vital-name {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      font-family: var(--mono);
-    }
-
-    .vital-value {
-      font-family: var(--mono);
-      font-size: 28px;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1;
-    }
-
-    .vital-value .unit {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 400;
-      margin-left: 2px;
-    }
-
-    .vital-status {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
       border-radius: 999px;
-      display: inline-block;
-      width: fit-content;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
     }
 
-    .vital-status.danger { background: rgba(239,68,68,0.15); color: var(--danger); }
-    .vital-status.warn   { background: rgba(249,115,22,0.15); color: var(--warn); }
-    .vital-status.ok     { background: rgba(0,232,176,0.12); color: var(--accent); }
+    .btn-outline:hover { background: var(--text); color: #fff; }
 
-    /* sparkline */
-    .sparkline {
-      position: absolute;
-      bottom: 0; right: 0;
-      opacity: 0.18;
-    }
-
-    /* alert strip */
-    .alert-strip {
+    .btn-purple {
+      height: 48px;
+      padding: 0 24px;
+      border: none;
+      background: linear-gradient(135deg, #9d5df5, #7c3aed);
+      border-radius: 999px;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
-      background: rgba(239,68,68,0.06);
-      font-size: 12px;
-      color: #fca5a5;
+      gap: 10px;
+      box-shadow: 0 4px 18px rgba(124,58,237,0.32);
+      transition: box-shadow 0.2s, transform 0.2s;
     }
 
-    .alert-icon {
-      width: 22px;
-      height: 22px;
+    .btn-purple:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,58,237,0.42); }
+
+    .btn-purple .arrow-circ {
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: rgba(239,68,68,0.2);
+      background: rgba(255,255,255,0.25);
       display: grid;
       place-items: center;
-      font-size: 11px;
+      font-size: 13px;
+    }
+
+    /* trust row */
+    .trust-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .avatars {
+      display: flex;
+    }
+
+    .avatars img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      object-fit: cover;
+      margin-left: -12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    }
+
+    .avatars img:first-child { margin-left: 0; }
+
+    .trust-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .trust-text span {
+      display: block;
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* RIGHT — image */
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(160deg, #daeeff 0%, #ede8ff 100%);
+    }
+
+    .hero-right img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+
+    /* floating pills */
+    .pill {
+      position: absolute;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      box-shadow: 0 8px 28px rgba(100,116,139,0.18);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .pill-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
       flex-shrink: 0;
     }
 
-    .alert-text strong { color: var(--danger); margin-right: 4px; }
+    .pill.p1 { top: 15%;  left: 6%;  animation-delay: 0s;   }
+    .pill.p2 { top: 42%;  right: 6%; animation-delay: 1.5s; }
+    .pill.p3 { bottom: 14%; right: 10%; animation-delay: 0.8s; }
 
-    .alert-action {
-      margin-left: auto;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--danger);
-      border: 1px solid rgba(239,68,68,0.4);
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
-
-    .alert-action:hover { background: rgba(239,68,68,0.1); }
-
-    /* ── SECTION WRAPPER ── */
-    .section {
-      position: relative;
-      z-index: 1;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 80px 48px;
-    }
-
-    .section-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .section-label::before {
-      content: '';
-      display: block;
-      width: 20px;
-      height: 1px;
-      background: var(--accent);
-    }
-
-    .section-heading {
-      font-family: var(--serif);
-      font-size: clamp(34px, 3.5vw, 52px);
-      color: #fff;
-      margin-bottom: 16px;
-      max-width: 600px;
-    }
-
-    .section-sub {
-      font-size: 15px;
-      color: var(--muted);
-      line-height: 1.8;
-      max-width: 520px;
-      margin-bottom: 56px;
-    }
-
-    /* ── FEATURES BENTO ── */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      grid-template-rows: auto;
-      gap: 16px;
-    }
-
-    .bento-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.3s, transform 0.3s;
-    }
-
-    .bento-card:hover {
-      border-color: rgba(0,232,176,0.25);
-      transform: translateY(-2px);
-    }
-
-    .bento-card.span-5  { grid-column: span 5; }
-    .bento-card.span-7  { grid-column: span 7; }
-    .bento-card.span-4  { grid-column: span 4; }
-    .bento-card.span-8  { grid-column: span 8; }
-    .bento-card.span-6  { grid-column: span 6; }
-    .bento-card.span-12 { grid-column: span 12; }
-
-    .bento-glow {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      filter: blur(60px);
-      top: -60px; right: -60px;
-      pointer-events: none;
-    }
-
-    .glow-green  { background: rgba(0,232,176,0.08); }
-    .glow-red    { background: rgba(239,68,68,0.08); }
-    .glow-blue   { background: rgba(8,145,178,0.10); }
-    .glow-orange { background: rgba(249,115,22,0.08); }
-
-    .bento-tag {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 24px;
-    }
-
-    .bento-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      font-size: 22px;
-      margin-bottom: 20px;
-    }
-
-    .bento-icon.green  { background: rgba(0,232,176,0.10); }
-    .bento-icon.red    { background: rgba(239,68,68,0.10); }
-    .bento-icon.blue   { background: rgba(8,145,178,0.12); }
-    .bento-icon.orange { background: rgba(249,115,22,0.10); }
-
-    .bento-card h3 {
-      font-family: var(--serif);
-      font-size: 24px;
-      color: #fff;
-      margin-bottom: 12px;
-    }
-
-    .bento-card p {
-      font-size: 14px;
-      line-height: 1.75;
-      color: var(--muted);
-    }
-
-    /* inline mini chart for bento */
-    .mini-chart {
-      margin-top: 28px;
-      height: 56px;
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-    }
-
-    .bar {
-      flex: 1;
-      border-radius: 3px 3px 0 0;
-      background: rgba(0,232,176,0.15);
-      transition: background 0.2s;
-      min-height: 8px;
-    }
-
-    .bar.active { background: var(--accent); }
-    .bar:hover  { background: rgba(0,232,176,0.5); }
-
-    /* alert feed preview */
-    .alert-feed {
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .feed-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      font-size: 12px;
-    }
-
-    .feed-dot {
+    .pill-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
-    .feed-dot.red    { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
-    .feed-dot.orange { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
-    .feed-dot.green  { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-
-    .feed-msg { color: var(--text); flex: 1; }
-    .feed-time { color: var(--muted); font-family: var(--mono); font-size: 10px; }
-
-    /* ── HOW IT WORKS ── */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      background: var(--border);
-      border-radius: 16px;
-      overflow: hidden;
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-8px); }
     }
 
-    .step {
-      background: var(--surface);
-      padding: 40px 36px;
-      position: relative;
-      transition: background 0.2s;
+    /* ── STATS BAR ── */
+    .stats-bar {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
     }
 
-    .step:hover { background: var(--surface2); }
-
-    .step-number {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent);
-      letter-spacing: 0.1em;
-      margin-bottom: 28px;
+    .stat-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 28px 40px;
+      border-right: 1px solid var(--border);
+      max-width: 280px;
     }
 
-    .step-icon-wrap {
-      width: 56px;
-      height: 56px;
-      border: 1px solid var(--border);
+    .stat-item:last-child { border-right: none; }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
       border-radius: 14px;
       display: grid;
       place-items: center;
-      font-size: 26px;
-      margin-bottom: 24px;
-      background: var(--surface2);
+      font-size: 22px;
+      flex-shrink: 0;
     }
 
-    .step h3 {
-      font-family: var(--serif);
-      font-size: 22px;
-      color: #fff;
+    .stat-icon.purple { background: var(--purple-pale); }
+    .stat-icon.blue   { background: var(--blue-pale); }
+    .stat-icon.green  { background: #ecfdf5; }
+    .stat-icon.orange { background: #fff7ed; }
+
+    .stat-num {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-num span { color: var(--purple); }
+
+    .stat-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 3px;
+    }
+
+    /* ── FEATURES ── */
+    .features-section {
+      padding: 90px 72px;
+      background: var(--bg);
+    }
+
+    .section-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--purple);
       margin-bottom: 12px;
     }
 
-    .step p {
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(28px, 3vw, 42px);
+      color: var(--text);
+      margin-bottom: 14px;
+      max-width: 520px;
+    }
+
+    .section-sub {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 500px;
+      margin-bottom: 52px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .feat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    }
+
+    .feat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(124,58,237,0.10);
+      border-color: rgba(124,58,237,0.25);
+    }
+
+    .feat-card-glow {
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      filter: blur(50px);
+      top: -50px; right: -50px;
+      pointer-events: none;
+    }
+
+    .feat-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .feat-card h3 {
+      font-family: var(--serif);
+      font-size: 19px;
+      color: var(--text);
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .feat-card p {
       font-size: 14px;
       line-height: 1.75;
       color: var(--muted);
-    }
-
-    .step-connector {
-      position: absolute;
-      top: 50%;
-      right: -16px;
-      width: 32px;
-      height: 1px;
-      background: var(--accent);
-      z-index: 2;
-      transform: translateY(-50%);
-    }
-
-    .step-connector::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      border: 4px solid transparent;
-      border-left-color: var(--accent);
-    }
-
-    /* ── CTA ── */
-    .cta-section {
       position: relative;
       z-index: 1;
-      margin: 0 48px 80px;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      padding: 90px 72px;
+      background: var(--white);
+    }
+
+    .how-section .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      position: relative;
+    }
+
+    /* connecting line */
+    .steps-row::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: calc(16.6% + 24px);
+      right: calc(16.6% + 24px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--blue));
+      border-radius: 2px;
+      z-index: 0;
+    }
+
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-num {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #9d5df5, #7c3aed);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      margin-bottom: 28px;
+      box-shadow: 0 8px 24px rgba(124,58,237,0.28);
+      position: relative;
+    }
+
+    .step-item:nth-child(2) .step-num {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      box-shadow: 0 8px 24px rgba(59,130,246,0.28);
+    }
+
+    .step-item:nth-child(3) .step-num {
+      background: linear-gradient(135deg, #34d399, #059669);
+      box-shadow: 0 8px 24px rgba(5,150,105,0.28);
+    }
+
+    .step-item h3 {
+      font-family: var(--serif);
+      font-size: 20px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .step-item p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* ── ALERT PREVIEW ── */
+    .alert-section {
+      padding: 90px 72px;
+      background: linear-gradient(160deg, #f8f4ff 0%, #eaf4ff 100%);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+
+    .alert-copy h2 {
+      font-family: var(--serif);
+      font-size: clamp(28px, 3vw, 42px);
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .alert-copy p {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    .alert-panel {
+      background: var(--white);
       border: 1px solid var(--border);
       border-radius: 24px;
-      background: var(--surface);
-      padding: 80px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(100,116,139,0.12);
+    }
+
+    .alert-panel-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #059669;
+      animation: blink 1.4s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .alert-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.18s;
+      cursor: default;
+    }
+
+    .alert-row:last-child { border-bottom: none; }
+    .alert-row:hover { background: var(--bg); }
+
+    .alert-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .alert-indicator.red    { background: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+    .alert-indicator.orange { background: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
+    .alert-indicator.green  { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+
+    .alert-info { flex: 1; }
+    .alert-patient { font-size: 13px; font-weight: 700; color: var(--text); }
+    .alert-detail  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .alert-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    .alert-tag.red    { background: #fef2f2; color: #ef4444; }
+    .alert-tag.orange { background: #fff7ed; color: #f97316; }
+    .alert-tag.green  { background: #f0fdf4; color: #16a34a; }
+
+    .alert-time { font-size: 11px; color: var(--muted); margin-left: 8px; white-space: nowrap; }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+      margin: 0 72px 80px;
+      background: linear-gradient(135deg, #9d5df5 0%, #7c3aed 50%, #5b21b6 100%);
+      border-radius: 28px;
+      padding: 64px 72px;
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 60px;
+      gap: 48px;
+      position: relative;
       overflow: hidden;
+      box-shadow: 0 20px 60px rgba(124,58,237,0.30);
     }
 
-    .cta-glow {
+    .cta-banner::before {
+      content: '';
       position: absolute;
       width: 400px;
       height: 400px;
       border-radius: 50%;
-      background: rgba(0,232,176,0.05);
-      filter: blur(100px);
-      right: -100px;
-      top: -100px;
-      pointer-events: none;
+      background: rgba(255,255,255,0.06);
+      top: -150px; right: -100px;
     }
 
-    .cta-section h2 {
+    .cta-banner::after {
+      content: '';
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      bottom: -80px; left: 200px;
+    }
+
+    .cta-banner h2 {
       font-family: var(--serif);
-      font-size: clamp(32px, 3vw, 48px);
+      font-size: clamp(26px, 2.8vw, 40px);
       color: #fff;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
     }
 
-    .cta-section p {
+    .cta-banner p {
       font-size: 15px;
-      line-height: 1.8;
-      color: var(--muted);
-      max-width: 520px;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.75;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
     }
 
-    .cta-actions {
+    .cta-btns {
       display: flex;
       flex-direction: column;
       gap: 12px;
       flex-shrink: 0;
+      position: relative;
+      z-index: 1;
     }
+
+    .btn-white {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 32px;
+      background: #fff;
+      color: var(--purple);
+      border: none;
+      border-radius: 999px;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+    .btn-white-outline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 32px;
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 999px;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-white-outline:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
 
     /* ── FOOTER ── */
     footer {
-      position: relative;
-      z-index: 1;
+      background: var(--white);
       border-top: 1px solid var(--border);
-      padding: 32px 48px;
+      padding: 28px 72px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .footer-logo {
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--muted);
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      text-decoration: none;
     }
 
     .footer-mark {
-      width: 24px;
-      height: 24px;
-      background: var(--accent);
-      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #9d5df5, #7c3aed);
+      border-radius: 50%;
       display: grid;
       place-items: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
     }
 
     .footer-copy {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
     }
 
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
-
     /* ── ANIMATIONS ── */
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    .monitor-panel { animation: float 6s ease-in-out infinite; }
-
     @keyframes slide-up {
-      from { opacity: 0; transform: translateY(24px); }
+      from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .hero-eyebrow { animation: slide-up 0.6s ease both; }
-    .hero h1      { animation: slide-up 0.6s 0.1s ease both; }
-    .hero-desc    { animation: slide-up 0.6s 0.2s ease both; }
-    .hero-actions { animation: slide-up 0.6s 0.3s ease both; }
-    .hero-stats   { animation: slide-up 0.6s 0.4s ease both; }
+    .hero-left h1       { animation: slide-up 0.6s 0.05s ease both; }
+    .hero-left p        { animation: slide-up 0.6s 0.15s ease both; }
+    .hero-actions       { animation: slide-up 0.6s 0.25s ease both; }
+    .trust-row          { animation: slide-up 0.6s 0.35s ease both; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
-      .hero { grid-template-columns: 1fr; gap: 48px; padding-top: 140px; }
-      .monitor-panel { animation: none; }
-      .bento-card.span-5, .bento-card.span-7 { grid-column: span 12; }
-      .bento-card.span-4 { grid-column: span 6; }
-      .bento-card.span-8 { grid-column: span 6; }
-      .cta-section { grid-template-columns: 1fr; }
-      .cta-actions { flex-direction: row; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .alert-section { grid-template-columns: 1fr; }
+      .cta-banner    { grid-template-columns: 1fr; }
+      .cta-btns      { flex-direction: row; }
     }
 
     @media (max-width: 768px) {
-      nav { padding: 16px 24px; }
+      nav { padding: 0 20px; }
       .nav-links { display: none; }
-      .hero { padding: 120px 24px 60px; }
-      .section { padding: 60px 24px; }
-      .bento-card.span-4, .bento-card.span-8 { grid-column: span 12; }
-      .bento-card.span-6 { grid-column: span 12; }
-      .steps { grid-template-columns: 1fr; }
-      .step-connector { display: none; }
-      .cta-section { padding: 48px 32px; margin: 0 24px 60px; }
-      .cta-actions { flex-direction: column; }
-      footer { flex-direction: column; gap: 12px; padding: 24px; }
-      .hero-stats { flex-wrap: wrap; gap: 24px; }
-      .stat-divider { display: none; }
+      .hero { grid-template-columns: 1fr; max-height: none; }
+      .hero-right { height: 340px; }
+      .hero-left  { padding: 52px 24px; }
+      .features-section, .how-section, .alert-section, .how-section { padding: 60px 24px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-row { grid-template-columns: 1fr; }
+      .steps-row::before { display: none; }
+      .stat-item { max-width: 100%; }
+      .stats-bar { flex-wrap: wrap; }
+      .cta-banner { margin: 0 20px 60px; padding: 40px 28px; }
+      .cta-btns { flex-direction: column; }
+      footer { flex-direction: column; gap: 10px; padding: 24px; text-align: center; }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-
-  <!-- NAV -->
+  <!-- ── NAVBAR ── -->
   <nav>
-    <div class="nav-logo">
-      <div class="nav-logo-mark">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 2v16M2 10h16" stroke="#080d14" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <span class="nav-logo-text">RG<span>MS</span></span>
-    </div>
+    <a href="#" class="logo">
+      <div class="logo-mark">✚</div>
+      RGMS
+    </a>
 
     <ul class="nav-links">
       <li><a href="#" class="active">Home</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#users">Patients</a></li>
       <li><a href="#oversight">Clinical Oversight</a></li>
+      <li><a href="#contact">Contact Us</a></li>
     </ul>
 
-    <a href="/login" class="nav-cta">Access Portal ↗</a>
+    <a href="{% url 'login' %}" class="access-btn">
+      Access Portal
+      <span class="arrow-circle"></span>
+    </a>
   </nav>
 
-  <!-- HERO -->
+  <!-- ── HERO ── -->
   <section class="hero">
     <div class="hero-left">
-      <div class="hero-eyebrow">Clinical-Grade Remote Monitoring</div>
-      <h1>Vitals.<br><em>Tracked.</em><br>Action taken.</h1>
-      <p class="hero-desc">
-        RGMS bridges the gap between home care and clinical response. Caregivers submit daily vitals — blood pressure, glucose, pulse — while doctors monitor flagged readings in one command center, in real time.
+      <h1>Remote Geriatric Monitoring, <em style="font-style:italic; color:var(--purple);">Simplified.</em></h1>
+      <p>
+        Turning home readings into faster clinical action. RGMS helps caregivers submit daily vitals while doctors monitor abnormal readings from one clear command center — in real time.
       </p>
 
       <div class="hero-actions">
-        <a href="/login" class="btn-primary">
-          <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Enter Portal
-        </a>
-        <a href="#features" class="btn-ghost">Explore Features</a>
+        <button class="btn-outline">Explore Services</button>
+        <button class="btn-purple">
+          Consult Now
+          <span class="arrow-circ">↗</span>
+        </button>
       </div>
 
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="stat-value">24<span>/7</span></div>
-          <div class="stat-label">Real-time monitoring</div>
+      <div class="trust-row">
+        <div class="avatars">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Caregiver" />
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Doctor" />
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Patient" />
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <div class="stat-value">4<span>+</span></div>
-          <div class="stat-label">Vital parameters tracked</div>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <div class="stat-value">&lt;2<span>s</span></div>
-          <div class="stat-label">Alert response time</div>
+        <div class="trust-text">
+          Trusted by Doctors &amp; Caregivers
+          <span>Vitals, alerts &amp; clinical review in one place</span>
         </div>
       </div>
     </div>
 
-    <!-- Monitor panel -->
-    <div class="monitor-panel">
-      <div class="panel-topbar">
-        <span class="panel-title">Patient Dashboard — Mrs. Okonkwo, 74</span>
+    <div class="hero-right">
+      <img
+        src="https://images.unsplash.com/photo-1638202993928-7267aad84c31?auto=format&fit=crop&w=900&q=80"
+        alt="Doctor reviewing patient vitals"
+      />
+
+      <div class="pill p1">
+        <div class="pill-icon" style="background:#ecfdf5;">💓</div>
+        Daily Vitals Entry
+      </div>
+
+      <div class="pill p2">
+        <div class="pill-icon" style="background:#fef2f2;">
+          <span style="font-size:10px; font-weight:900; color:#ef4444;">!</span>
+        </div>
+        Critical Alert Triage
+        <span class="pill-dot" style="background:#ef4444; box-shadow:0 0 6px #ef4444;"></span>
+      </div>
+
+      <div class="pill p3">
+        <div class="pill-icon" style="background:#eff6ff;">🩺</div>
+        Doctor Review
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STATS BAR ── -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-icon purple">🩺</div>
+      <div>
+        <div class="stat-num">24<span>/7</span></div>
+        <div class="stat-desc">Real-time monitoring</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon blue">📊</div>
+      <div>
+        <div class="stat-num">4<span>+</span></div>
+        <div class="stat-desc">Vital parameters tracked</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon green">⚡</div>
+      <div>
+        <div class="stat-num">&lt;2<span>s</span></div>
+        <div class="stat-desc">Alert response time</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon orange">📋</div>
+      <div>
+        <div class="stat-num">100<span>%</span></div>
+        <div class="stat-desc">Timestamped records</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FEATURES ── -->
+  <section class="features-section" id="features">
+    <div class="section-eyebrow">Core Features</div>
+    <h2 class="section-title">Everything your care team needs, remotely.</h2>
+    <p class="section-sub">From bedside readings to doctor review — RGMS keeps the care loop closed without the patient leaving home.</p>
+
+    <div class="features-grid">
+
+      <div class="feat-card">
+        <div class="feat-card-glow" style="background:rgba(157,93,245,0.07);"></div>
+        <div class="feat-icon" style="background:var(--purple-pale);">📋</div>
+        <h3>Caregiver Entry</h3>
+        <p>Simple, guided form for BP, blood sugar, pulse rate, symptoms, and free-text notes — from any device, any time.</p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-card-glow" style="background:rgba(239,68,68,0.06);"></div>
+        <div class="feat-icon" style="background:#fef2f2;">🚨</div>
+        <h3>Critical Alerts</h3>
+        <p>Abnormal readings are automatically flagged so doctors can triage and act without delay — no reading slips through.</p>
+      </div>
+
+      <div class="feat-card" id="oversight">
+        <div class="feat-card-glow" style="background:rgba(34,197,94,0.06);"></div>
+        <div class="feat-icon" style="background:#f0fdf4;">🏥</div>
+        <h3>Doctor Oversight</h3>
+        <p>Clinicians review urgent cases, add clinical notes, and mark alerts as resolved — all from a single dashboard.</p>
+      </div>
+
+      <div class="feat-card" id="users">
+        <div class="feat-card-glow" style="background:rgba(59,130,246,0.06);"></div>
+        <div class="feat-icon" style="background:var(--blue-pale);">📈</div>
+        <h3>Patient History</h3>
+        <p>Every reading is stored with patient details, caregiver ID, and timestamp — a complete, auditable health trail.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="how-section">
+    <div class="header">
+      <div class="section-eyebrow">Workflow</div>
+      <h2 class="section-title" style="max-width:100%; text-align:center;">Three steps. One closed care loop.</h2>
+      <p class="section-sub" style="max-width:520px; margin: 0 auto 0; text-align:center;">Designed to be fast to adopt and simple to use — for caregivers and clinicians alike.</p>
+    </div>
+
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <h3>Caregiver Submits</h3>
+        <p>The caregiver enters the patient's vitals — blood pressure, glucose, pulse, symptoms, and notes — into a simple guided form.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <h3>System Flags Abnormals</h3>
+        <p>RGMS analyses each submission against clinical thresholds and instantly flags critical or elevated readings for review.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <h3>Doctor Reviews &amp; Acts</h3>
+        <p>The physician sees flagged alerts on their dashboard, reviews the patient's history, and marks cases as reviewed or escalates.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ALERT PREVIEW ── -->
+  <section class="alert-section">
+    <div class="alert-copy">
+      <div class="section-eyebrow">Live Monitoring</div>
+      <h2>Abnormal readings surface instantly.</h2>
+      <p>The moment a caregiver submits a critical value, it appears on the doctor's dashboard — colour-coded by severity, with full patient context alongside it.</p>
+      <a href="{% url 'login' %}" class="btn-purple" style="width:fit-content; text-decoration:none;">
+        View Dashboard ↗
+      </a>
+    </div>
+
+    <div class="alert-panel">
+      <div class="alert-panel-head">
+        <span class="panel-title-text">Live Alert Feed</span>
         <div class="live-badge">
           <div class="live-dot"></div>
           LIVE
         </div>
       </div>
 
-      <div class="vitals-grid">
-        <!-- BP -->
-        <div class="vital-cell danger">
-          <div class="vital-icon danger-bg">🩺</div>
-          <div class="vital-name">Blood Pressure</div>
-          <div class="vital-value">182<span class="unit">/110 mmHg</span></div>
-          <div class="vital-status danger">⚠ Critical High</div>
-          <svg class="sparkline" width="90" height="40" viewBox="0 0 90 40">
-            <polyline points="0,35 15,30 30,28 45,20 60,15 75,10 90,5" fill="none" stroke="#ef4444" stroke-width="1.5" opacity="0.6"/>
-          </svg>
+      <div class="alert-row">
+        <div class="alert-indicator red"></div>
+        <div class="alert-info">
+          <div class="alert-patient">Mrs. A. Okonkwo · Age 74</div>
+          <div class="alert-detail">BP: 182/110 mmHg — Hypertensive Crisis</div>
         </div>
-
-        <!-- Glucose -->
-        <div class="vital-cell warn">
-          <div class="vital-icon warn-bg">🩸</div>
-          <div class="vital-name">Blood Glucose</div>
-          <div class="vital-value">14.2<span class="unit">mmol/L</span></div>
-          <div class="vital-status warn">⚡ Elevated</div>
-          <svg class="sparkline" width="90" height="40" viewBox="0 0 90 40">
-            <polyline points="0,25 15,22 30,20 45,18 60,14 75,12 90,10" fill="none" stroke="#f97316" stroke-width="1.5" opacity="0.6"/>
-          </svg>
-        </div>
-
-        <!-- Pulse -->
-        <div class="vital-cell ok">
-          <div class="vital-icon ok-bg">💓</div>
-          <div class="vital-name">Pulse Rate</div>
-          <div class="vital-value">88<span class="unit">bpm</span></div>
-          <div class="vital-status ok">✓ Normal</div>
-          <svg class="sparkline" width="90" height="40" viewBox="0 0 90 40">
-            <polyline points="0,25 15,18 30,22 45,15 60,20 75,17 90,20" fill="none" stroke="#00e8b0" stroke-width="1.5" opacity="0.6"/>
-          </svg>
-        </div>
-
-        <!-- SpO2 -->
-        <div class="vital-cell ok">
-          <div class="vital-icon ok-bg">🫁</div>
-          <div class="vital-name">Oxygen Saturation</div>
-          <div class="vital-value">97<span class="unit">%</span></div>
-          <div class="vital-status ok">✓ Normal</div>
-          <svg class="sparkline" width="90" height="40" viewBox="0 0 90 40">
-            <polyline points="0,20 15,18 30,19 45,17 60,19 75,18 90,19" fill="none" stroke="#00e8b0" stroke-width="1.5" opacity="0.6"/>
-          </svg>
-        </div>
+        <span class="alert-tag red">Critical</span>
+        <span class="alert-time">2m ago</span>
       </div>
 
-      <div class="alert-strip">
-        <div class="alert-icon">!</div>
-        <div class="alert-text">
-          <strong>ALERT:</strong> BP exceeds hypertensive crisis threshold — immediate review required.
+      <div class="alert-row">
+        <div class="alert-indicator orange"></div>
+        <div class="alert-info">
+          <div class="alert-patient">Mr. B. Adeyemi · Age 81</div>
+          <div class="alert-detail">Glucose: 14.2 mmol/L — Hyperglycaemia</div>
         </div>
-        <div class="alert-action">REVIEW →</div>
+        <span class="alert-tag orange">Elevated</span>
+        <span class="alert-time">14m ago</span>
+      </div>
+
+      <div class="alert-row">
+        <div class="alert-indicator green"></div>
+        <div class="alert-info">
+          <div class="alert-patient">Mrs. C. Bello · Age 68</div>
+          <div class="alert-detail">Pulse: 78 bpm — Within normal range</div>
+        </div>
+        <span class="alert-tag green">Normal</span>
+        <span class="alert-time">1h ago</span>
+      </div>
+
+      <div class="alert-row">
+        <div class="alert-indicator orange"></div>
+        <div class="alert-info">
+          <div class="alert-patient">Mr. D. Chukwu · Age 77</div>
+          <div class="alert-detail">BP: 155/98 mmHg — Stage 2 Hypertension</div>
+        </div>
+        <span class="alert-tag orange">Elevated</span>
+        <span class="alert-time">2h ago</span>
+      </div>
+
+      <div class="alert-row">
+        <div class="alert-indicator green"></div>
+        <div class="alert-info">
+          <div class="alert-patient">Mrs. E. Ibrahim · Age 70</div>
+          <div class="alert-detail">SpO₂: 97% — Oxygen saturation normal</div>
+        </div>
+        <span class="alert-tag green">Normal</span>
+        <span class="alert-time">3h ago</span>
       </div>
     </div>
   </section>
 
-  <!-- FEATURES -->
-  <section class="section" id="features">
-    <div class="section-label">Core Capabilities</div>
-    <h2 class="section-heading">Everything a clinical team needs, remotely.</h2>
-    <p class="section-sub">From bedside readings to doctor review — RGMS keeps the care loop closed without the patient leaving home.</p>
-
-    <div class="bento">
-
-      <!-- Caregiver Entry — wide -->
-      <div class="bento-card span-7">
-        <div class="bento-glow glow-green"></div>
-        <div class="bento-tag">01 — Caregiver Entry</div>
-        <div class="bento-icon green">📋</div>
-        <h3>Simple, Guided Vitals Entry</h3>
-        <p>Caregivers use a clean, guided form to log blood pressure, glucose, pulse rate, symptoms, and free-text notes — from any device, any time.</p>
-        <div class="mini-chart">
-          <div class="bar" style="height:40%"></div>
-          <div class="bar" style="height:55%"></div>
-          <div class="bar" style="height:48%"></div>
-          <div class="bar active" style="height:72%"></div>
-          <div class="bar" style="height:60%"></div>
-          <div class="bar" style="height:65%"></div>
-          <div class="bar" style="height:80%"></div>
-          <div class="bar active" style="height:95%"></div>
-          <div class="bar" style="height:70%"></div>
-          <div class="bar" style="height:58%"></div>
-          <div class="bar" style="height:74%"></div>
-          <div class="bar" style="height:62%"></div>
-        </div>
-      </div>
-
-      <!-- Critical Alerts -->
-      <div class="bento-card span-5">
-        <div class="bento-glow glow-red"></div>
-        <div class="bento-tag">02 — Automated Flagging</div>
-        <div class="bento-icon red">🚨</div>
-        <h3>Critical Alert Triage</h3>
-        <p>Abnormal readings are automatically flagged so no dangerous value slips through unnoticed.</p>
-        <div class="alert-feed">
-          <div class="feed-item">
-            <div class="feed-dot red"></div>
-            <span class="feed-msg">BP 182/110 — Critical high</span>
-            <span class="feed-time">2m ago</span>
-          </div>
-          <div class="feed-item">
-            <div class="feed-dot orange"></div>
-            <span class="feed-msg">Glucose 14.2 — Elevated</span>
-            <span class="feed-time">14m ago</span>
-          </div>
-          <div class="feed-item">
-            <div class="feed-dot green"></div>
-            <span class="feed-msg">Pulse 88 bpm — Normal range</span>
-            <span class="feed-time">1h ago</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Doctor Oversight -->
-      <div class="bento-card span-4" id="oversight">
-        <div class="bento-glow glow-blue"></div>
-        <div class="bento-tag">03 — Doctor Oversight</div>
-        <div class="bento-icon blue">🏥</div>
-        <h3>Clinician Command Center</h3>
-        <p>Doctors review urgent cases, add clinical notes, and mark alerts as resolved — all from a single dashboard.</p>
-      </div>
-
-      <!-- History -->
-      <div class="bento-card span-4" id="users">
-        <div class="bento-glow glow-orange"></div>
-        <div class="bento-tag">04 — Patient History</div>
-        <div class="bento-icon orange">📈</div>
-        <h3>Longitudinal Records</h3>
-        <p>Every submission is stored with patient identity, timestamp, and caregiver attribution — a complete, auditable health trail.</p>
-      </div>
-
-      <!-- Real-time -->
-      <div class="bento-card span-4">
-        <div class="bento-glow glow-green"></div>
-        <div class="bento-tag">05 — Live Monitoring</div>
-        <div class="bento-icon green">⚡</div>
-        <h3>Real-Time Updates</h3>
-        <p>Readings surface to the clinical team the moment they're submitted. No delays, no batch processing.</p>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="section">
-    <div class="section-label">Workflow</div>
-    <h2 class="section-heading">Three steps. One closed care loop.</h2>
-    <p class="section-sub" style="margin-bottom: 40px;">RGMS was designed to be fast to adopt and simple to use — for caregivers and clinicians alike.</p>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-number">STEP 01</div>
-        <div class="step-icon-wrap">📝</div>
-        <h3>Caregiver Submits</h3>
-        <p>The caregiver enters the patient's vitals into a simple, guided form — blood pressure, glucose, pulse, symptoms, and any notes.</p>
-        <div class="step-connector"></div>
-      </div>
-      <div class="step">
-        <div class="step-number">STEP 02</div>
-        <div class="step-icon-wrap">🔔</div>
-        <h3>System Flags Abnormals</h3>
-        <p>RGMS automatically analyses each submission against clinical thresholds and flags critical or elevated readings in real time.</p>
-        <div class="step-connector"></div>
-      </div>
-      <div class="step">
-        <div class="step-number">STEP 03</div>
-        <div class="step-icon-wrap">🩺</div>
-        <h3>Doctor Reviews & Acts</h3>
-        <p>The physician sees flagged alerts on their dashboard, reviews the patient's history, and marks cases as reviewed or escalates action.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <div class="cta-section">
-    <div class="cta-glow"></div>
+  <!-- ── CTA BANNER ── -->
+  <div class="cta-banner">
     <div>
-      <h2>Ready to bring your geriatric care remote?</h2>
-      <p>Join clinicians and caregivers already using RGMS to keep elderly patients safer, from wherever they are.</p>
+      <h2>Ready to bring geriatric care closer?</h2>
+      <p>Join clinicians and caregivers already using RGMS to keep elderly patients safer — from wherever they are.</p>
     </div>
-    <div class="cta-actions">
-      <a href="/login" class="btn-primary">
-        <svg width="14" height="14" fill="none" viewBox="0 0 14 14"><path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Access Portal
+    <div class="cta-btns">
+      <a href="{% url 'login' %}" class="btn-white">
+        ↗ Access Portal
       </a>
-      <a href="#features" class="btn-ghost">Learn More</a>
+      <a href="#features" class="btn-white-outline">Learn More</a>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-logo">
-      <div class="footer-mark">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M7 1v12M1 7h12" stroke="#080d14" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      RGMS — Remote Geriatric Monitoring System
-    </div>
-    <div class="footer-copy">© 2025 RGMS. Clinical monitoring, simplified.</div>
+  <!-- ── FOOTER ── -->
+  <footer id="contact">
+    <a href="#" class="footer-logo">
+      <div class="footer-mark">✚</div>
+      RGMS
+    </a>
+    <span class="footer-copy">© 2025 Remote Geriatric Monitoring System. Clinical monitoring, simplified.</span>
   </footer>
 
 </body>

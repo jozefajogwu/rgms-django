@@ -11,8 +11,12 @@
     <header class="bg-white border-b">
         <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-blue-950">Caregiver Dashboard</h1>
-                <p class="text-slate-500 text-sm">Welcome, {{ request.user.username }}</p>
+                <h1 class="text-2xl font-bold text-blue-950">
+                    Caregiver Dashboard
+                </h1>
+                <p class="text-slate-500 text-sm">
+                    Welcome, {{ request.user.username }}
+                </p>
             </div>
 
             <a href="{% url 'logout' %}"
@@ -32,9 +36,13 @@
             {% endfor %}
         {% endif %}
 
+        <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
             <div class="bg-white rounded-2xl shadow p-6 border">
-                <p class="text-slate-500">Assigned Patients</p>
+                <p class="text-slate-500">
+                    Assigned Patients
+                </p>
                 <h2 class="text-4xl font-bold text-blue-950 mt-2">
                     {{ assigned_patients.count }}
                 </h2>
@@ -42,20 +50,29 @@
 
             <a href="{% url 'add_vital_reading' %}"
                class="bg-blue-950 text-white rounded-2xl shadow p-6 border hover:bg-blue-900">
-                <p class="text-blue-100">Quick Action</p>
-                <h2 class="text-2xl font-bold mt-2">Add Vital Reading</h2>
+                <p class="text-blue-100">
+                    Quick Action
+                </p>
+                <h2 class="text-2xl font-bold mt-2">
+                    Add Vital Reading
+                </h2>
             </a>
 
             <div class="bg-white rounded-2xl shadow p-6 border">
-                <p class="text-slate-500">Recent Entries</p>
+                <p class="text-slate-500">
+                    Recent Entries
+                </p>
                 <h2 class="text-4xl font-bold text-blue-950 mt-2">
                     {{ recent_readings.count }}
                 </h2>
             </div>
+
         </div>
 
+        <!-- Main Content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
+            <!-- Assigned Patients -->
             <section class="bg-white rounded-2xl shadow p-6 border">
                 <h2 class="text-2xl font-bold text-blue-950 mb-4">
                     My Assigned Patients
@@ -81,6 +98,7 @@
                 {% endif %}
             </section>
 
+            <!-- Recent Readings -->
             <section class="bg-white rounded-2xl shadow p-6 border">
                 <h2 class="text-2xl font-bold text-blue-950 mb-4">
                     Recent Readings
@@ -95,10 +113,64 @@
                                 </h3>
 
                                 <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
-                                    <p>BP: <strong>{{ reading.systolic_bp }}/{{ reading.diastolic_bp }}</strong></p>
-                                    <p>Pulse: <strong>{{ reading.pulse_rate }}</strong></p>
-                                    <p>FBS: <strong>{{ reading.fasting_blood_sugar|default:"N/A" }}</strong></p>
-                                    <p>RBS: <strong>{{ reading.random_blood_sugar|default:"N/A" }}</strong></p>
+                                    <p>
+                                        <span class="text-gray-500">BP:</span>
+                                        <strong>{{ reading.systolic_bp }}/{{ reading.diastolic_bp }}</strong>
+                                    </p>
+
+                                    <p>
+                                        <span class="text-gray-500">Pulse:</span>
+                                        <strong>{{ reading.pulse_rate }}</strong>
+                                    </p>
+
+                                    <p>
+                                        <span class="text-gray-500">SpO2:</span>
+                                        <strong>{{ reading.oxygen_saturation|default:"N/A" }}%</strong>
+                                    </p>
+
+                                    <p>
+                                        <span class="text-gray-500">FBS:</span>
+                                        <strong>{{ reading.fasting_blood_sugar|default:"N/A" }}</strong>
+                                    </p>
+
+                                    <p>
+                                        <span class="text-gray-500">RBS:</span>
+                                        <strong>{{ reading.random_blood_sugar|default:"N/A" }}</strong>
+                                    </p>
+                                </div>
+
+                                {% if reading.symptoms %}
+                                    <p class="text-sm text-slate-700 mt-3">
+                                        <span class="text-gray-500">Symptoms:</span>
+                                        {{ reading.symptoms }}
+                                    </p>
+                                {% endif %}
+
+                                <!-- Urinalysis Section -->
+                                <div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-4">
+                                    <h4 class="font-bold text-blue-950 mb-3">
+                                        Urinalysis
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-3 text-sm">
+                                        <p><span class="text-gray-500">Glucose:</span>
+                                            <strong>{{ reading.get_urine_glucose_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Protein:</span>
+                                            <strong>{{ reading.get_urine_protein_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Acetone/Ketone:</span>
+                                            <strong>{{ reading.get_urine_acetone_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Bilirubin:</span>
+                                            <strong>{{ reading.get_urine_bilirubin_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Urobilinogen:</span>
+                                            <strong>{{ reading.get_urine_urobilinogen_display }}</strong>
+                                        </p>
+                                        <p><span class="text-gray-500">Nitrite:</span>
+                                            <strong>{{ reading.get_urine_nitrite_display }}</strong>
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <p class="text-xs text-slate-500 mt-3">
