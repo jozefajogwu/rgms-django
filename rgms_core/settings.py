@@ -27,8 +27,11 @@ SECRET_KEY = 'django-insecure-w%@jjq5-c(-h4_k7_t2b2pm^i0#wih^#e!t9zkfljw)b6$77av
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'remote-geriatric-monitoring-system.onrender.com'
+]
 
 # Application definition
 
