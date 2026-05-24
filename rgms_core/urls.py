@@ -8,7 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Public landing page
-    path('', views.landing_page, name='landing'),
+    path('', views.landing_page, name='home'),
 
     # Auth
     path('login/', views.login_view, name='login'),
