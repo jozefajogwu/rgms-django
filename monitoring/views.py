@@ -31,7 +31,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('landing')
+    return redirect('home')
 
 
 def redirect_user_by_role(user):

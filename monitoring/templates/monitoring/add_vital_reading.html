@@ -2,266 +2,462 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Vital Reading | RGMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f4f9;
+            color: #0a1628;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        /* ----- MAIN CONTAINER ----- */
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        /* ----- BACK LINK ----- */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #13AA9A;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            padding: 10px 0;
+            transition: color 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .back-link:hover {
+            color: #0d8a7e;
+        }
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        /* ----- FORM CARD ----- */
+        .form-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 40px 44px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-top: 8px;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+        }
+
+        .form-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.3px;
+        }
+
+        .form-header p {
+            font-size: 14px;
+            color: #718096;
+            font-family: 'Inter', sans-serif;
+            margin-top: 4px;
+        }
+
+        /* ----- MESSAGES ----- */
+        .msg-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: #16a34a;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 24px;
+        }
+
+        /* ----- FORM ELEMENTS ----- */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.01em;
+        }
+
+        .field-group label .required {
+            color: #ef4444;
+            margin-left: 2px;
+        }
+
+        .field-group input,
+        .field-group select,
+        .field-group textarea {
+            width: 100%;
+            padding: 11px 14px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #0a1628;
+            transition: all 0.25s ease;
+            outline: none;
+        }
+
+        .field-group input::placeholder,
+        .field-group textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .field-group input:focus,
+        .field-group select:focus,
+        .field-group textarea:focus {
+            border-color: #13AA9A;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(19, 170, 154, 0.08);
+        }
+
+        .field-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .field-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .field-group .error-text {
+            font-size: 12px;
+            color: #dc2626;
+            font-family: 'Inter', sans-serif;
+            margin-top: 2px;
+        }
+
+        /* ----- GRID LAYOUTS ----- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 18px;
+        }
+
+        /* ----- SECTION DIVIDER ----- */
+        .section-divider {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 8px 0 4px 0;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .section-header p {
+            font-size: 13px;
+            color: #718096;
+            font-family: 'Inter', sans-serif;
+            margin-top: 2px;
+        }
+
+        /* ----- SUBMIT BUTTON ----- */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #13AA9A;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.25);
+            margin-top: 8px;
+            letter-spacing: 0.01em;
+        }
+        .submit-btn:hover {
+            background: #0d8a7e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(19, 170, 154, 0.35);
+        }
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .form-card {
+                padding: 24px 20px;
+            }
+
+            .form-header h1 {
+                font-size: 22px;
+            }
+
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .section-header h2 {
+                font-size: 18px;
+            }
+
+            .submit-btn {
+                padding: 14px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-card {
+                padding: 18px 14px;
+            }
+
+            .form-header h1 {
+                font-size: 20px;
+            }
+
+            .field-group input,
+            .field-group select,
+            .field-group textarea {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen">
+<body>
 
-    <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="container">
 
-        <!-- Back link -->
-        <div class="mb-6">
-            <a href="{% url 'caregiver_dashboard' %}" class="text-blue-700 font-medium">
-                ← Back to Caregiver Dashboard
-            </a>
-        </div>
+        <!-- Back Link -->
+        <a href="{% url 'caregiver_dashboard' %}" class="back-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Caregiver Dashboard
+        </a>
 
         <!-- Form Card -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        <div class="form-card">
 
-            <h1 class="text-3xl font-bold text-blue-950 mb-2">
-                Caregiver Vital Entry
-            </h1>
-
-            <p class="text-gray-600 mb-8">
-                Enter the patient’s blood pressure, blood sugar, pulse, SpO2, urinalysis result, symptoms, and notes.
-            </p>
+            <div class="form-header">
+                <h1>Caregiver Vital Entry</h1>
+                <p>Enter the patient's blood pressure, blood sugar, pulse, SpO₂, urinalysis result, symptoms, and notes.</p>
+            </div>
 
             {% if messages %}
                 {% for message in messages %}
-                    <div class="mb-6 rounded-lg bg-green-100 border border-green-300 text-green-800 px-4 py-3">
-                        {{ message }}
-                    </div>
+                    <div class="msg-success">✓ {{ message }}</div>
                 {% endfor %}
             {% endif %}
 
-            <form method="POST" class="space-y-6">
+            <form method="POST">
                 {% csrf_token %}
 
                 <!-- Patient -->
-                <div>
-                    <label class="block text-lg font-semibold text-gray-800 mb-2">
-                        Patient
-                    </label>
+                <div class="field-group">
+                    <label for="{{ form.patient.id_for_label }}">Patient <span class="required">*</span></label>
                     {{ form.patient }}
-
                     {% if form.patient.errors %}
-                        <p class="text-red-600 text-sm mt-1">
-                            {{ form.patient.errors.0 }}
-                        </p>
+                        <span class="error-text">{{ form.patient.errors.0 }}</span>
                     {% endif %}
                 </div>
 
                 <!-- Blood Sugar -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-lg font-semibold text-gray-800 mb-2">
-                            Fasting Blood Sugar
-                        </label>
+                <div class="grid-2">
+                    <div class="field-group">
+                        <label for="{{ form.fasting_blood_sugar.id_for_label }}">Fasting Blood Sugar</label>
                         {{ form.fasting_blood_sugar }}
-
                         {% if form.fasting_blood_sugar.errors %}
-                            <p class="text-red-600 text-sm mt-1">
-                                {{ form.fasting_blood_sugar.errors.0 }}
-                            </p>
+                            <span class="error-text">{{ form.fasting_blood_sugar.errors.0 }}</span>
                         {% endif %}
                     </div>
 
-                    <div>
-                        <label class="block text-lg font-semibold text-gray-800 mb-2">
-                            Random Blood Sugar
-                        </label>
+                    <div class="field-group">
+                        <label for="{{ form.random_blood_sugar.id_for_label }}">Random Blood Sugar</label>
                         {{ form.random_blood_sugar }}
-
                         {% if form.random_blood_sugar.errors %}
-                            <p class="text-red-600 text-sm mt-1">
-                                {{ form.random_blood_sugar.errors.0 }}
-                            </p>
+                            <span class="error-text">{{ form.random_blood_sugar.errors.0 }}</span>
                         {% endif %}
                     </div>
                 </div>
 
                 <!-- BP, Pulse, SpO2 -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div>
-                        <label class="block text-lg font-semibold text-gray-800 mb-2">
-                            Systolic BP
-                        </label>
+                <div class="grid-4">
+                    <div class="field-group">
+                        <label for="{{ form.systolic_bp.id_for_label }}">Systolic BP</label>
                         {{ form.systolic_bp }}
-
                         {% if form.systolic_bp.errors %}
-                            <p class="text-red-600 text-sm mt-1">
-                                {{ form.systolic_bp.errors.0 }}
-                            </p>
+                            <span class="error-text">{{ form.systolic_bp.errors.0 }}</span>
                         {% endif %}
                     </div>
 
-                    <div>
-                        <label class="block text-lg font-semibold text-gray-800 mb-2">
-                            Diastolic BP
-                        </label>
+                    <div class="field-group">
+                        <label for="{{ form.diastolic_bp.id_for_label }}">Diastolic BP</label>
                         {{ form.diastolic_bp }}
-
                         {% if form.diastolic_bp.errors %}
-                            <p class="text-red-600 text-sm mt-1">
-                                {{ form.diastolic_bp.errors.0 }}
-                            </p>
+                            <span class="error-text">{{ form.diastolic_bp.errors.0 }}</span>
                         {% endif %}
                     </div>
 
-                    <div>
-                        <label class="block text-lg font-semibold text-gray-800 mb-2">
-                            Pulse Rate
-                        </label>
+                    <div class="field-group">
+                        <label for="{{ form.pulse_rate.id_for_label }}">Pulse Rate</label>
                         {{ form.pulse_rate }}
-
                         {% if form.pulse_rate.errors %}
-                            <p class="text-red-600 text-sm mt-1">
-                                {{ form.pulse_rate.errors.0 }}
-                            </p>
+                            <span class="error-text">{{ form.pulse_rate.errors.0 }}</span>
                         {% endif %}
                     </div>
 
-                    <div>
-                        <label class="block text-lg font-semibold text-gray-800 mb-2">
-                            SpO2 (%)
-                        </label>
+                    <div class="field-group">
+                        <label for="{{ form.oxygen_saturation.id_for_label }}">SpO₂ (%)</label>
                         {{ form.oxygen_saturation }}
-
                         {% if form.oxygen_saturation.errors %}
-                            <p class="text-red-600 text-sm mt-1">
-                                {{ form.oxygen_saturation.errors.0 }}
-                            </p>
+                            <span class="error-text">{{ form.oxygen_saturation.errors.0 }}</span>
                         {% endif %}
                     </div>
                 </div>
 
                 <!-- Urinalysis -->
-                <div class="border-t border-gray-200 pt-6">
-                    <h2 class="text-2xl font-bold text-blue-950 mb-2">
-                        Urinalysis Result
-                    </h2>
+                <hr class="section-divider">
 
-                    <p class="text-gray-600 mb-6">
-                        Select the result shown on the urine dipstick test.
-                    </p>
+                <div class="section-header">
+                    <h2>Urinalysis Result</h2>
+                    <p>Select the result shown on the urine dipstick test.</p>
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label class="block text-lg font-semibold text-gray-800 mb-2">
-                                Urine Glucose
-                            </label>
-                            {{ form.urine_glucose }}
+                <div class="grid-3">
+                    <div class="field-group">
+                        <label for="{{ form.urine_glucose.id_for_label }}">Urine Glucose</label>
+                        {{ form.urine_glucose }}
+                        {% if form.urine_glucose.errors %}
+                            <span class="error-text">{{ form.urine_glucose.errors.0 }}</span>
+                        {% endif %}
+                    </div>
 
-                            {% if form.urine_glucose.errors %}
-                                <p class="text-red-600 text-sm mt-1">
-                                    {{ form.urine_glucose.errors.0 }}
-                                </p>
-                            {% endif %}
-                        </div>
+                    <div class="field-group">
+                        <label for="{{ form.urine_protein.id_for_label }}">Urine Protein</label>
+                        {{ form.urine_protein }}
+                        {% if form.urine_protein.errors %}
+                            <span class="error-text">{{ form.urine_protein.errors.0 }}</span>
+                        {% endif %}
+                    </div>
 
-                        <div>
-                            <label class="block text-lg font-semibold text-gray-800 mb-2">
-                                Urine Protein
-                            </label>
-                            {{ form.urine_protein }}
+                    <div class="field-group">
+                        <label for="{{ form.urine_acetone.id_for_label }}">Acetone / Ketone</label>
+                        {{ form.urine_acetone }}
+                        {% if form.urine_acetone.errors %}
+                            <span class="error-text">{{ form.urine_acetone.errors.0 }}</span>
+                        {% endif %}
+                    </div>
 
-                            {% if form.urine_protein.errors %}
-                                <p class="text-red-600 text-sm mt-1">
-                                    {{ form.urine_protein.errors.0 }}
-                                </p>
-                            {% endif %}
-                        </div>
+                    <div class="field-group">
+                        <label for="{{ form.urine_bilirubin.id_for_label }}">Bilirubin</label>
+                        {{ form.urine_bilirubin }}
+                        {% if form.urine_bilirubin.errors %}
+                            <span class="error-text">{{ form.urine_bilirubin.errors.0 }}</span>
+                        {% endif %}
+                    </div>
 
-                        <div>
-                            <label class="block text-lg font-semibold text-gray-800 mb-2">
-                                Acetone / Ketone
-                            </label>
-                            {{ form.urine_acetone }}
+                    <div class="field-group">
+                        <label for="{{ form.urine_urobilinogen.id_for_label }}">Urobilinogen</label>
+                        {{ form.urine_urobilinogen }}
+                        {% if form.urine_urobilinogen.errors %}
+                            <span class="error-text">{{ form.urine_urobilinogen.errors.0 }}</span>
+                        {% endif %}
+                    </div>
 
-                            {% if form.urine_acetone.errors %}
-                                <p class="text-red-600 text-sm mt-1">
-                                    {{ form.urine_acetone.errors.0 }}
-                                </p>
-                            {% endif %}
-                        </div>
-
-                        <div>
-                            <label class="block text-lg font-semibold text-gray-800 mb-2">
-                                Bilirubin
-                            </label>
-                            {{ form.urine_bilirubin }}
-
-                            {% if form.urine_bilirubin.errors %}
-                                <p class="text-red-600 text-sm mt-1">
-                                    {{ form.urine_bilirubin.errors.0 }}
-                                </p>
-                            {% endif %}
-                        </div>
-
-                        <div>
-                            <label class="block text-lg font-semibold text-gray-800 mb-2">
-                                Urobilinogen
-                            </label>
-                            {{ form.urine_urobilinogen }}
-
-                            {% if form.urine_urobilinogen.errors %}
-                                <p class="text-red-600 text-sm mt-1">
-                                    {{ form.urine_urobilinogen.errors.0 }}
-                                </p>
-                            {% endif %}
-                        </div>
-
-                        <div>
-                            <label class="block text-lg font-semibold text-gray-800 mb-2">
-                                Nitrite
-                            </label>
-                            {{ form.urine_nitrite }}
-
-                            {% if form.urine_nitrite.errors %}
-                                <p class="text-red-600 text-sm mt-1">
-                                    {{ form.urine_nitrite.errors.0 }}
-                                </p>
-                            {% endif %}
-                        </div>
+                    <div class="field-group">
+                        <label for="{{ form.urine_nitrite.id_for_label }}">Nitrite</label>
+                        {{ form.urine_nitrite }}
+                        {% if form.urine_nitrite.errors %}
+                            <span class="error-text">{{ form.urine_nitrite.errors.0 }}</span>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Symptoms -->
-                <div>
-                    <label class="block text-lg font-semibold text-gray-800 mb-2">
-                        Symptoms
-                    </label>
+                <div class="field-group">
+                    <label for="{{ form.symptoms.id_for_label }}">Symptoms</label>
                     {{ form.symptoms }}
-
                     {% if form.symptoms.errors %}
-                        <p class="text-red-600 text-sm mt-1">
-                            {{ form.symptoms.errors.0 }}
-                        </p>
+                        <span class="error-text">{{ form.symptoms.errors.0 }}</span>
                     {% endif %}
                 </div>
 
                 <!-- Notes -->
-                <div>
-                    <label class="block text-lg font-semibold text-gray-800 mb-2">
-                        Notes
-                    </label>
+                <div class="field-group">
+                    <label for="{{ form.notes.id_for_label }}">Notes</label>
                     {{ form.notes }}
-
                     {% if form.notes.errors %}
-                        <p class="text-red-600 text-sm mt-1">
-                            {{ form.notes.errors.0 }}
-                        </p>
+                        <span class="error-text">{{ form.notes.errors.0 }}</span>
                     {% endif %}
                 </div>
 
                 <!-- Submit -->
-                <button type="submit"
-                    class="w-full bg-blue-950 hover:bg-blue-900 text-white text-xl font-semibold py-4 rounded-xl transition">
+                <button type="submit" class="submit-btn">
                     Submit Vital Reading
                 </button>
             </form>
+
         </div>
     </div>
 

@@ -2,193 +2,877 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Caregiver Dashboard | RGMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caregiver Portal | RGMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* ----- GLOBAL DESIGN SYSTEM ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f4f9;
+            color: #0a1628;
+            min-height: 100vh;
+            display: flex;
+            line-height: 1.5;
+        }
+
+        /* ----- SIDEBAR (dark with teal accents, white text) ----- */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 240px;
+            background: #031220;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 24px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: #13AA9A;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.30);
+            flex-shrink: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .brand-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            font-family: 'Inter', sans-serif;
+        }
+        .brand-text span {
+            color: #13AA9A;
+        }
+        .brand-sub {
+            font-size: 10px;
+            color: #ffffff;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            opacity: 0.7;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 12px 8px 6px 8px;
+            font-family: 'Inter', sans-serif;
+            opacity: 0.5;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            opacity: 0.7;
+        }
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 1;
+        }
+        .nav-item.active {
+            background: rgba(19, 170, 154, 0.15);
+            color: #13AA9A;
+            border: 1px solid rgba(19, 170, 154, 0.15);
+            opacity: 1;
+        }
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            stroke-width: 1.8;
+        }
+        .nav-item .badge {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #ffffff;
+            opacity: 0.6;
+        }
+        .nav-item.active .badge {
+            background: rgba(19, 170, 154, 0.15);
+            color: #13AA9A;
+            opacity: 1;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 16px;
+            margin-top: auto;
+        }
+
+        .logout-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            opacity: 0.7;
+        }
+        .logout-item:hover {
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            opacity: 1;
+        }
+        .logout-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            stroke-width: 1.8;
+        }
+
+        /* ----- MAIN CONTENT (white background) ----- */
+        .main-content {
+            margin-left: 240px;
+            flex: 1;
+            position: relative;
+            z-index: 5;
+            min-height: 100vh;
+            background: #ffffff;
+            padding: 24px 32px 32px 32px;
+        }
+
+        /* ----- TOP BAR ----- */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 28px;
+        }
+
+        .topbar-left h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.3px;
+        }
+        .topbar-left p {
+            font-size: 13px;
+            color: #718096;
+            font-family: 'Inter', sans-serif;
+            margin-top: 2px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .topbar-right .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #13AA9A;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+        }
+        .topbar-right .welcome {
+            font-size: 13px;
+            color: #475569;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ----- MESSAGES ----- */
+        .msg-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 12px 18px;
+            color: #16a34a;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 24px;
+        }
+
+        /* ----- STATS ROW ----- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .stat-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+
+        .stat-card .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'Inter', sans-serif;
+        }
+        .stat-card .value {
+            font-size: 30px;
+            font-weight: 800;
+            color: #0a1628;
+            margin-top: 2px;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.5px;
+        }
+        .stat-card .sub {
+            font-size: 11px;
+            color: #94a3b8;
+            font-family: 'Inter', sans-serif;
+            margin-top: 2px;
+        }
+
+        /* ----- QUICK ACTION CARD (teal accent) ----- */
+        .quick-action-card {
+            background: #f0fdfa;
+            border: 1px solid #99f6e4;
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .quick-action-card:hover {
+            background: #ccfbf1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.10);
+        }
+        .quick-action-card .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #0d9488;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'Inter', sans-serif;
+        }
+        .quick-action-card .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0d9488;
+            font-family: 'Inter', sans-serif;
+        }
+        .quick-action-card .arrow {
+            font-size: 20px;
+            color: #0d9488;
+            transition: transform 0.3s ease;
+        }
+        .quick-action-card:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        /* ----- GRID 2 ----- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 20px 22px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .card-badge {
+            background: #f1f5f9;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ----- SEARCH BAR ----- */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-bar input::placeholder {
+            color: #94a3b8;
+        }
+        .search-bar input:focus {
+            border-color: #13AA9A;
+            box-shadow: 0 0 0 3px rgba(19, 170, 154, 0.10);
+        }
+        .search-bar select {
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: #475569;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .search-bar select:focus {
+            border-color: #13AA9A;
+            box-shadow: 0 0 0 3px rgba(19, 170, 154, 0.10);
+        }
+
+        /* ----- PATIENT ITEMS ----- */
+        .patient-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .patient-item:last-child {
+            margin-bottom: 0;
+        }
+        .patient-item:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .patient-item .name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+        }
+        .patient-item .status {
+            font-size: 11px;
+            font-weight: 500;
+            color: #94a3b8;
+            font-family: 'Inter', sans-serif;
+        }
+        .patient-item .status.active {
+            color: #13AA9A;
+        }
+
+        /* ----- READING ITEMS ----- */
+        .reading-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+        .reading-item:last-child {
+            margin-bottom: 0;
+        }
+        .reading-item:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .reading-item .name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #0a1628;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 4px;
+        }
+        .reading-item .meta {
+            font-size: 12px;
+            color: #718096;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ----- SCROLL AREA ----- */
+        .scroll-area {
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .scroll-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .empty-state {
+            color: #94a3b8;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            text-align: center;
+            padding: 32px 0;
+        }
+
+        /* ----- MOBILE HAMBURGER ----- */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .hamburger:hover {
+            background: #f1f5f9;
+        }
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #0a1628;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 1024px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px 16px 24px;
+            }
+
+            .topbar {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding-bottom: 14px;
+                margin-bottom: 18px;
+            }
+            .topbar-left h1 {
+                font-size: 18px;
+            }
+            .topbar-right .welcome {
+                display: none;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 18px;
+            }
+            .stat-card {
+                padding: 14px 16px;
+            }
+            .stat-card .value {
+                font-size: 24px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-top: 16px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .search-bar {
+                flex-wrap: wrap;
+            }
+            .search-bar select {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .quick-action-card {
+                padding: 14px 16px;
+            }
+            .quick-action-card .value {
+                font-size: 15px;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 90;
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 12px 14px;
+            }
+            .stat-card .value {
+                font-size: 20px;
+            }
+            .stat-card .label {
+                font-size: 10px;
+            }
+            .stat-card .sub {
+                font-size: 10px;
+            }
+            .topbar-left h1 {
+                font-size: 16px;
+            }
+            .card-title {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-slate-100 min-h-screen">
+<body>
 
-    <header class="bg-white border-b">
-        <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+    <!-- ══ SIDEBAR OVERLAY (mobile) ══ -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ══ SIDEBAR (dark with teal accents, white text) ══ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">+</div>
             <div>
-                <h1 class="text-2xl font-bold text-blue-950">
-                    Caregiver Dashboard
-                </h1>
-                <p class="text-slate-500 text-sm">
-                    Welcome, {{ request.user.username }}
-                </p>
+                <div class="brand-text">RG<span>MS</span></div>
+                <div class="brand-sub">CAREGIVER PORTAL</div>
             </div>
+        </div>
 
-            <a href="{% url 'logout' %}"
-               class="bg-slate-900 text-white px-5 py-3 rounded-xl font-semibold hover:bg-slate-800">
+        <nav class="sidebar-nav">
+            <div class="nav-label">Main</div>
+
+            <a href="#" class="nav-item active">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+
+            <a href="#" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                My Patients
+                <span class="badge">{{ assigned_patients.count }}</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Medical Logs
+                <span class="badge">{{ recent_readings.count }}</span>
+            </a>
+
+            <a href="{% url 'add_vital_reading' %}" class="nav-item" style="color:#13AA9A; opacity:1;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="#13AA9A"/></svg>
+                Add New Reading
+            </a>
+
+            <div class="nav-label">Overview</div>
+
+            <a href="#" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Recent Readings
+                <span class="badge">{{ recent_readings.count }}</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Alerts
+                <span class="badge" style="background:rgba(239,68,68,0.15);color:#ef4444;opacity:1;">0</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}" class="logout-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 Logout
             </a>
         </div>
-    </header>
+    </aside>
 
-    <main class="max-w-7xl mx-auto px-6 py-8">
+    <!-- ══ MAIN CONTENT (white background) ══ -->
+    <main class="main-content">
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="mb-6 rounded-lg bg-green-100 border border-green-300 text-green-800 px-4 py-3">
-                    {{ message }}
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle sidebar">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div>
+                        <h1>RGMSCaregiver Portal</h1>
+                        <p>Welcome back, {{ request.user.username }}</p>
+                    </div>
                 </div>
-            {% endfor %}
+            </div>
+            <div class="topbar-right">
+                <span class="welcome">Welcome, {{ request.user.username }}</span>
+                <div class="avatar">CG</div>
+            </div>
+        </header>
+
+        <!-- MESSAGES -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="msg-success">✓ {{ message }}</div>
+        {% endfor %}
         {% endif %}
 
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-            <div class="bg-white rounded-2xl shadow p-6 border">
-                <p class="text-slate-500">
-                    Assigned Patients
-                </p>
-                <h2 class="text-4xl font-bold text-blue-950 mt-2">
-                    {{ assigned_patients.count }}
-                </h2>
+        <!-- STATS ROW -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="label">Assigned Patients</div>
+                <div class="value">{{ assigned_patients.count }}</div>
+                <div class="sub">Active monitoring</div>
             </div>
-
-            <a href="{% url 'add_vital_reading' %}"
-               class="bg-blue-950 text-white rounded-2xl shadow p-6 border hover:bg-blue-900">
-                <p class="text-blue-100">
-                    Quick Action
-                </p>
-                <h2 class="text-2xl font-bold mt-2">
-                    Add Vital Reading
-                </h2>
+            <div class="stat-card">
+                <div class="label">Recent Entries</div>
+                <div class="value">{{ recent_readings.count }}</div>
+                <div class="sub">Logged this session</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">My Patients</div>
+                <div class="value">{{ assigned_patients.count }}</div>
+                <div class="sub">Total assigned</div>
+            </div>
+            <a href="{% url 'add_vital_reading' %}" class="quick-action-card">
+                <div>
+                    <div class="label">Quick Action</div>
+                    <div class="value">+ Add Vital Reading</div>
+                </div>
+                <span class="arrow">→</span>
             </a>
-
-            <div class="bg-white rounded-2xl shadow p-6 border">
-                <p class="text-slate-500">
-                    Recent Entries
-                </p>
-                <h2 class="text-4xl font-bold text-blue-950 mt-2">
-                    {{ recent_readings.count }}
-                </h2>
-            </div>
-
         </div>
 
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- GRID 2 -->
+        <div class="grid-2">
 
-            <!-- Assigned Patients -->
-            <section class="bg-white rounded-2xl shadow p-6 border">
-                <h2 class="text-2xl font-bold text-blue-950 mb-4">
-                    My Assigned Patients
-                </h2>
+            <!-- MY PATIENTS -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">My Patients</h2>
+                    <span class="card-badge">{{ assigned_patients.count }}</span>
+                </div>
 
-                {% if assigned_patients %}
-                    <div class="space-y-4">
-                        {% for patient in assigned_patients %}
-                            <div class="border border-slate-200 rounded-xl p-4">
-                                <h3 class="font-bold text-slate-900">
-                                    {{ patient.full_name }}
-                                </h3>
-                                <p class="text-sm text-slate-500">
-                                    {{ patient.get_care_type_display }}
-                                </p>
-                            </div>
-                        {% endfor %}
+                <!-- Search -->
+                <div class="search-bar">
+                    <input type="text" placeholder="Search patient..." />
+                    <select>
+                        <option>All Status ▼</option>
+                        <option>Active</option>
+                        <option>Stable</option>
+                        <option>Critical</option>
+                    </select>
+                </div>
+
+                <div class="scroll-area">
+                    {% if assigned_patients %}
+                    {% for patient in assigned_patients %}
+                    <div class="patient-item">
+                        <span class="name">{{ patient.full_name }}</span>
+                        <span class="status active">{{ patient.get_care_type_display }}</span>
                     </div>
-                {% else %}
-                    <p class="text-slate-500">
-                        No patient has been assigned to you yet.
-                    </p>
-                {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state">No patients assigned.</div>
+                    {% endif %}
+                </div>
             </section>
 
-            <!-- Recent Readings -->
-            <section class="bg-white rounded-2xl shadow p-6 border">
-                <h2 class="text-2xl font-bold text-blue-950 mb-4">
-                    Recent Readings
-                </h2>
+            <!-- RECENT READINGS -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Readings</h2>
+                    <span class="card-badge">{{ recent_readings.count }}</span>
+                </div>
 
-                {% if recent_readings %}
-                    <div class="space-y-4">
-                        {% for reading in recent_readings %}
-                            <div class="border border-slate-200 rounded-xl p-4">
-                                <h3 class="font-bold text-slate-900">
-                                    {{ reading.patient.full_name }}
-                                </h3>
-
-                                <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
-                                    <p>
-                                        <span class="text-gray-500">BP:</span>
-                                        <strong>{{ reading.systolic_bp }}/{{ reading.diastolic_bp }}</strong>
-                                    </p>
-
-                                    <p>
-                                        <span class="text-gray-500">Pulse:</span>
-                                        <strong>{{ reading.pulse_rate }}</strong>
-                                    </p>
-
-                                    <p>
-                                        <span class="text-gray-500">SpO2:</span>
-                                        <strong>{{ reading.oxygen_saturation|default:"N/A" }}%</strong>
-                                    </p>
-
-                                    <p>
-                                        <span class="text-gray-500">FBS:</span>
-                                        <strong>{{ reading.fasting_blood_sugar|default:"N/A" }}</strong>
-                                    </p>
-
-                                    <p>
-                                        <span class="text-gray-500">RBS:</span>
-                                        <strong>{{ reading.random_blood_sugar|default:"N/A" }}</strong>
-                                    </p>
-                                </div>
-
-                                {% if reading.symptoms %}
-                                    <p class="text-sm text-slate-700 mt-3">
-                                        <span class="text-gray-500">Symptoms:</span>
-                                        {{ reading.symptoms }}
-                                    </p>
-                                {% endif %}
-
-                                <!-- Urinalysis Section -->
-                                <div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-4">
-                                    <h4 class="font-bold text-blue-950 mb-3">
-                                        Urinalysis
-                                    </h4>
-                                    <div class="grid grid-cols-2 gap-3 text-sm">
-                                        <p><span class="text-gray-500">Glucose:</span>
-                                            <strong>{{ reading.get_urine_glucose_display }}</strong>
-                                        </p>
-                                        <p><span class="text-gray-500">Protein:</span>
-                                            <strong>{{ reading.get_urine_protein_display }}</strong>
-                                        </p>
-                                        <p><span class="text-gray-500">Acetone/Ketone:</span>
-                                            <strong>{{ reading.get_urine_acetone_display }}</strong>
-                                        </p>
-                                        <p><span class="text-gray-500">Bilirubin:</span>
-                                            <strong>{{ reading.get_urine_bilirubin_display }}</strong>
-                                        </p>
-                                        <p><span class="text-gray-500">Urobilinogen:</span>
-                                            <strong>{{ reading.get_urine_urobilinogen_display }}</strong>
-                                        </p>
-                                        <p><span class="text-gray-500">Nitrite:</span>
-                                            <strong>{{ reading.get_urine_nitrite_display }}</strong>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <p class="text-xs text-slate-500 mt-3">
-                                    {{ reading.created_at }}
-                                </p>
-                            </div>
-                        {% endfor %}
+                <div class="scroll-area">
+                    {% if recent_readings %}
+                    {% for reading in recent_readings %}
+                    <div class="reading-item">
+                        <div class="name">{{ reading.patient.full_name }}</div>
+                        <div class="meta">
+                            BP {{ reading.systolic_bp }}/{{ reading.diastolic_bp }} ·
+                            Pulse {{ reading.pulse_rate }} bpm ·
+                            SpO2 {{ reading.oxygen_saturation|default:"—" }}%
+                        </div>
+                        <div class="meta" style="font-size:11px;margin-top:4px;color:#94a3b8;">
+                            {{ reading.created_at }}
+                        </div>
                     </div>
-                {% else %}
-                    <p class="text-slate-500">
-                        No readings submitted yet.
-                    </p>
-                {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state">
+                        No readings found.<br>
+                        <span style="font-size:12px;color:#94a3b8;">Start by adding a vital reading for a patient.</span>
+                    </div>
+                    {% endif %}
+                </div>
             </section>
 
         </div>
 
     </main>
+
+    <script>
+        // Mobile sidebar toggle
+        const hamburger = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar(open) {
+            sidebar.classList.toggle('open', open);
+            overlay.classList.toggle('open', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+
+        hamburger.addEventListener('click', () => toggleSidebar(!sidebar.classList.contains('open')));
+        overlay.addEventListener('click', () => toggleSidebar(false));
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && sidebar.classList.contains('open')) toggleSidebar(false);
+        });
+
+        // Close sidebar on nav item click (mobile)
+        document.querySelectorAll('.nav-item, .logout-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) toggleSidebar(false);
+            });
+        });
+    </script>
 
 </body>
 </html>

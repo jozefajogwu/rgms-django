@@ -1,797 +1,677 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RGMS Doctor Dashboard</title>
+  <title>RGMS · Clinical Care Suite</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Premium Google Fonts: Inter and Outfit for Display Headings -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
-    :root {
-      --bg: #f0f4f9;
-      --surface: #ffffff;
-      --surface-2: #f7f9fc;
-      --navy: #0d1f3c;
-      --accent: #3b7cf4;
-      --accent-soft: #deeaff;
-      --red: #e53e3e;
-      --amber: #d97706;
-      --green: #059669;
-      --text: #1a202c;
-      --muted: #718096;
-      --border: #e2e8f0;
-      --sidebar-w: 72px;
-      --topbar-h: 64px;
-      --bottom-nav-h: 64px;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      letter-spacing: -0.011em;
+    }
+    .font-display {
+      font-family: 'Outfit', sans-serif;
+    }
+    
+    /* Fine-grained shadow design */
+    .premium-flat-shadow {
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03), 0 4px 18px -1px rgba(15, 23, 42, 0.02);
+    }
+    .premium-elevated-shadow {
+      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 20px 40px -12px rgba(15, 23, 42, 0.05);
     }
 
-    /* ══════════════════════════════════════
-       DESKTOP SIDEBAR (hidden on mobile)
-    ══════════════════════════════════════ */
-    .sidebar {
-      width: var(--sidebar-w);
-      background: var(--navy);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 0;
-      gap: 8px;
-      position: fixed;
-      left: 0; top: 0; bottom: 0;
-      z-index: 200;
+    /* Glassmorphism details */
+    .glass-backdrop {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
-    .sidebar-logo {
-      width: 40px; height: 40px;
-      background: var(--accent);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 800; font-size: 18px;
-      margin-bottom: 16px;
+    /* Active indicator states */
+    .sidebar-link-active {
+      background: rgba(13, 148, 136, 0.08);
+      color: #0d9488;
+      border-right: 3.5px solid #0d9488;
+      font-weight: 600;
     }
 
-    .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-
-    .nav-item {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.45);
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
+    /* Smooth transitions and card transformations */
+    .animated-card {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .nav-item.active { background: var(--accent); color: #fff; }
-    .nav-item svg { width: 20px; height: 20px; }
-
-    .nav-item::after {
-      content: attr(data-label);
-      position: absolute;
-      left: calc(100% + 12px);
-      background: var(--navy);
-      color: #fff;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s;
-      z-index: 300;
-    }
-    .nav-item:hover::after { opacity: 1; }
-
-    .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-
-    .avatar-sm {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg,#4a9df8,#1a3560);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 700; font-size: 13px;
-      border: 2px solid rgba(255,255,255,0.2);
+    .animated-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.06);
+      border-color: rgba(13, 148, 136, 0.2);
     }
 
-    /* ══════════════════════════════════════
-       MAIN WRAPPER
-    ══════════════════════════════════════ */
-    .main {
-      margin-left: var(--sidebar-w);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+    /* Subtle pulse on crucial items */
+    @keyframes alert-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.06); opacity: 0.85; }
+    }
+    .vital-pulse-icon {
+      animation: alert-pulse 2s infinite ease-in-out;
     }
 
-    /* ══════════════════════════════════════
-       TOP BAR
-    ══════════════════════════════════════ */
-    .topbar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: var(--topbar-h);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky; top: 0; z-index: 150;
-      gap: 12px;
-    }
-
-    .topbar-greeting h2 {
-      font-size: 15px; font-weight: 700; color: var(--navy); white-space: nowrap;
-    }
-    .topbar-greeting p { font-size: 12px; color: var(--muted); margin-top: 1px; }
-
-    .topbar-tabs {
-      display: flex; gap: 4px;
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 4px;
-      flex-shrink: 0;
-    }
-    .tab-btn {
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 12px; font-weight: 500;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.18s;
-      border: none; background: transparent;
-      font-family: 'Inter', sans-serif;
-      white-space: nowrap;
-    }
-    .tab-btn.active { background: var(--surface); color: var(--navy); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-
-    .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-    .notif-btn {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--muted); cursor: pointer; position: relative;
-    }
-    .notif-dot {
-      width: 8px; height: 8px; background: var(--red); border-radius: 50%;
-      position: absolute; top: 6px; right: 6px; border: 1.5px solid #fff;
-    }
-
-    /* ══════════════════════════════════════
-       PAGE CONTENT
-    ══════════════════════════════════════ */
-    .content { padding: 20px 24px 32px; flex: 1; }
-
-    /* ══════════════════════════════════════
-       STAT CARDS
-    ══════════════════════════════════════ */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border-radius: 14px;
-      padding: 18px 16px;
-      border: 1px solid var(--border);
-      display: flex; align-items: flex-start; justify-content: space-between;
-      transition: box-shadow 0.2s;
-    }
-    .stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
-
-    .stat-icon {
-      width: 38px; height: 38px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .stat-icon svg { width: 18px; height: 18px; }
-
-    .stat-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 4px; letter-spacing: 0.03em; text-transform: uppercase; }
-    .stat-value { font-size: 26px; font-weight: 800; color: var(--navy); line-height: 1; }
-    .stat-sub { font-size: 11px; margin-top: 5px; font-weight: 500; }
-
-    /* ══════════════════════════════════════
-       TWO COLUMN GRID
-    ══════════════════════════════════════ */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-
-    .card {
-      background: var(--surface);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-
-    .card-header {
-      padding: 16px 18px 12px;
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-    }
-    .card-title { font-size: 14px; font-weight: 700; color: var(--navy); }
-    .card-body { padding: 0 18px; }
-
-    /* ══════════════════════════════════════
-       BADGES
-    ══════════════════════════════════════ */
-    .badge {
-      font-size: 10px; font-weight: 600;
-      padding: 3px 9px; border-radius: 20px;
-      letter-spacing: 0.03em; white-space: nowrap;
-    }
-    .badge-red    { background: #fee2e2; color: #b91c1c; }
-    .badge-amber  { background: #fef3c7; color: #92400e; }
-    .badge-blue   { background: var(--accent-soft); color: #1d4ed8; }
-    .badge-green  { background: #d1fae5; color: #065f46; }
-
-    /* ══════════════════════════════════════
-       ALERT ITEMS
-    ══════════════════════════════════════ */
-    .alert-item {
-      padding: 13px 0;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: flex-start; gap: 10px;
-    }
-    .alert-item:last-child { border-bottom: none; }
-
-    .alert-dot {
-      width: 9px; height: 9px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
-    }
-    .alert-dot.critical { background: var(--red); box-shadow: 0 0 0 3px #fee2e2; }
-    .alert-dot.warning  { background: var(--amber); box-shadow: 0 0 0 3px #fef3c7; }
-
-    .alert-name { font-weight: 600; font-size: 13px; color: var(--navy); }
-    .alert-msg  { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .alert-time { font-size: 10px; color: #a0aec0; margin-top: 3px; }
-
-    .btn-review {
-      background: var(--navy); color: #fff;
-      border: none; border-radius: 7px;
-      padding: 5px 12px;
-      font-size: 11px; font-weight: 600;
-      cursor: pointer; transition: background 0.18s; white-space: nowrap;
-      font-family: 'Inter', sans-serif;
-    }
-    .btn-review:hover { background: var(--accent); }
-
-    /* ══════════════════════════════════════
-       VITAL READING ITEMS
-    ══════════════════════════════════════ */
-    .reading-item { padding: 13px 0; border-bottom: 1px solid var(--border); }
-    .reading-item:last-child { border-bottom: none; }
-    .reading-name { font-weight: 600; font-size: 13px; color: var(--navy); margin-bottom: 8px; }
-
-    .vitals-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; }
-
-    .vital-chip {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 7px; padding: 5px 8px; font-size: 11px;
-    }
-    .vital-chip .lbl { color: var(--muted); font-size: 10px; text-transform: uppercase; font-weight: 500; display: block; margin-bottom: 1px; }
-    .vital-chip .val { font-weight: 700; color: var(--navy); font-size: 12px; }
-
+    /* Urinalysis expander summary clean-up */
     details summary {
-      font-size: 11px; font-weight: 600; color: var(--accent);
-      cursor: pointer; margin-top: 9px; list-style: none; user-select: none;
+      list-style: none;
     }
-    details summary::-webkit-details-marker { display: none; }
-    details summary::before { content: '▸ '; }
-    details[open] summary::before { content: '▾ '; }
-
-    .urinalysis-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; margin-top: 7px; }
-    .ua-chip { font-size: 10px; background: var(--bg); border-radius: 6px; padding: 4px 7px; color: var(--muted); }
-    .ua-chip strong { color: var(--text); }
-
-    /* ══════════════════════════════════════
-       CHARTS SECTION
-    ══════════════════════════════════════ */
-    .chart-section {
-      background: var(--surface); border-radius: 14px;
-      border: 1px solid var(--border); padding: 18px;
-    }
-    .chart-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-top: 14px; }
-    .chart-wrap {
-      background: var(--surface-2); border-radius: 10px;
-      padding: 14px; border: 1px solid var(--border);
-    }
-    .chart-label {
-      font-size: 11px; font-weight: 600; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px;
-    }
-
-    /* ══════════════════════════════════════
-       SCROLL AREAS
-    ══════════════════════════════════════ */
-    .scroll-area { max-height: 360px; overflow-y: auto; }
-    .scroll-area::-webkit-scrollbar { width: 4px; }
-    .scroll-area::-webkit-scrollbar-track { background: transparent; }
-    .scroll-area::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
-
-    /* ══════════════════════════════════════
-       EMPTY STATE
-    ══════════════════════════════════════ */
-    .empty { text-align: center; padding: 28px 16px; color: var(--muted); font-size: 13px; }
-    .empty svg { width: 32px; height: 32px; color: #cbd5e0; margin: 0 auto 8px; display: block; }
-
-    /* ══════════════════════════════════════
-       MOBILE BOTTOM NAV
-    ══════════════════════════════════════ */
-    .bottom-nav {
+    details summary::-webkit-details-marker {
       display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: var(--bottom-nav-h);
-      background: var(--navy);
-      z-index: 200;
-      align-items: center;
-      justify-content: space-around;
-      padding: 0 8px;
-      border-top: 1px solid rgba(255,255,255,0.06);
     }
 
-    .bnav-item {
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
-      color: rgba(255,255,255,0.4);
-      cursor: pointer; padding: 8px 12px; border-radius: 10px;
-      transition: all 0.18s; min-width: 52px;
+    /* Custom high-scannability scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    .bnav-item.active { color: #fff; background: rgba(59,124,244,0.25); }
-    .bnav-item svg { width: 20px; height: 20px; }
-    .bnav-item span { font-size: 10px; font-weight: 500; }
-
-    /* ══════════════════════════════════════
-       MOBILE TOP BAR ADJUSTMENTS
-    ══════════════════════════════════════ */
-    .mobile-menu-btn { display: none; }
-
-    /* ══════════════════════════════════════
-       RESPONSIVE BREAKPOINTS
-    ══════════════════════════════════════ */
-
-    /* ── Tablet (≤1024px): narrower sidebar, hide tabs ── */
-    @media (max-width: 1024px) {
-      .topbar-tabs { display: none; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    ::-webkit-scrollbar-track {
+      background: transparent;
     }
-
-    /* ── Mobile (≤768px): hide sidebar, show bottom nav ── */
-    @media (max-width: 768px) {
-      :root { --topbar-h: 56px; }
-
-      .sidebar { display: none; }
-      .bottom-nav { display: flex; }
-
-      .main {
-        margin-left: 0;
-        padding-bottom: var(--bottom-nav-h);
-      }
-
-      .topbar {
-        padding: 0 16px;
-        height: var(--topbar-h);
-      }
-
-      .topbar-greeting h2 { font-size: 14px; }
-      .topbar-greeting p  { display: none; }
-
-      .content { padding: 14px 14px 24px; }
-
-      .stats-row {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-
-      .stat-card { padding: 14px 12px; }
-      .stat-value { font-size: 22px; }
-      .stat-icon { width: 32px; height: 32px; border-radius: 8px; }
-      .stat-icon svg { width: 15px; height: 15px; }
-
-      .grid-2 {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        margin-bottom: 14px;
-      }
-
-      .scroll-area { max-height: none; overflow-y: visible; }
-
-      .chart-grid { grid-template-columns: 1fr; }
-
-      .chart-section { padding: 14px; }
-      .card-header { padding: 13px 14px 10px; }
-      .card-body { padding: 0 14px; }
-
-      .vitals-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
-      .urinalysis-grid { grid-template-columns: repeat(2, 1fr); }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 99px;
     }
-
-    /* ── Small mobile (≤480px) ── */
-    @media (max-width: 480px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .stat-card { padding: 12px 10px; }
-      .stat-value { font-size: 20px; }
-      .stat-label { font-size: 10px; }
-      .stat-sub { display: none; }
-
-      .vitals-grid { grid-template-columns: repeat(2, 1fr); }
-
-      .topbar-right .avatar-sm { display: none; }
-
-      .alert-item { gap: 8px; }
-
-      .urinalysis-grid { grid-template-columns: 1fr 1fr; }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
   </style>
 </head>
-<body>
+<body class="text-[#0f172a] min-h-screen flex flex-col md:flex-row antialiased select-none">
 
-  <!-- ═══════════════════════════════════
-       DESKTOP SIDEBAR
-  ═══════════════════════════════════ -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">R</div>
-    <nav class="sidebar-nav">
-      <div class="nav-item active" data-label="Dashboard">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  <!-- ============================================ -->
+  <!-- 1. LEFT SIDEBAR NAVIGATION (DESKTOP) -->
+  <!-- ============================================ -->
+  <aside class="hidden md:flex md:w-64 bg-slate-950 text-slate-100 flex-col justify-between shrink-0 border-r border-slate-800/80">
+    <div>
+      <!-- Clinic Branding Frame -->
+      <div class="p-6 border-b border-slate-800/60 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-teal-500/20">
+          RG
+        </div>
+        <div class="leading-none">
+          <span class="font-extrabold text-white text-base tracking-tight font-display">RGMS <span class="text-teal-400">Portal</span></span>
+          <p class="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5 font-bold">Clinical Care</p>
+        </div>
       </div>
-      <div class="nav-item" data-label="Patients">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+
+      <!-- Main Navigation Menu -->
+      <nav class="p-4 space-y-1 mt-4">
+        <!-- Dashboard (Active Accesspoint) -->
+        <a href="#" class="sidebar-link-active flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm transition-all">
+          <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- Patients View Accesspoint placeholder -->
+        <a href="#" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 transition-all text-sm group">
+          <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Patients List</span>
+          <span class="ml-auto text-[10px] bg-slate-900 text-slate-450 px-2 py-0.5 rounded-full font-bold">
+            {{ total_patients }}
+          </span>
+        </a>
+
+        <!-- Live Vitals Tracker Accesspoint placeholder -->
+        <a href="#" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 transition-all text-sm group">
+          <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <span>Live Telemetry</span>
+          <span class="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+            7-Point
+          </span>
+        </a>
+
+        <!-- General Alerts View Accesspoint -->
+        <a href="#" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 transition-all text-sm group">
+          <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span>Triage Desk</span>
+          {% if urgent_alerts %}
+          <span class="ml-auto bg-rose-500 text-white text-[10px] px-2.5 py-0.5 rounded-full font-extrabold animate-pulse">
+            {{ urgent_alerts|length }} Active
+          </span>
+          {% endif %}
+        </a>
+      </nav>
+    </div>
+
+    <!-- User Clinical ID Section -->
+    <div class="p-4 border-t border-slate-800/60 bg-slate-950/80">
+      <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-705 flex items-center justify-center font-bold text-xs text-teal-400 select-none">
+          DR
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-bold text-slate-205 truncate">Doctor Portal</p>
+          <span class="text-[9px] text-slate-400 block truncate uppercase tracking-widest font-mono">Geriatrics Unit</span>
+        </div>
       </div>
-      <div class="nav-item" data-label="Alerts">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      </div>
-      <div class="nav-item" data-label="Analytics">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      </div>
-      <div class="nav-item" data-label="Records">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      </div>
-    </nav>
-    <div class="sidebar-bottom">
-      <div class="nav-item" data-label="Settings">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </div>
-      <div class="nav-item" data-label="Logout" style="color:rgba(255,80,80,0.7)" onclick="window.location='{% url 'logout' %}'">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </div>
-      <div class="avatar-sm">DR</div>
+      
+      <!-- Secure clinical log out button -->
+      <a href="{% url 'logout' %}" class="mt-3 flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl font-bold text-xs transition-all cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span>End Secure Shift Sessions</span>
+      </a>
     </div>
   </aside>
 
-  <!-- ═══════════════════════════════════
-       MOBILE BOTTOM NAV
-  ═══════════════════════════════════ -->
-  <nav class="bottom-nav">
-    <div class="bnav-item active">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Home</span>
+  <!-- ============================================ -->
+  <!-- 2. MOBILE HEADER & NAVIGATION OVERLAYS -->
+  <!-- ============================================ -->
+  <header class="md:hidden glass-backdrop border-b border-slate-200/85 px-4 h-16 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">R</div>
+      <span class="font-extrabold text-[#0f172a] font-display text-sm tracking-tight">RGMS <span class="text-teal-600">Care</span></span>
     </div>
-    <div class="bnav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-      <span>Patients</span>
+    <div class="flex items-center gap-3">
+      <!-- Mobile Shift Exit -->
+      <a href="{% url 'logout' %}" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg">Shift Log-out</a>
     </div>
-    <div class="bnav-item" style="position:relative">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span>Alerts</span>
-      <span style="position:absolute;top:6px;right:10px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--navy)"></span>
-    </div>
-    <div class="bnav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <span>Trends</span>
-    </div>
-    <div class="bnav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span>Records</span>
-    </div>
-  </nav>
+  </header>
 
-  <!-- ═══════════════════════════════════
-       MAIN
-  ═══════════════════════════════════ -->
-  <div class="main">
+  <!-- ============================================ -->
+  <!-- 3. MAIN WORKSPACE PANEL -->
+  <!-- ============================================ -->
+  <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
 
-    <!-- TOP BAR -->
-    <header class="topbar">
-      <div class="topbar-greeting">
-        <h2>Hello, Doctor. Ready to review patient data?</h2>
-        <p>{{ current_date|default:"Today's Overview" }}</p>
+    <!-- Desktop Sticky Header Row -->
+    <header class="hidden md:flex h-20 bg-white border-b border-slate-200 px-8 items-center justify-between shadow-sm shrink-0 z-40">
+      <div>
+        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 font-display">Hello Doctor, Welcome back to clinical rounds.</h1>
+        <p class="text-xs text-slate-500 mt-1">Status monitors and remote bio-signals are fully synchronized with passive geriatric nodes.</p>
       </div>
 
-      <div class="topbar-tabs">
-        <button class="tab-btn active">Dashboard</button>
-        <button class="tab-btn">Analytics</button>
-        <button class="tab-btn">Heart Rate</button>
-        <button class="tab-btn">Records</button>
-      </div>
-
-      <div class="topbar-right">
-        <div class="notif-btn">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="notif-dot"></span>
+      <div class="flex items-center gap-4">
+        <!-- Live status telemetry pill -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-full select-none">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 vital-pulse-icon"></span>
+          <span class="text-[10.5px] font-bold text-slate-600 tracking-wider">Passive Remote Mappings Active</span>
         </div>
-        <div class="avatar-sm">DR</div>
       </div>
     </header>
 
-    <!-- CONTENT -->
-    <div class="content">
+    <!-- Scrollable Space Workspace Content -->
+    <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 select-none">
 
-      <!-- STAT CARDS -->
-      <div class="stats-row">
-
-        <div class="stat-card">
-          <div>
-            <div class="stat-label">Total Patients</div>
-            <div class="stat-value">{{ total_patients }}</div>
-            <div class="stat-sub" style="color:var(--green)">↑ Active monitoring</div>
+      <!-- ============================================ -->
+      <!-- SECTION I: FOUR ADAPTIVE KPI CARDS -->
+      <!-- ============================================ -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Total Patients -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 premium-flat-shadow animated-card flex justify-between items-start">
+          <div class="min-w-0">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Total Geriatric Cohorts</span>
+            <p class="text-3xl font-bold font-display text-slate-900 leading-none">{{ total_patients }}</p>
+            <div class="flex items-center gap-1.5 text-xs text-teal-600 mt-3 font-semibold">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
+              <span>Fully Validated</span>
+            </div>
           </div>
-          <div class="stat-icon" style="background:#dbeafe">
-            <svg fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div>
-            <div class="stat-label">Total Readings</div>
-            <div class="stat-value">{{ total_readings }}</div>
-            <div class="stat-sub" style="color:var(--accent)">↑ Vitals logged</div>
-          </div>
-          <div class="stat-icon" style="background:#dbeafe">
-            <svg fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <div class="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            </svg>
           </div>
         </div>
 
-        <div class="stat-card" style="border-color:#fecaca">
-          <div>
-            <div class="stat-label" style="color:var(--red)">Critical Alerts</div>
-            <div class="stat-value" style="color:var(--red)">{{ critical_alerts_count }}</div>
-            <div class="stat-sub" style="color:var(--red)">Needs attention</div>
+        <!-- Total Readings Logs -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 premium-flat-shadow animated-card flex justify-between items-start">
+          <div class="min-w-0">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Total Telemetered Logs</span>
+            <p class="text-3xl font-bold font-display text-slate-900 leading-none">{{ total_readings }}</p>
+            <div class="flex items-center gap-1.5 text-xs text-sky-650 mt-3 font-semibold">
+              <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping"></span>
+              <span>Passively Recording</span>
+            </div>
           </div>
-          <div class="stat-icon" style="background:#fee2e2">
-            <svg fill="none" stroke="#dc2626" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          </div>
-        </div>
-
-        <div class="stat-card" style="border-color:#fde68a">
-          <div>
-            <div class="stat-label" style="color:var(--amber)">Warning Alerts</div>
-            <div class="stat-value" style="color:var(--amber)">{{ warning_alerts_count }}</div>
-            <div class="stat-sub" style="color:var(--amber)">Under observation</div>
-          </div>
-          <div class="stat-icon" style="background:#fef3c7">
-            <svg fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-650 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
           </div>
         </div>
 
-      </div>
+        <!-- Critical Alerts -->
+        <div class="p-5 rounded-2xl border flex justify-between items-start animated-card premium-flat-shadow {% if critical_alerts_count > 0 %}bg-rose-50/50 border-rose-200{% else %}bg-white border-slate-200/80{% endif %}">
+          <div class="min-w-0">
+            <span class="text-[10px] font-bold uppercase tracking-widest block mb-1 {% if critical_alerts_count > 0 %}text-rose-600{% else %}text-slate-400{% endif %}">Critical Alerts</span>
+            <p class="text-3xl font-bold font-display leading-none {% if critical_alerts_count > 0 %}text-rose-600{% else %}text-slate-900{% endif %}">{{ critical_alerts_count }}</p>
+            <div class="flex items-center gap-1 mt-3 text-xs font-semibold {% if critical_alerts_count > 0 %}text-rose-600{% else %}text-slate-505{% endif %}">
+              {% if critical_alerts_count > 0 %}
+              <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <span>Requiring Intervention</span>
+              {% else %}
+              <span>No Urgent Anomalies</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {% if critical_alerts_count > 0 %}bg-rose-100 text-rose-600{% else %}bg-slate-50 text-slate-450{% endif %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            </svg>
+          </div>
+        </div>
 
-      <!-- TWO COLUMN PANELS -->
-      <div class="grid-2">
+        <!-- Warning Alerts -->
+        <div class="p-5 rounded-2xl border flex justify-between items-start animated-card premium-flat-shadow {% if warning_alerts_count > 0 %}bg-amber-50/50 border-amber-200{% else %}bg-white border-slate-200/80{% endif %}">
+          <div class="min-w-0">
+            <span class="text-[10px] font-bold uppercase tracking-widest block mb-1 {% if warning_alerts_count > 0 %}text-amber-600{% else %}text-slate-400{% endif %}">Warning Alerts</span>
+            <p class="text-3xl font-bold font-display leading-none {% if warning_alerts_count > 0 %}text-amber-600{% else %}text-slate-900{% endif %}">{{ warning_alerts_count }}</p>
+            <div class="flex items-center gap-1.5 text-xs mt-3 font-semibold {% if warning_alerts_count > 0 %}text-amber-600{% else %}text-slate-505{% endif %}">
+              {% if warning_alerts_count > 0 %}
+              <span>Under Stable Observation</span>
+              {% else %}
+              <span>Normal Variabilities</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {% if warning_alerts_count > 0 %}bg-amber-100 text-amber-600{% else %}bg-slate-50 text-slate-450{% endif %}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+        </div>
 
-        <!-- URGENT ALERTS -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Urgent Alerts</span>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SECTION II: GRID-2 ADAPTIVE TRIAGE DESKS -->
+      <!-- ============================================ -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Urgent Alerts clinical list -->
+        <div class="bg-white rounded-2xl border border-slate-200/85 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
+          <div class="p-5 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 bg-rose-500 rounded-full inline-block vital-pulse-icon"></span>
+              <h3 class="font-extrabold text-[#0f172a] font-display text-base">Geriatric Patient Rescue Triage Alerts</h3>
+            </div>
             {% if urgent_alerts %}
-              <span class="badge badge-red">{{ urgent_alerts|length }} active</span>
+            <span class="text-[10px] uppercase tracking-wider font-bold bg-rose-100 text-rose-700 px-3 py-1 rounded-full border border-rose-200">
+              {{ urgent_alerts|length }} Pending Action
+            </span>
             {% endif %}
           </div>
-          <div class="card-body scroll-area">
+
+          <div class="p-4 overflow-y-auto space-y-4 divide-y divide-slate-100/80 flex-1">
             {% if urgent_alerts %}
               {% for alert in urgent_alerts %}
-                <div class="alert-item">
-                  <div class="alert-dot {% if alert.severity == 'critical' %}critical{% else %}warning{% endif %}"></div>
-                  <div style="flex:1;min-width:0">
-                    <div class="alert-name">{{ alert.patient.full_name }}</div>
-                    <div class="alert-msg">{{ alert.title }} — {{ alert.message }}</div>
-                    <div class="alert-time">{{ alert.created_at }}</div>
+                <div class="pt-4 first:pt-0 alert-item flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div class="flex gap-3 items-start min-w-0">
+                    <!-- Status dot representation -->
+                    <div class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 {% if alert.severity == 'critical' %}bg-rose-500 shadow-[0_0_8px_#ef444455]{% else %}bg-amber-400{% endif %}"></div>
+                    <div class="min-w-0">
+                      <!-- Patient Full Name -->
+                      <p class="font-bold text-[#0f172a] text-sm">{{ alert.patient.full_name }}</p>
+                      <!-- Alert Title and message -->
+                      <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                        <span class="font-semibold text-slate-800">[{{ alert.title }}]</span> — {{ alert.message }}
+                      </p>
+                      <span class="text-[10.5px] text-slate-400 font-medium inline-flex items-center gap-1 mt-2 font-mono">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Recorded: {{ alert.created_at }}
+                      </span>
+                    </div>
                   </div>
-                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0">
-                    <span class="badge {% if alert.severity == 'critical' %}badge-red{% else %}badge-amber{% endif %}">{{ alert.severity|title }}</span>
-                    <form method="POST" action="{% url 'mark_alert_reviewed' alert.id %}">
+
+                  <div class="flex flex-col items-end gap-2.5 sm:shrink-0">
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border {% if alert.severity == 'critical' %}bg-rose-50 text-rose-700 border-rose-200{% else %}bg-amber-50 text-amber-700 border-amber-200{% endif %}">
+                      {{ alert.severity|title }}
+                    </span>
+                    
+                    <!-- Dispatch Reviewed Event Action -->
+                    <form method="POST" action="{% url 'mark_alert_reviewed' alert.id %}" class="w-full">
                       {% csrf_token %}
-                      <button type="submit" class="btn-review">Review</button>
+                      <button type="submit" class="w-full sm:w-auto bg-[#0f172a] hover:bg-teal-650 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        Dismiss & Clear
+                      </button>
                     </form>
                   </div>
                 </div>
               {% endfor %}
             {% else %}
-              <div class="empty">
-                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                All clear — no urgent alerts.
+              <div class="py-14 text-center text-slate-400 space-y-2">
+                <svg class="w-10 h-10 mx-auto text-slate-300 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-xs font-semibold">Triage channels clear. No active alerts flagged.</p>
               </div>
             {% endif %}
           </div>
         </div>
 
-        <!-- LATEST READINGS -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Latest Vital Readings</span>
+        <!-- Latest vitals telemetered feeds list -->
+        <div class="bg-white rounded-2xl border border-slate-200/85 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
+          <div class="p-5 border-b border-slate-200/80 bg-slate-50/50 flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <h3 class="font-extrabold text-[#0f172a] font-display text-base">Incoming Patient Vital Records Stream</h3>
+            </div>
             {% if latest_readings %}
-              <span class="badge badge-blue">{{ latest_readings|length }} recent</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-50 border border-sky-100 text-sky-700 px-3 py-1 rounded-full">
+              {{ latest_readings|length }} Streams Active
+            </span>
             {% endif %}
           </div>
-          <div class="card-body scroll-area">
+
+          <div class="p-4 overflow-y-auto space-y-4 divide-y divide-slate-150/60 flex-1">
             {% if latest_readings %}
               {% for reading in latest_readings %}
-                <div class="reading-item">
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-                    <div class="reading-name">{{ reading.patient.full_name }}</div>
-                    <span style="font-size:10px;color:var(--muted)">{{ reading.created_at }}</span>
+                <div class="pt-4 first:pt-0 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <p class="font-extrabold text-sm text-[#0f172a]">{{ reading.patient.full_name }}</p>
+                    <span class="text-[10.5px] text-slate-400 font-mono">{{ reading.created_at }}</span>
                   </div>
-                  <div class="vitals-grid">
-                    <div class="vital-chip">
-                      <span class="lbl">BP</span>
-                      <span class="val">{{ reading.systolic_bp }}/{{ reading.diastolic_bp }}</span>
+
+                  <!-- Patient Vitals metrics matrix -->
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs text-slate-600">
+                    <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Blood Pressure</span>
+                      <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.systolic_bp }}/{{ reading.diastolic_bp }} <span class="text-[10px] font-normal text-slate-450">mmHg</span></span>
                     </div>
-                    <div class="vital-chip">
-                      <span class="lbl">Pulse</span>
-                      <span class="val">{{ reading.pulse_rate }} bpm</span>
+
+                    <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Pulse Rate</span>
+                      <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.pulse_rate }} <span class="text-[10px] font-light text-slate-420 font-sans">bpm</span></span>
                     </div>
-                    <div class="vital-chip">
-                      <span class="lbl">SpO2</span>
-                      <span class="val">{{ reading.oxygen_saturation|default:"—" }}%</span>
+
+                    <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Blood Ox (SpO2)</span>
+                      <span class="font-bold text-teal-700 text-sm mt-0.5 block">{{ reading.oxygen_saturation|default:"—" }}%</span>
                     </div>
-                    <div class="vital-chip">
-                      <span class="lbl">FBS</span>
-                      <span class="val">{{ reading.fasting_blood_sugar|default:"—" }}</span>
+
+                    <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Fasting Glucose</span>
+                      <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.fasting_blood_sugar|default:"—" }}</span>
                     </div>
-                    <div class="vital-chip">
-                      <span class="lbl">RBS</span>
-                      <span class="val">{{ reading.random_blood_sugar|default:"—" }}</span>
+
+                    <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Random Glucose</span>
+                      <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.random_blood_sugar|default:"—" }}</span>
                     </div>
-                    {% if reading.symptoms %}
-                    <div class="vital-chip">
-                      <span class="lbl">Symptoms</span>
-                      <span class="val" style="font-size:10px">{{ reading.symptoms|truncatechars:18 }}</span>
+
+                    <!-- Symptoms block representation -->
+                    <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl min-w-0" title="{{ reading.symptoms }}">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Symptoms</span>
+                      <span class="font-semibold text-rose-700 text-xs block truncate mt-0.5">
+                        {{ reading.symptoms|default:"None Logged"|truncatechars:18 }}
+                      </span>
                     </div>
-                    {% endif %}
                   </div>
-                  <details>
-                    <summary>Urinalysis Results</summary>
-                    <div class="urinalysis-grid">
-                      <span class="ua-chip">Glucose: <strong>{{ reading.get_urine_glucose_display }}</strong></span>
-                      <span class="ua-chip">Protein: <strong>{{ reading.get_urine_protein_display }}</strong></span>
-                      <span class="ua-chip">Ketone: <strong>{{ reading.get_urine_acetone_display }}</strong></span>
-                      <span class="ua-chip">Bilirubin: <strong>{{ reading.get_urine_bilirubin_display }}</strong></span>
-                      <span class="ua-chip">Urobilinogen: <strong>{{ reading.get_urine_urobilinogen_display }}</strong></span>
-                      <span class="ua-chip">Nitrite: <strong>{{ reading.get_urine_nitrite_display }}</strong></span>
+
+                  <!-- Accordion expansion details for clinical urinalysis details -->
+                  <details class="group">
+                    <summary class="inline-flex items-center gap-1.5 focus:outline-none select-none text-xs text-teal-600 font-bold hover:text-teal-800 cursor-pointer pt-1 transition-colors">
+                      <span>Clinical Urinalysis Assays</span>
+                    </summary>
+                    <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 bg-teal-50/30 border border-teal-100/70 rounded-xl">
+                      <div class="bg-white/80 border border-teal-100/40 px-2.5 py-1.5 rounded-lg flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Glucose:</span>
+                        <strong class="font-bold text-[#0f172a]">{{ reading.get_urine_glucose_display }}</strong>
+                      </div>
+                      <div class="bg-white/80 border border-teal-100/40 px-2.5 py-1.5 rounded-lg flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Protein:</span>
+                        <strong class="font-bold text-[#0f172a]">{{ reading.get_urine_protein_display }}</strong>
+                      </div>
+                      <div class="bg-white/80 border border-teal-100/40 px-2.5 py-1.5 rounded-lg flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Ketones:</span>
+                        <strong class="font-bold text-[#0f172a]">{{ reading.get_urine_acetone_display }}</strong>
+                      </div>
+                      <div class="bg-white/80 border border-teal-100/40 px-2.5 py-1.5 rounded-lg flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Bilirubin:</span>
+                        <strong class="font-bold text-[#0f172a]">{{ reading.get_urine_bilirubin_display }}</strong>
+                      </div>
+                      <div class="bg-white/80 border border-teal-100/40 px-2.5 py-1.5 rounded-lg flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Urobilin:</span>
+                        <strong class="font-bold text-[#0f172a]">{{ reading.get_urine_urobilinogen_display }}</strong>
+                      </div>
+                      <div class="bg-white/80 border border-teal-100/40 px-2.5 py-1.5 rounded-lg flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Nitrite:</span>
+                        <strong class="font-bold text-[#0f172a]">{{ reading.get_urine_nitrite_display }}</strong>
+                      </div>
                     </div>
                   </details>
                 </div>
               {% endfor %}
             {% else %}
-              <div class="empty">
-                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                No vital readings recorded yet.
+              <div class="py-14 text-center text-slate-400 space-y-2">
+                <svg class="w-10 h-10 mx-auto text-slate-300 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <p class="text-xs font-semibold text-slate-400">Telemetry logs empty. Connect standard sensor telemetry arrays to round feeds.</p>
               </div>
             {% endif %}
           </div>
         </div>
 
-      </div>
+      </section>
 
-      <!-- CHARTS -->
-      <div class="chart-section">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <!-- ============================================ -->
+      <!-- SECTION III: MULTI-CHANNEL HEURISTIC CHARTS -->
+      <!-- ============================================ -->
+      <section class="bg-white border border-slate-200/85 rounded-2xl p-6 shadow-sm space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <div class="card-title" style="font-size:15px">Vital Trends</div>
-            <p style="font-size:12px;color:var(--muted);margin-top:2px">Last 7 readings across all patients</p>
+            <h3 class="font-extrabold text-[#0f172a] text-lg font-display leading-none">Diagnostic Heuristic Trends</h3>
+            <p class="text-xs text-slate-400 mt-1">Cohort-wide remote monitoring baselines mapped across the latest 7 telemetry rounds.</p>
           </div>
-          <span class="badge badge-blue">Last 7 readings</span>
+          <span class="text-[10.5px] uppercase tracking-wider font-bold bg-[#fafafa] border border-slate-200 text-slate-500 px-3.5 py-1.5 rounded-full select-none">
+            7-Point Interval Scale
+          </span>
         </div>
-        <div class="chart-grid">
-          <div class="chart-wrap">
-            <div class="chart-label">Blood Pressure</div>
-            <canvas id="bpTrend"></canvas>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 pt-2">
+          
+          <!-- Blood Pressure trends -->
+          <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">A. Arterial Pressure Variabilities (mmHg)</span>
+            <div class="h-60 w-full relative">
+              <canvas id="bpTrend"></canvas>
+            </div>
           </div>
-          <div class="chart-wrap">
-            <div class="chart-label">Pulse Rate</div>
-            <canvas id="pulseTrend"></canvas>
+
+          <!-- Pulse rate trends -->
+          <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">B. Cardiac Pacing Chronometrography (bpm)</span>
+            <div class="h-60 w-full relative">
+              <canvas id="pulseTrend"></canvas>
+            </div>
           </div>
-          <div class="chart-wrap">
-            <div class="chart-label">SpO2 Saturation</div>
-            <canvas id="spo2Trend"></canvas>
+
+          <!-- SpO2 Blood Oxygenation -->
+          <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">C. Blood Oxygen Saturation Index (SpO2 %)</span>
+            <div class="h-60 w-full relative">
+              <canvas id="spo2Trend"></canvas>
+            </div>
           </div>
-          <div class="chart-wrap">
-            <div class="chart-label">Fasting Blood Sugar</div>
-            <canvas id="sugarTrend"></canvas>
+
+          <!-- Fasting Blood Sugar Glycemic trends -->
+          <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">D. Circadian Glycemic Variability Index (mg/dL)</span>
+            <div class="h-60 w-full relative">
+              <canvas id="sugarTrend"></canvas>
+            </div>
           </div>
+
         </div>
-      </div>
 
-    </div><!-- /content -->
-  </div><!-- /main -->
+      </section>
 
+    </div>
+  </main>
+
+  <!-- ============================================ -->
+  <!-- 4. BOTTOM MOBILE TAB NAVIGATION BAR -->
+  <!-- ============================================ -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-950 border-t border-slate-800/80 px-2 flex items-center justify-around z-50">
+    <a href="#" class="flex flex-col items-center justify-center text-teal-400 min-w-[50px] space-y-0.5 select-none focus:outline-none">
+      <svg class="w-5 h-5 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+      </svg>
+      <span class="text-[9px] font-bold">Round Desk</span>
+    </a>
+    
+    <a href="#" class="flex flex-col items-center justify-center text-slate-500 min-w-[50px] space-y-0.5 select-none focus:outline-none">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+      </svg>
+      <span class="text-[9px] font-semibold">Patients</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center justify-center text-slate-500 min-w-[50px] space-y-0.5 select-none focus:outline-none relative">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="text-[9px] font-semibold">Triage</span>
+      {% if urgent_alerts %}
+      <span class="absolute w-2 h-2 rounded-full bg-rose-500 top-1 right-2.5 shadow-sm"></span>
+      {% endif %}
+    </a>
+  </nav>
+
+  <!-- ============================================ -->
+  <!-- 5. CHART.JS TELEMENTRY GRAPH INTEGRATION -->
+  <!-- ============================================ -->
   <script>
-    const chartDefaults = {
-      responsive: true,
-      plugins: {
-        legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 }, boxWidth: 10, padding: 12 } }
-      },
-      scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: 'Inter', size: 10 }, color: '#718096' } },
-        y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: 'Inter', size: 10 }, color: '#718096' } }
+    document.addEventListener('DOMContentLoaded', () => {
+      // Common baseline typographic and aesthetic defaults for medical graphs
+      const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: { family: 'Inter', size: 10, weight: 600 },
+              boxWidth: 7,
+              boxHeight: 7,
+              usePointStyle: true,
+              color: '#475569',
+              padding: 14
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { font: { family: 'Inter', size: 9.5, weight: 500 }, color: '#64748b' }
+          },
+          y: {
+            grid: { color: 'rgba(226, 232, 240, 0.55)' },
+            ticks: { font: { family: 'Inter', size: 9.5, weight: 500 }, color: '#64748b' }
+          }
+        },
+        elements: {
+          line: { borderWidth: 2.2, tension: 0.35 },
+          point: { radius: 1.5, hoverRadius: 5 }
+        }
+      };
+
+      // 1. Blood Pressure Trends Diagram
+      const bpCtx = document.getElementById('bpTrend')?.getContext('2d');
+      if (bpCtx) {
+        new Chart(bpCtx, {
+          type: 'line',
+          data: {
+            labels: {{ bp_labels|safe }},
+            datasets: [
+              {
+                label: 'Systolic BP (SYS)',
+                data: {{ systolic_data|safe }},
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.02)',
+                fill: true
+              },
+              {
+                label: 'Diastolic BP (DIA)',
+                data: {{ diastolic_data|safe }},
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.02)',
+                fill: true
+              }
+            ]
+          },
+          options: chartDefaults
+        });
       }
-    };
 
-    new Chart(document.getElementById('bpTrend').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: {{ bp_labels|safe }},
-        datasets: [
-          { label: 'Systolic', data: {{ systolic_data|safe }}, borderColor: '#e53e3e', backgroundColor: 'rgba(229,62,62,0.07)', fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5 },
-          { label: 'Diastolic', data: {{ diastolic_data|safe }}, borderColor: '#3b7cf4', backgroundColor: 'rgba(59,124,244,0.07)', fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5 }
-        ]
-      },
-      options: chartDefaults
-    });
+      // 2. Pulse Rate Diagram
+      const pulseCtx = document.getElementById('pulseTrend')?.getContext('2d');
+      if (pulseCtx) {
+        new Chart(pulseCtx, {
+          type: 'line',
+          data: {
+            labels: {{ bp_labels|safe }},
+            datasets: [{
+              label: 'Pulse Rate (Heart HR)',
+              data: {{ pulse_data|safe }},
+              borderColor: '#0d9488',
+              backgroundColor: 'rgba(13, 148, 136, 0.02)',
+              fill: true
+            }]
+          },
+          options: chartDefaults
+        });
+      }
 
-    new Chart(document.getElementById('pulseTrend').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: {{ bp_labels|safe }},
-        datasets: [{ label: 'Pulse (bpm)', data: {{ pulse_data|safe }}, borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,0.07)', fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5 }]
-      },
-      options: chartDefaults
-    });
+      // 3. Blood Oxygen SpO2 Diagram
+      const spo2Ctx = document.getElementById('spo2Trend')?.getContext('2d');
+      if (spo2Ctx) {
+        new Chart(spo2Ctx, {
+          type: 'line',
+          data: {
+            labels: {{ bp_labels|safe }},
+            datasets: [{
+              label: 'Saturation Status (SpO2)',
+              data: {{ spo2_data|safe }},
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.02)',
+              fill: true
+            }]
+          },
+          options: chartDefaults
+        });
+      }
 
-    new Chart(document.getElementById('spo2Trend').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: {{ bp_labels|safe }},
-        datasets: [{ label: 'SpO2 (%)', data: {{ spo2_data|safe }}, borderColor: '#d97706', backgroundColor: 'rgba(217,119,6,0.07)', fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5 }]
-      },
-      options: chartDefaults
-    });
-
-    new Chart(document.getElementById('sugarTrend').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: {{ bp_labels|safe }},
-        datasets: [{ label: 'Fasting Sugar', data: {{ sugar_data|safe }}, borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.07)', fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5 }]
-      },
-      options: chartDefaults
-    });
-
-    // Desktop tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-
-    // Mobile bottom nav switching
-    document.querySelectorAll('.bnav-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-        item.classList.add('active');
-      });
-    });
-
-    // Desktop sidebar nav switching
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.sidebar-nav .nav-item').forEach(b => b.classList.remove('active'));
-        item.classList.add('active');
-      });
+      // 4. Circadian Glycemic Sugar Diagram
+      const sugarCtx = document.getElementById('sugarTrend')?.getContext('2d');
+      if (sugarCtx) {
+        new Chart(sugarCtx, {
+          type: 'line',
+          data: {
+            labels: {{ bp_labels|safe }},
+            datasets: [{
+              label: 'Fasting Blood Sugar (FBS)',
+              data: {{ sugar_data|safe }},
+              borderColor: '#8b5cf6',
+              backgroundColor: 'rgba(139, 92, 246, 0.02)',
+              fill: true
+            }]
+          },
+          options: chartDefaults
+        });
+      }
     });
   </script>
+
 </body>
 </html>
