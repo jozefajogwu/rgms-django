@@ -38,16 +38,23 @@ def logout_view(request):
 
 
 def redirect_user_by_role(user):
-    if user.is_superuser or user.groups.filter(name='Doctors').exists():
+    """Redirect users based on their role"""
+    # Superusers go to admin
+    if user.is_superuser:
+        return redirect('admin:index')
+    
+    # Doctors go to doctor dashboard (clinical view with charts)
+    if user.groups.filter(name='Doctors').exists():
         return redirect('doctor_dashboard')
-    if user.groups.filter(name='Caregivers').exists():
-        return redirect('caregiver_dashboard')
-    return redirect('landing')
+    
+    # Everyone else (patients, caregivers, clients) go to caregiver dashboard
+    # Since Patient = Caregiver = Client, they all use the same dashboard
+    return redirect('caregiver_dashboard')
 
 
 @login_required
 def doctor_dashboard(request):
-    # Get the current doctor
+    """Doctor dashboard - clinical view with charts"""
     doctor = request.user
     
     # Get all patients assigned to this doctor
@@ -65,22 +72,22 @@ def doctor_dashboard(request):
         if latest:
             latest_readings.append(latest)
     
-    # Get alerts
+    # Get alerts - using 'unreviewed' status
     urgent_alerts = Alert.objects.filter(
         patient__in=patients,
-        status='active'
-    ).exclude(severity='low').order_by('-created_at')[:10]
+        status='unreviewed'
+    ).exclude(severity='normal').order_by('-created_at')[:10]
     
     critical_alerts_count = Alert.objects.filter(
         patient__in=patients,
         severity='critical',
-        status='active'
+        status='unreviewed'
     ).count()
     
     warning_alerts_count = Alert.objects.filter(
         patient__in=patients,
         severity='warning',
-        status='active'
+        status='unreviewed'
     ).count()
     
     # ============================================
@@ -161,20 +168,137 @@ def doctor_dashboard(request):
     return render(request, 'doctor_dashboard.html', context)
 
 
-# ============================================
-# ADD CAREGIVER DASHBOARD HERE
-# ============================================
 @login_required
 def caregiver_dashboard(request):
-    assigned_patients = Patient.objects.filter(assigned_caregiver=request.user)
-    recent_readings = VitalReading.objects.filter(
-        patient__assigned_caregiver=request.user
-    ).select_related('patient').order_by('-created_at')[:5]
-
-    return render(request, 'caregiver_dashboard.html', {
-        'assigned_patients': assigned_patients,
-        'recent_readings': recent_readings,
-    })
+    """
+    Unified dashboard for Client/Patient/Caregiver
+    Since Patient = Caregiver = Client, this one dashboard serves all roles
+    """
+    
+    # Get the current user's client profile
+    try:
+        client = request.user.client_profile
+    except Patient.DoesNotExist:
+        # If user doesn't have a client profile, redirect to home
+        messages.warning(request, 'No client profile found for this account.')
+        return redirect('home')
+    
+    # ============================================
+    # AS A PATIENT: Get client's own readings
+    # ============================================
+    my_readings = VitalReading.objects.filter(patient=client).order_by('-created_at')
+    total_my_readings = my_readings.count()
+    
+    # Get latest reading for self
+    latest_my_reading = my_readings.first()
+    
+    # ============================================
+    # AS A CAREGIVER: Get patients this person cares for
+    # ============================================
+    patients_caring_for = client.patients_caring_for.all()
+    
+    # Get readings for patients this person cares for
+    patients_readings = VitalReading.objects.filter(
+        patient__in=patients_caring_for
+    ).order_by('-created_at')
+    
+    # ============================================
+    # ALERTS: For both self and patients they care for
+    # ============================================
+    # Alerts for self
+    my_alerts = Alert.objects.filter(patient=client, status='unreviewed')
+    
+    # Alerts for patients they care for
+    patient_alerts = Alert.objects.filter(
+        patient__in=patients_caring_for,
+        status='unreviewed'
+    )
+    
+    # Total alerts
+    total_alerts = my_alerts.count() + patient_alerts.count()
+    
+    # Urgent alerts for display
+    urgent_alerts = Alert.objects.filter(
+        patient__in=list(patients_caring_for) + [client],
+        status='unreviewed'
+    ).exclude(severity='normal').order_by('-created_at')[:10]
+    
+    # ============================================
+    # CHART DATA FOR SELF (7-day trends)
+    # ============================================
+    end_date = timezone.now()
+    start_date = end_date - timedelta(days=7)
+    
+    self_recent_readings = VitalReading.objects.filter(
+        patient=client,
+        created_at__gte=start_date,
+        created_at__lte=end_date
+    ).order_by('created_at')
+    
+    chart_labels = []
+    systolic_data = []
+    diastolic_data = []
+    pulse_data = []
+    spo2_data = []
+    sugar_data = []
+    
+    daily_readings = defaultdict(list)
+    
+    for reading in self_recent_readings:
+        day_key = reading.created_at.strftime('%Y-%m-%d')
+        daily_readings[day_key].append(reading)
+    
+    sorted_days = sorted(daily_readings.keys())
+    
+    for day in sorted_days:
+        day_readings = daily_readings[day]
+        chart_labels.append(day)
+        
+        avg_systolic = sum(r.systolic_bp for r in day_readings if r.systolic_bp) / len(day_readings) if day_readings else 0
+        avg_diastolic = sum(r.diastolic_bp for r in day_readings if r.diastolic_bp) / len(day_readings) if day_readings else 0
+        avg_pulse = sum(r.pulse_rate for r in day_readings if r.pulse_rate) / len(day_readings) if day_readings else 0
+        avg_spo2 = sum(r.oxygen_saturation for r in day_readings if r.oxygen_saturation) / len(day_readings) if day_readings else 0
+        avg_sugar = sum(r.fasting_blood_sugar for r in day_readings if r.fasting_blood_sugar) / len(day_readings) if day_readings else 0
+        
+        systolic_data.append(round(avg_systolic, 1))
+        diastolic_data.append(round(avg_diastolic, 1))
+        pulse_data.append(round(avg_pulse, 1))
+        spo2_data.append(round(avg_spo2, 1))
+        sugar_data.append(round(avg_sugar, 1))
+    
+    if not chart_labels:
+        chart_labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7']
+        systolic_data = [120, 118, 122, 125, 119, 121, 120]
+        diastolic_data = [80, 78, 82, 85, 79, 81, 80]
+        pulse_data = [72, 70, 75, 74, 71, 73, 72]
+        spo2_data = [98, 97, 99, 98, 97, 98, 98]
+        sugar_data = [95, 92, 98, 100, 94, 96, 95]
+    
+    context = {
+        'client': client,
+        'my_readings': my_readings[:20],
+        'total_my_readings': total_my_readings,
+        'latest_my_reading': latest_my_reading,
+        'patients_caring_for': patients_caring_for,
+        'patients_readings': patients_readings[:10],
+        'my_alerts': my_alerts,
+        'patient_alerts': patient_alerts,
+        'total_alerts': total_alerts,
+        'urgent_alerts': urgent_alerts,
+        'is_patient': client.is_patient,
+        'is_caregiver': client.is_caregiver,
+        'is_client': client.is_client,
+        'has_patients': patients_caring_for.exists(),
+        # Chart data
+        'bp_labels': chart_labels,
+        'systolic_data': systolic_data,
+        'diastolic_data': diastolic_data,
+        'pulse_data': pulse_data,
+        'spo2_data': spo2_data,
+        'sugar_data': sugar_data,
+    }
+    
+    return render(request, 'caregiver_dashboard.html', context)
 
 
 def create_alert_for_reading(reading):
