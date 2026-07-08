@@ -1,16 +1,65 @@
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
 from .models import Patient, VitalReading, Alert
 from .utils import send_patient_registration_email
 
 
 # ============================================
-# SIMPLE APPROACH: Don't override User admin
-# Use default Django User admin
+# FIXED: CUSTOM USER ADMIN - No duplicate fields
 # ============================================
+class CustomUserAdmin(BaseUserAdmin):
+    """
+    Custom User Admin - Fixed to avoid duplicate groups field
+    """
+    list_display = ('username', 'email', 'first_name', 'last_name', 'get_roles', 'is_staff')
+    list_filter = ('is_staff', 'is_superuser', 'groups')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    
+    # FIXED: Removed duplicate 'groups' field from fieldsets
+    # The groups field is already in BaseUserAdmin's 'Permissions' section
+    # We just add a descriptive help text
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissions', {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        }),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        # The 'groups' field is NOT added here - it's already in Permissions above
+        ('Role Assignment Help', {
+            'fields': (),
+            'description': '👨‍⚕️ To assign a role: Go to "Permissions" section above and add user to "Doctors" or "Caregivers" group.'
+        }),
+    )
+    
+    def get_roles(self, obj):
+        roles = obj.groups.all()
+        if roles:
+            return ", ".join([g.name for g in roles])
+        return "No Role"
+    get_roles.short_description = "Roles"
+    
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        
+        # If user has no groups but is staff, suggest they be in a group
+        if obj.is_staff and not obj.is_superuser and not obj.groups.exists():
+            # Default to Caregivers if no group selected
+            caregiver_group, _ = Group.objects.get_or_create(name='Caregivers')
+            obj.groups.add(caregiver_group)
+            self.message_user(
+                request,
+                f"ℹ️ User {obj.username} was automatically added to the 'Caregivers' group.",
+                level='INFO'
+            )
 
+
+# ============================================
+# PATIENT ADMIN
+# ============================================
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
     list_display = (
@@ -105,6 +154,9 @@ class PatientAdmin(admin.ModelAdmin):
                 )
 
 
+# ============================================
+# VITAL READING ADMIN
+# ============================================
 @admin.register(VitalReading)
 class VitalReadingAdmin(admin.ModelAdmin):
     list_display = (
@@ -121,6 +173,9 @@ class VitalReadingAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
 
 
+# ============================================
+# ALERT ADMIN
+# ============================================
 @admin.register(Alert)
 class AlertAdmin(admin.ModelAdmin):
     list_display = (
@@ -132,3 +187,14 @@ class AlertAdmin(admin.ModelAdmin):
     )
     search_fields = ('patient__full_name', 'title')
     list_filter = ('severity', 'status', 'created_at')
+
+
+# ============================================
+# REGISTER CUSTOM USER ADMIN
+# ============================================
+# Unregister default User admin and register custom one
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+admin.site.register(User, CustomUserAdmin)
