@@ -1024,34 +1024,41 @@
         </div>
 
         <!-- CARE TEAM SECTION -->
-        <div style="margin-top:24px;padding:16px 20px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0;">
-            <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
+<div style="margin-top:24px;padding:16px 20px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0;">
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
+        <div>
+            <span style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">My Care Team</span>
+            <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;">
                 <div>
-                    <span style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">My Care Team</span>
-                    <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;">
-                        <div>
-                            <span style="font-size:13px;font-weight:600;color:#0a1628;">👨‍⚕️ Doctor</span>
-                            <span style="font-size:13px;color:#475569;margin-left:6px;">
-                                {{ client.assigned_doctor.get_full_name|default:"Not assigned" }}
-                            </span>
-                        </div>
-                        <div>
-                            <span style="font-size:13px;font-weight:600;color:#0a1628;">👩‍⚕️ Caregiver</span>
-                            <span style="font-size:13px;color:#475569;margin-left:6px;">
-                                {{ client.assigned_caregiver.get_full_name|default:"Not assigned" }}
-                            </span>
-                        </div>
-                        <div>
-                            <span style="font-size:13px;font-weight:600;color:#0a1628;">📋 Care Type</span>
-                            <span style="font-size:13px;color:#475569;margin-left:6px;">
-                                {{ client.get_care_type_display }}
-                            </span>
-                        </div>
-                    </div>
+                    <span style="font-size:13px;font-weight:600;color:#0a1628;">👨‍⚕️ Doctor</span>
+                    <span style="font-size:13px;color:#475569;margin-left:6px;">
+                        {% if client.assigned_doctor %}
+                            Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username }}
+                        {% else %}
+                            <span style="color:#94a3b8;">Not assigned</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div>
+                    <span style="font-size:13px;font-weight:600;color:#0a1628;">👩‍⚕️ Caregiver</span>
+                    <span style="font-size:13px;color:#475569;margin-left:6px;">
+                        {% if client.assigned_caregiver %}
+                            {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username }}
+                        {% else %}
+                            <span style="color:#94a3b8;">Not assigned</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div>
+                    <span style="font-size:13px;font-weight:600;color:#0a1628;">📋 Care Type</span>
+                    <span style="font-size:13px;color:#475569;margin-left:6px;">
+                        {{ client.get_care_type_display }}
+                    </span>
                 </div>
             </div>
         </div>
-
+    </div>
+</div>
     </main>
 
     <script>

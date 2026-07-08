@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Vital Reading | RGMS</title>
+    <title>Client Vital Entry | RGMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
     <style>
+        /* ----- RESET & BASE ----- */
         * {
             margin: 0;
             padding: 0;
@@ -16,15 +17,19 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f0f4f9;
+            background: linear-gradient(145deg, #f0f4f9 0%, #e8edf5 100%);
             color: #0a1628;
             min-height: 100vh;
-            padding: 24px;
+            padding: 32px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* ----- MAIN CONTAINER ----- */
         .container {
-            max-width: 820px;
+            max-width: 860px;
+            width: 100%;
             margin: 0 auto;
         }
 
@@ -32,36 +37,75 @@
         .back-link {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             color: #13AA9A;
             font-weight: 600;
             font-size: 14px;
             text-decoration: none;
-            padding: 10px 0;
-            transition: color 0.2s ease;
+            padding: 8px 4px 20px 4px;
+            transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
+            letter-spacing: 0.2px;
         }
         .back-link:hover {
             color: #0d8a7e;
+            transform: translateX(-4px);
         }
         .back-link svg {
-            width: 18px;
-            height: 18px;
-            stroke-width: 2;
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.5;
         }
 
         /* ----- FORM CARD ----- */
         .form-card {
             background: #ffffff;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            padding: 40px 44px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-            margin-top: 8px;
+            border-radius: 24px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            padding: 48px 52px;
+            box-shadow: 0 20px 60px -12px rgba(10, 22, 40, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
         }
 
+        .form-card:hover {
+            box-shadow: 0 24px 72px -16px rgba(10, 22, 40, 0.12);
+        }
+
+        /* ----- HEADER ----- */
         .form-header {
-            margin-bottom: 28px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #f1f5f9;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .form-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-header-left .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #13AA9A 0%, #0d8a7e 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 16px rgba(19, 170, 154, 0.25);
+        }
+
+        .form-header-left .icon-wrapper svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+            stroke-width: 2;
         }
 
         .form-header h1 {
@@ -69,33 +113,204 @@
             font-weight: 700;
             color: #0a1628;
             font-family: 'Inter', sans-serif;
-            letter-spacing: -0.3px;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
         }
 
-        .form-header p {
+        .form-header h1 span {
+            color: #13AA9A;
+        }
+
+        .form-header .subtitle {
             font-size: 14px;
             color: #718096;
             font-family: 'Inter', sans-serif;
-            margin-top: 4px;
+            margin-top: 2px;
+        }
+
+        .form-header .badge-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .badge-self {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            color: #1e40af;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            white-space: nowrap;
+        }
+
+        .badge-self svg {
+            width: 14px;
+            height: 14px;
+            stroke: #1e40af;
+            stroke-width: 2.5;
+        }
+
+        .badge-required {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(220, 38, 38, 0.1);
         }
 
         /* ----- MESSAGES ----- */
         .msg-success {
-            background: #f0fdf4;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
             border: 1px solid #bbf7d0;
-            border-radius: 10px;
-            padding: 12px 18px;
-            color: #16a34a;
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: #15803d;
             font-weight: 500;
             font-family: 'Inter', sans-serif;
             margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .msg-success svg {
+            width: 20px;
+            height: 20px;
+            stroke: #15803d;
+            stroke-width: 2.5;
+            flex-shrink: 0;
+        }
+
+        /* ============================================ */
+        /* ERROR SUMMARY - ADD THIS SECTION */
+        /* ============================================ */
+        .error-summary {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+
+        .error-summary .error-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .error-summary .error-header svg {
+            width: 20px;
+            height: 20px;
+            stroke: #dc2626;
+            stroke-width: 2.5;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .error-summary .error-title {
+            font-weight: 700;
+            color: #dc2626;
+            font-size: 14px;
+        }
+
+        .error-summary .error-list {
+            margin-top: 4px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .error-summary .error-list li {
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 2px;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .error-summary .error-list li::before {
+            content: "•";
+            font-weight: 700;
+        }
+
+        /* ----- CLIENT INFO CARD ----- */
+        .client-info-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 16px;
+            padding: 16px 20px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .client-info-card .avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #13AA9A, #0d8a7e);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .client-info-card .info {
+            flex: 1;
+        }
+
+        .client-info-card .info .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .client-info-card .info .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0a1628;
+        }
+
+        .client-info-card .info .email {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .client-info-card .status-badge {
+            font-size: 11px;
+            font-weight: 600;
+            color: #13AA9A;
+            background: rgba(19, 170, 154, 0.1);
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(19, 170, 154, 0.15);
+            white-space: nowrap;
         }
 
         /* ----- FORM ELEMENTS ----- */
         form {
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 24px;
+            margin-top: 8px;
         }
 
         .field-group {
@@ -109,32 +324,36 @@
             font-weight: 600;
             color: #0a1628;
             font-family: 'Inter', sans-serif;
-            letter-spacing: 0.01em;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .field-group label .required {
             color: #ef4444;
-            margin-left: 2px;
+            font-size: 16px;
+        }
+
+        .field-group label .unit {
+            font-weight: 400;
+            color: #94a3b8;
+            font-size: 12px;
         }
 
         .field-group input,
         .field-group select,
         .field-group textarea {
             width: 100%;
-            padding: 11px 14px;
-            background: #f8fafc;
+            padding: 12px 16px;
+            background: #fafbfc;
             border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
+            border-radius: 12px;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
             color: #0a1628;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
             outline: none;
-        }
-
-        .field-group input::placeholder,
-        .field-group textarea::placeholder {
-            color: #94a3b8;
         }
 
         .field-group input:focus,
@@ -142,7 +361,27 @@
         .field-group textarea:focus {
             border-color: #13AA9A;
             background: #ffffff;
-            box-shadow: 0 0 0 3px rgba(19, 170, 154, 0.08);
+            box-shadow: 0 0 0 4px rgba(19, 170, 154, 0.08);
+        }
+
+        /* Error state for form fields */
+        .field-group input.error,
+        .field-group select.error,
+        .field-group textarea.error {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .field-group input.error:focus,
+        .field-group select.error:focus,
+        .field-group textarea.error:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+        }
+
+        .field-group input::placeholder,
+        .field-group textarea::placeholder {
+            color: #a0aec0;
         }
 
         .field-group textarea {
@@ -154,7 +393,7 @@
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 14px center;
+            background-position: right 16px center;
             padding-right: 40px;
             cursor: pointer;
         }
@@ -164,32 +403,43 @@
             color: #dc2626;
             font-family: 'Inter', sans-serif;
             margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .field-group .help-text {
+            font-size: 12px;
+            color: #94a3b8;
+            font-family: 'Inter', sans-serif;
+            margin-top: 2px;
+            font-style: italic;
         }
 
         /* ----- GRID LAYOUTS ----- */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 18px;
+            gap: 20px;
         }
 
         .grid-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 18px;
+            gap: 20px;
         }
 
         .grid-4 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 18px;
+            gap: 20px;
         }
 
         /* ----- SECTION DIVIDER ----- */
         .section-divider {
             border: none;
-            border-top: 1px solid #e2e8f0;
-            margin: 8px 0 4px 0;
+            border-top: 2px solid #f1f5f9;
+            margin: 4px 0 8px 0;
         }
 
         .section-header {
@@ -197,10 +447,17 @@
         }
 
         .section-header h2 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #0a1628;
             font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header h2 .section-icon {
+            font-size: 20px;
         }
 
         .section-header p {
@@ -208,80 +465,153 @@
             color: #718096;
             font-family: 'Inter', sans-serif;
             margin-top: 2px;
+            margin-left: 32px;
         }
 
         /* ----- SUBMIT BUTTON ----- */
         .submit-btn {
             width: 100%;
-            padding: 16px;
-            background: #13AA9A;
+            padding: 18px 24px;
+            background: linear-gradient(135deg, #13AA9A 0%, #0d8a7e 100%);
             color: #ffffff;
             border: none;
-            border-radius: 10px;
+            border-radius: 14px;
             font-family: 'Inter', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(19, 170, 154, 0.25);
             margin-top: 8px;
-            letter-spacing: 0.01em;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
+
         .submit-btn:hover {
-            background: #0d8a7e;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(19, 170, 154, 0.35);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(19, 170, 154, 0.35);
         }
+
         .submit-btn:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
+        }
+
+        .submit-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: white;
+            stroke-width: 2.5;
         }
 
         /* ----- RESPONSIVE ----- */
         @media (max-width: 768px) {
             body {
-                padding: 16px;
+                padding: 16px 12px;
             }
 
             .form-card {
-                padding: 24px 20px;
+                padding: 28px 20px;
+                border-radius: 20px;
+            }
+
+            .form-header {
+                flex-direction: column;
+                gap: 12px;
+                padding-bottom: 16px;
+                margin-bottom: 20px;
             }
 
             .form-header h1 {
                 font-size: 22px;
             }
 
+            .form-header .badge-group {
+                flex-wrap: wrap;
+            }
+
             .grid-2,
             .grid-3,
             .grid-4 {
                 grid-template-columns: 1fr;
-                gap: 14px;
+                gap: 16px;
             }
 
             .section-header h2 {
-                font-size: 18px;
+                font-size: 17px;
+            }
+
+            .section-header p {
+                margin-left: 0;
+            }
+
+            .client-info-card {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .client-info-card .avatar {
+                align-self: center;
+            }
+
+            .client-info-card .status-badge {
+                align-self: center;
             }
 
             .submit-btn {
-                padding: 14px;
+                padding: 16px;
                 font-size: 15px;
             }
         }
 
         @media (max-width: 480px) {
             .form-card {
-                padding: 18px 14px;
+                padding: 20px 14px;
+                border-radius: 16px;
             }
 
             .form-header h1 {
                 font-size: 20px;
             }
 
+            .form-header .subtitle {
+                font-size: 13px;
+            }
+
             .field-group input,
             .field-group select,
             .field-group textarea {
-                padding: 10px 12px;
+                padding: 10px 14px;
                 font-size: 13px;
             }
+
+            .badge-self {
+                font-size: 10px;
+                padding: 4px 12px;
+            }
+
+            .client-info-card .info .name {
+                font-size: 15px;
+            }
+        }
+
+        /* Animated input focus rings */
+        .field-group input:focus,
+        .field-group select:focus,
+        .field-group textarea:focus {
+            border-color: #13AA9A;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(19, 170, 154, 0.08);
+        }
+
+        /* Subtle hover on form fields */
+        .field-group input:hover,
+        .field-group select:hover,
+        .field-group textarea:hover {
+            border-color: #cbd5e1;
         }
     </style>
 </head>
@@ -292,49 +622,109 @@
 
         <!-- Back Link -->
         <a href="{% url 'caregiver_dashboard' %}" class="back-link">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to Caregiver Dashboard
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Dashboard
         </a>
 
         <!-- Form Card -->
         <div class="form-card">
 
+            <!-- Header -->
             <div class="form-header">
-                <h1>Caregiver Vital Entry</h1>
-                <p>Enter the patient's blood pressure, blood sugar, pulse, SpO₂, urinalysis result, symptoms, and notes.</p>
+                <div class="form-header-left">
+                    <div class="icon-wrapper">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <h1>Client <span>Vital</span> Entry</h1>
+                    <div class="subtitle">Record your daily health metrics accurately</div>
+                </div>
+                <div class="badge-group">
+                    <span class="badge-self">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        Self-Reporting
+                    </span>
+                    <span class="badge-required">* Required</span>
+                </div>
             </div>
 
+            <!-- ============================================ -->
+            <!-- ERROR SUMMARY - ADDED HERE -->
+            <!-- ============================================ -->
+            {% if form.errors %}
+            <div class="error-summary">
+                <div class="error-header">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <div class="error-title">Please correct the errors below:</div>
+                        <ul class="error-list">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field|title }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Success Messages -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="msg-success">✓ {{ message }}</div>
+                    <div class="msg-success">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
+
+            <!-- Client Info Card -->
+            <div class="client-info-card">
+                <div class="avatar">{{ client.full_name|slice:":2"|upper }}</div>
+                <div class="info">
+                    <div class="label">Recording Vitals For</div>
+                    <div class="name">{{ client.full_name }}</div>
+                    <div class="email">{{ client.email|default:"No email on file" }}</div>
+                </div>
+                <span class="status-badge">● Active</span>
+                <!-- Hidden field to submit the client ID -->
+                <input type="hidden" name="patient" value="{{ client.id }}">
+            </div>
 
             <form method="POST">
                 {% csrf_token %}
 
-                <!-- Patient -->
-                <div class="field-group">
-                    <label for="{{ form.patient.id_for_label }}">Client <span class="required">*</span></label>
-                    {{ form.patient }}
-                    {% if form.patient.errors %}
-                        <span class="error-text">{{ form.patient.errors.0 }}</span>
-                    {% endif %}
-                </div>
-
                 <!-- Blood Sugar -->
                 <div class="grid-2">
                     <div class="field-group">
-                        <label for="{{ form.fasting_blood_sugar.id_for_label }}">Fasting Blood Sugar</label>
+                        <label for="{{ form.fasting_blood_sugar.id_for_label }}">
+                            Fasting Blood Sugar
+                            <span class="unit">(mg/dL)</span>
+                        </label>
                         {{ form.fasting_blood_sugar }}
+                        <span class="help-text">After 8+ hours of fasting</span>
                         {% if form.fasting_blood_sugar.errors %}
                             <span class="error-text">{{ form.fasting_blood_sugar.errors.0 }}</span>
                         {% endif %}
                     </div>
 
                     <div class="field-group">
-                        <label for="{{ form.random_blood_sugar.id_for_label }}">Random Blood Sugar</label>
+                        <label for="{{ form.random_blood_sugar.id_for_label }}">
+                            Random Blood Sugar
+                            <span class="unit">(mg/dL)</span>
+                        </label>
                         {{ form.random_blood_sugar }}
+                        <span class="help-text">Any time of day</span>
                         {% if form.random_blood_sugar.errors %}
                             <span class="error-text">{{ form.random_blood_sugar.errors.0 }}</span>
                         {% endif %}
@@ -344,32 +734,51 @@
                 <!-- BP, Pulse, SpO2 -->
                 <div class="grid-4">
                     <div class="field-group">
-                        <label for="{{ form.systolic_bp.id_for_label }}">Systolic BP</label>
+                        <label for="{{ form.systolic_bp.id_for_label }}">
+                            Systolic BP
+                            <span class="unit">(mmHg)</span>
+                            <span class="required">*</span>
+                        </label>
                         {{ form.systolic_bp }}
+                        <span class="help-text">Normal: 90-120 mmHg</span>
                         {% if form.systolic_bp.errors %}
                             <span class="error-text">{{ form.systolic_bp.errors.0 }}</span>
                         {% endif %}
                     </div>
 
                     <div class="field-group">
-                        <label for="{{ form.diastolic_bp.id_for_label }}">Diastolic BP</label>
+                        <label for="{{ form.diastolic_bp.id_for_label }}">
+                            Diastolic BP
+                            <span class="unit">(mmHg)</span>
+                            <span class="required">*</span>
+                        </label>
                         {{ form.diastolic_bp }}
+                        <span class="help-text">Normal: 60-80 mmHg</span>
                         {% if form.diastolic_bp.errors %}
                             <span class="error-text">{{ form.diastolic_bp.errors.0 }}</span>
                         {% endif %}
                     </div>
 
                     <div class="field-group">
-                        <label for="{{ form.pulse_rate.id_for_label }}">Pulse Rate</label>
+                        <label for="{{ form.pulse_rate.id_for_label }}">
+                            Pulse Rate
+                            <span class="unit">(bpm)</span>
+                            <span class="required">*</span>
+                        </label>
                         {{ form.pulse_rate }}
+                        <span class="help-text">Normal: 60-100 bpm</span>
                         {% if form.pulse_rate.errors %}
                             <span class="error-text">{{ form.pulse_rate.errors.0 }}</span>
                         {% endif %}
                     </div>
 
                     <div class="field-group">
-                        <label for="{{ form.oxygen_saturation.id_for_label }}">SpO₂ (%)</label>
+                        <label for="{{ form.oxygen_saturation.id_for_label }}">
+                            SpO₂
+                            <span class="unit">(%)</span>
+                        </label>
                         {{ form.oxygen_saturation }}
+                        <span class="help-text">Normal: 95-100%</span>
                         {% if form.oxygen_saturation.errors %}
                             <span class="error-text">{{ form.oxygen_saturation.errors.0 }}</span>
                         {% endif %}
@@ -380,13 +789,16 @@
                 <hr class="section-divider">
 
                 <div class="section-header">
-                    <h2>Urinalysis Result</h2>
-                    <p>Select the result shown on the urine dipstick test.</p>
+                    <h2>
+                        <span class="section-icon">🧪</span>
+                        Urinalysis Result
+                    </h2>
+                    <p>Select the result shown on the urine dipstick test strip</p>
                 </div>
 
                 <div class="grid-3">
                     <div class="field-group">
-                        <label for="{{ form.urine_glucose.id_for_label }}">Urine Glucose</label>
+                        <label for="{{ form.urine_glucose.id_for_label }}">Glucose</label>
                         {{ form.urine_glucose }}
                         {% if form.urine_glucose.errors %}
                             <span class="error-text">{{ form.urine_glucose.errors.0 }}</span>
@@ -394,7 +806,7 @@
                     </div>
 
                     <div class="field-group">
-                        <label for="{{ form.urine_protein.id_for_label }}">Urine Protein</label>
+                        <label for="{{ form.urine_protein.id_for_label }}">Protein</label>
                         {{ form.urine_protein }}
                         {% if form.urine_protein.errors %}
                             <span class="error-text">{{ form.urine_protein.errors.0 }}</span>
@@ -438,6 +850,7 @@
                 <div class="field-group">
                     <label for="{{ form.symptoms.id_for_label }}">Symptoms</label>
                     {{ form.symptoms }}
+                    <span class="help-text">Describe any symptoms you're experiencing (e.g., headache, dizziness, shortness of breath)</span>
                     {% if form.symptoms.errors %}
                         <span class="error-text">{{ form.symptoms.errors.0 }}</span>
                     {% endif %}
@@ -445,8 +858,9 @@
 
                 <!-- Notes -->
                 <div class="field-group">
-                    <label for="{{ form.notes.id_for_label }}">Notes</label>
+                    <label for="{{ form.notes.id_for_label }}">Additional Notes</label>
                     {{ form.notes }}
+                    <span class="help-text">Any additional information about your health or the reading conditions</span>
                     {% if form.notes.errors %}
                         <span class="error-text">{{ form.notes.errors.0 }}</span>
                     {% endif %}
@@ -454,6 +868,9 @@
 
                 <!-- Submit -->
                 <button type="submit" class="submit-btn">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
                     Submit Vital Reading
                 </button>
             </form>

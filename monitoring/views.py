@@ -391,17 +391,79 @@ def create_alert_for_reading(reading):
 
 @login_required
 def add_vital_reading(request):
+    """Client/Patient vital entry with doctor notification"""
+    
+    # Get the client
+    try:
+        client = request.user.client_profile
+    except Patient.DoesNotExist:
+        messages.error(request, 'No client profile found.')
+        return redirect('home')
+    
     if request.method == 'POST':
         form = VitalReadingForm(request.POST)
         if form.is_valid():
-            reading = form.save()
+            reading = form.save(commit=False)
+            
+            # Ensure the reading is for the logged-in client
+            # (The hidden field in the form already sets this)
+            reading.patient = client
+            
+            # Set source and entered_by
+            reading.source = 'patient_self'
+            reading.entered_by = request.user
+            
+            # Save the reading
+            reading.save()
+            
+            # Create alerts if needed
             create_alert_for_reading(reading)
-            messages.success(request, 'Vital reading submitted successfully.')
+            
+            # ============================================
+            # SUCCESS MESSAGE WITH DOCTOR NOTIFICATION
+            # ============================================
+            
+            # Get doctor name
+            doctor_name = "your doctor"
+            if reading.patient.assigned_doctor:
+                doctor_name = f"Dr. {reading.patient.assigned_doctor.get_full_name() or reading.patient.assigned_doctor.username}"
+            
+            # Check if any alerts were created
+            alerts_created = Alert.objects.filter(reading=reading).exists()
+            
+            # Build the success message
+            if alerts_created:
+                success_message = (
+                    f'✅ Vital reading submitted successfully! '
+                    f'{doctor_name} has been notified and will review your results.'
+                )
+                extra_message = (
+                    '⚠️ Some values were outside normal range. '
+                    'Your doctor will contact you if needed.'
+                )
+            else:
+                success_message = (
+                    f'✅ Vital reading submitted successfully! '
+                    f'{doctor_name} has been notified.'
+                )
+                extra_message = 'All values are within normal range. Continue monitoring your health.'
+            
+            # Add success message
+            messages.success(request, success_message)
+            
+            # Add extra info as a separate message or in the same message
+            messages.info(request, extra_message)
+            
             return redirect('caregiver_dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = VitalReadingForm()
 
-    return render(request, 'add_vital_reading.html', {'form': form})
+    return render(request, 'add_vital_reading.html', {
+        'form': form,
+        'client': client,
+    })
 
 
 @login_required
