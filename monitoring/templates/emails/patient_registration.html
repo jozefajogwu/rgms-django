@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to RGMS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+        }
+        .details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏥 Welcome to RGMS</h1>
+        <p>Remote Geriatric Monitoring System</p>
+    </div>
+    
+    <div class="content">
+        <p>Dear <strong>{{ patient_name }}</strong>,</p>
+        
+        <p>You have been successfully registered in the <strong>Remote Geriatric Monitoring System (RGMS)</strong>.</p>
+        
+        <div class="details">
+            <h3>📋 Your Registration Details</h3>
+            <p><strong>Patient ID:</strong> #{{ patient_id }}</p>
+            <p><strong>Full Name:</strong> {{ patient_name }}</p>
+            <p><strong>Gender:</strong> {{ gender|title }}</p>
+            <p><strong>Care Type:</strong> {{ care_type }}</p>
+            <p><strong>Doctor:</strong> {{ doctor_name }}</p>
+            <p><strong>Caregiver:</strong> {{ caregiver_name }}</p>
+            <p><strong>Registration Date:</strong> {{ registration_date }}</p>
+        </div>
+        
+        <p><strong>What happens next?</strong></p>
+        <ul>
+            <li>Your health metrics will be monitored remotely</li>
+            <li>You will receive regular health updates</li>
+            <li>Your assigned doctor will monitor your vitals</li>
+        </ul>
+        
+        <p style="font-size: 14px; color: #666;">
+            <strong>Need help?</strong> Contact support@rgms.com
+        </p>
+        
+        <div class="footer">
+            <p>This is an automated message from RGMS.</p>
+            <p>&copy; 2026 Remote Geriatric Monitoring System</p>
+        </div>
+    </div>
+</body>
+</html>

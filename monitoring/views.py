@@ -3,13 +3,16 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.db.models import Count, Avg, Q
+from datetime import timedelta
+from collections import defaultdict
 
 from .forms import VitalReadingForm
 from .models import Patient, VitalReading, Alert
 
 
 def landing_page(request):
-    return render(request, 'monitoring/landing.html')
+    return render(request, 'landing.html')
 
 
 def login_view(request):
@@ -26,7 +29,7 @@ def login_view(request):
             return redirect_user_by_role(user)
         messages.error(request, 'Invalid username or password.')
 
-    return render(request, 'monitoring/login.html')
+    return render(request, 'login.html')
 
 
 def logout_view(request):
@@ -44,23 +47,123 @@ def redirect_user_by_role(user):
 
 @login_required
 def doctor_dashboard(request):
-    total_patients = Patient.objects.count()
-    total_readings = VitalReading.objects.count()
-    critical_alerts_count = Alert.objects.filter(severity='critical', status='unreviewed').count()
-    warning_alerts_count = Alert.objects.filter(severity='warning', status='unreviewed').count()
-    latest_readings = VitalReading.objects.select_related('patient').order_by('-created_at')[:5]
-    urgent_alerts = Alert.objects.select_related('patient', 'reading').filter(status='unreviewed').order_by('-created_at')[:10]
-
-    return render(request, 'monitoring/doctor_dashboard.html', {
+    # Get the current doctor
+    doctor = request.user
+    
+    # Get all patients assigned to this doctor
+    patients = Patient.objects.filter(assigned_doctor=doctor)
+    total_patients = patients.count()
+    
+    # Get all readings for these patients
+    readings = VitalReading.objects.filter(patient__in=patients).order_by('-created_at')
+    total_readings = readings.count()
+    
+    # Get latest readings for each patient
+    latest_readings = []
+    for patient in patients:
+        latest = VitalReading.objects.filter(patient=patient).order_by('-created_at').first()
+        if latest:
+            latest_readings.append(latest)
+    
+    # Get alerts
+    urgent_alerts = Alert.objects.filter(
+        patient__in=patients,
+        status='active'
+    ).exclude(severity='low').order_by('-created_at')[:10]
+    
+    critical_alerts_count = Alert.objects.filter(
+        patient__in=patients,
+        severity='critical',
+        status='active'
+    ).count()
+    
+    warning_alerts_count = Alert.objects.filter(
+        patient__in=patients,
+        severity='warning',
+        status='active'
+    ).count()
+    
+    # ============================================
+    # CHART DATA PREPARATION
+    # ============================================
+    
+    # Get data for the last 7 days
+    end_date = timezone.now()
+    start_date = end_date - timedelta(days=7)
+    
+    # Get readings for the last 7 days
+    recent_readings = VitalReading.objects.filter(
+        patient__in=patients,
+        created_at__gte=start_date,
+        created_at__lte=end_date
+    ).order_by('created_at')
+    
+    # Prepare chart labels (dates)
+    chart_labels = []
+    systolic_data = []
+    diastolic_data = []
+    pulse_data = []
+    spo2_data = []
+    sugar_data = []
+    
+    # Group readings by day
+    daily_readings = defaultdict(list)
+    
+    for reading in recent_readings:
+        day_key = reading.created_at.strftime('%Y-%m-%d')
+        daily_readings[day_key].append(reading)
+    
+    # Sort the days
+    sorted_days = sorted(daily_readings.keys())
+    
+    for day in sorted_days:
+        day_readings = daily_readings[day]
+        chart_labels.append(day)
+        
+        # Calculate averages for each metric
+        avg_systolic = sum(r.systolic_bp for r in day_readings if r.systolic_bp) / len(day_readings) if day_readings else 0
+        avg_diastolic = sum(r.diastolic_bp for r in day_readings if r.diastolic_bp) / len(day_readings) if day_readings else 0
+        avg_pulse = sum(r.pulse_rate for r in day_readings if r.pulse_rate) / len(day_readings) if day_readings else 0
+        avg_spo2 = sum(r.oxygen_saturation for r in day_readings if r.oxygen_saturation) / len(day_readings) if day_readings else 0
+        avg_sugar = sum(r.fasting_blood_sugar for r in day_readings if r.fasting_blood_sugar) / len(day_readings) if day_readings else 0
+        
+        systolic_data.append(round(avg_systolic, 1))
+        diastolic_data.append(round(avg_diastolic, 1))
+        pulse_data.append(round(avg_pulse, 1))
+        spo2_data.append(round(avg_spo2, 1))
+        sugar_data.append(round(avg_sugar, 1))
+    
+    # If no data, provide sample data
+    if not chart_labels:
+        chart_labels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7']
+        systolic_data = [120, 118, 122, 125, 119, 121, 120]
+        diastolic_data = [80, 78, 82, 85, 79, 81, 80]
+        pulse_data = [72, 70, 75, 74, 71, 73, 72]
+        spo2_data = [98, 97, 99, 98, 97, 98, 98]
+        sugar_data = [95, 92, 98, 100, 94, 96, 95]
+    
+    context = {
         'total_patients': total_patients,
         'total_readings': total_readings,
+        'latest_readings': latest_readings[:10],
+        'urgent_alerts': urgent_alerts,
         'critical_alerts_count': critical_alerts_count,
         'warning_alerts_count': warning_alerts_count,
-        'latest_readings': latest_readings,
-        'urgent_alerts': urgent_alerts,
-    })
+        # Chart data
+        'bp_labels': chart_labels,
+        'systolic_data': systolic_data,
+        'diastolic_data': diastolic_data,
+        'pulse_data': pulse_data,
+        'spo2_data': spo2_data,
+        'sugar_data': sugar_data,
+    }
+    
+    return render(request, 'doctor_dashboard.html', context)
 
 
+# ============================================
+# ADD CAREGIVER DASHBOARD HERE
+# ============================================
 @login_required
 def caregiver_dashboard(request):
     assigned_patients = Patient.objects.filter(assigned_caregiver=request.user)
@@ -68,7 +171,7 @@ def caregiver_dashboard(request):
         patient__assigned_caregiver=request.user
     ).select_related('patient').order_by('-created_at')[:5]
 
-    return render(request, 'monitoring/caregiver_dashboard.html', {
+    return render(request, 'caregiver_dashboard.html', {
         'assigned_patients': assigned_patients,
         'recent_readings': recent_readings,
     })
@@ -174,11 +277,12 @@ def add_vital_reading(request):
     else:
         form = VitalReadingForm()
 
-    return render(request, 'monitoring/add_vital_reading.html', {'form': form})
+    return render(request, 'add_vital_reading.html', {'form': form})
 
 
 @login_required
 def mark_alert_reviewed(request, alert_id):
+    """Mark an alert as reviewed"""
     alert = get_object_or_404(Alert, id=alert_id)
 
     if request.method == 'POST':
@@ -186,7 +290,7 @@ def mark_alert_reviewed(request, alert_id):
         alert.reviewed_at = timezone.now()
         alert.reviewed_by = request.user
         alert.save()
-        messages.success(request, 'Alert marked as reviewed.')
+        messages.success(request, f'Alert for {alert.patient.full_name} has been reviewed and cleared.')
         return redirect('doctor_dashboard')
 
     return redirect('doctor_dashboard')

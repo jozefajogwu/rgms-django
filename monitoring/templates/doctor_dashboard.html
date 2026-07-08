@@ -5,11 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RGMS · Clinical Care Suite</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <!-- Premium Google Fonts: Inter and Outfit for Display Headings -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Custom Dashboard CSS -->
+  <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
   
   <style>
     body {
@@ -20,31 +27,15 @@
     .font-display {
       font-family: 'Outfit', sans-serif;
     }
-    
-    /* Fine-grained shadow design */
     .premium-flat-shadow {
       box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.03), 0 4px 18px -1px rgba(15, 23, 42, 0.02);
     }
-    .premium-elevated-shadow {
-      box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 20px 40px -12px rgba(15, 23, 42, 0.05);
-    }
-
-    /* Glassmorphism details */
-    .glass-backdrop {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    /* Active indicator states */
     .sidebar-link-active {
       background: rgba(13, 148, 136, 0.08);
       color: #0d9488;
       border-right: 3.5px solid #0d9488;
       font-weight: 600;
     }
-
-    /* Smooth transitions and card transformations */
     .animated-card {
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -53,8 +44,6 @@
       box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.06);
       border-color: rgba(13, 148, 136, 0.2);
     }
-
-    /* Subtle pulse on crucial items */
     @keyframes alert-pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.06); opacity: 0.85; }
@@ -62,16 +51,12 @@
     .vital-pulse-icon {
       animation: alert-pulse 2s infinite ease-in-out;
     }
-
-    /* Urinalysis expander summary clean-up */
     details summary {
       list-style: none;
     }
     details summary::-webkit-details-marker {
       display: none;
     }
-
-    /* Custom high-scannability scrollbars */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -86,6 +71,11 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+    .glass-backdrop {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
   </style>
 </head>
 <body class="text-[#0f172a] min-h-screen flex flex-col md:flex-row antialiased select-none">
@@ -95,7 +85,6 @@
   <!-- ============================================ -->
   <aside class="hidden md:flex md:w-64 bg-slate-950 text-slate-100 flex-col justify-between shrink-0 border-r border-slate-800/80">
     <div>
-      <!-- Clinic Branding Frame -->
       <div class="p-6 border-b border-slate-800/60 flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-teal-500/20">
           RG
@@ -105,67 +94,50 @@
           <p class="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5 font-bold">Clinical Care</p>
         </div>
       </div>
-
-      <!-- Main Navigation Menu -->
       <nav class="p-4 space-y-1 mt-4">
-        <!-- Dashboard (Active Accesspoint) -->
         <a href="#" class="sidebar-link-active flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm transition-all">
           <svg class="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
           </svg>
           <span>Dashboard</span>
         </a>
-
-        <!-- Patients View Accesspoint placeholder -->
         <a href="#" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 transition-all text-sm group">
           <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
           <span>Patients List</span>
-          <span class="ml-auto text-[10px] bg-slate-900 text-slate-450 px-2 py-0.5 rounded-full font-bold">
-            {{ total_patients }}
-          </span>
+          <span class="ml-auto text-[10px] bg-slate-900 text-slate-450 px-2 py-0.5 rounded-full font-bold">{{ total_patients }}</span>
         </a>
-
-        <!-- Live Vitals Tracker Accesspoint placeholder -->
         <a href="#" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 transition-all text-sm group">
           <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
           <span>Live Telemetry</span>
-          <span class="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-            7-Point
-          </span>
+          <span class="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">7-Point</span>
         </a>
-
-        <!-- General Alerts View Accesspoint -->
         <a href="#" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 transition-all text-sm group">
           <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
           <span>Triage Desk</span>
           {% if urgent_alerts %}
-          <span class="ml-auto bg-rose-500 text-white text-[10px] px-2.5 py-0.5 rounded-full font-extrabold animate-pulse">
-            {{ urgent_alerts|length }} Active
-          </span>
+          <span class="ml-auto bg-rose-500 text-white text-[10px] px-2.5 py-0.5 rounded-full font-extrabold animate-pulse">{{ urgent_alerts|length }} Active</span>
           {% endif %}
         </a>
       </nav>
     </div>
-
-    <!-- User Clinical ID Section -->
+    
+    <!-- User Section with Doctor's Name -->
     <div class="p-4 border-t border-slate-800/60 bg-slate-950/80">
       <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex items-center gap-3">
         <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-705 flex items-center justify-center font-bold text-xs text-teal-400 select-none">
-          DR
+          {{ user.first_name|first|default:user.username|first|upper }}
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-bold text-slate-205 truncate">Doctor Portal</p>
+          <p class="text-xs font-bold text-slate-205 truncate">{{ user.get_full_name|default:user.username }}</p>
           <span class="text-[9px] text-slate-400 block truncate uppercase tracking-widest font-mono">Geriatrics Unit</span>
         </div>
       </div>
-      
-      <!-- Secure clinical log out button -->
       <a href="{% url 'logout' %}" class="mt-3 flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl font-bold text-xs transition-all cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -176,7 +148,7 @@
   </aside>
 
   <!-- ============================================ -->
-  <!-- 2. MOBILE HEADER & NAVIGATION OVERLAYS -->
+  <!-- 2. MOBILE HEADER -->
   <!-- ============================================ -->
   <header class="md:hidden glass-backdrop border-b border-slate-200/85 px-4 h-16 flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center gap-2">
@@ -184,8 +156,8 @@
       <span class="font-extrabold text-[#0f172a] font-display text-sm tracking-tight">RGMS <span class="text-teal-600">Care</span></span>
     </div>
     <div class="flex items-center gap-3">
-      <!-- Mobile Shift Exit -->
-      <a href="{% url 'logout' %}" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg">Shift Log-out</a>
+      <span class="text-xs font-medium text-slate-600 hidden sm:block">Dr. {{ user.get_full_name|default:user.username }}</span>
+      <a href="{% url 'logout' %}" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-lg">Logout</a>
     </div>
   </header>
 
@@ -194,55 +166,50 @@
   <!-- ============================================ -->
   <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
 
-    <!-- Desktop Sticky Header Row -->
+    <!-- Desktop Header with Doctor's Name -->
     <header class="hidden md:flex h-20 bg-white border-b border-slate-200 px-8 items-center justify-between shadow-sm shrink-0 z-40">
       <div>
-        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 font-display">Hello Doctor, Welcome back to clinical rounds.</h1>
-        <p class="text-xs text-slate-500 mt-1">Status monitors and remote bio-signals are fully synchronized with passive geriatric nodes.</p>
+        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 font-display">Welcome, Dr. {{ user.get_full_name|default:user.username }}. Clinical Rounds Dashboard.</h1>
+        <p class="text-xs text-slate-500 mt-1">Remote patient monitoring and vital signs are fully synchronized.</p>
       </div>
-
       <div class="flex items-center gap-4">
-        <!-- Live status telemetry pill -->
         <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-full select-none">
           <span class="w-2 h-2 rounded-full bg-emerald-500 vital-pulse-icon"></span>
-          <span class="text-[10.5px] font-bold text-slate-600 tracking-wider">Passive Remote Mappings Active</span>
+          <span class="text-[10.5px] font-bold text-slate-600 tracking-wider">Active Monitoring</span>
         </div>
       </div>
     </header>
 
-    <!-- Scrollable Space Workspace Content -->
+    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 select-none">
 
       <!-- ============================================ -->
-      <!-- SECTION I: FOUR ADAPTIVE KPI CARDS -->
+      <!-- SECTION I: FOUR CLINICAL METRICS CARDS -->
       <!-- ============================================ -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        
-        <!-- Total Patients -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 premium-flat-shadow animated-card flex justify-between items-start">
           <div class="min-w-0">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Total Geriatric Cohorts</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Active Patients</span>
             <p class="text-3xl font-bold font-display text-slate-900 leading-none">{{ total_patients }}</p>
             <div class="flex items-center gap-1.5 text-xs text-teal-600 mt-3 font-semibold">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
-              <span>Fully Validated</span>
+              <span>Under Active Monitoring</span>
             </div>
           </div>
           <div class="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
           </div>
         </div>
 
-        <!-- Total Readings Logs -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 premium-flat-shadow animated-card flex justify-between items-start">
           <div class="min-w-0">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Total Telemetered Logs</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Vitals Recorded</span>
             <p class="text-3xl font-bold font-display text-slate-900 leading-none">{{ total_readings }}</p>
             <div class="flex items-center gap-1.5 text-xs text-sky-650 mt-3 font-semibold">
               <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping"></span>
-              <span>Passively Recording</span>
+              <span>Continuous Monitoring</span>
             </div>
           </div>
           <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-650 shrink-0">
@@ -252,37 +219,36 @@
           </div>
         </div>
 
-        <!-- Critical Alerts -->
         <div class="p-5 rounded-2xl border flex justify-between items-start animated-card premium-flat-shadow {% if critical_alerts_count > 0 %}bg-rose-50/50 border-rose-200{% else %}bg-white border-slate-200/80{% endif %}">
           <div class="min-w-0">
-            <span class="text-[10px] font-bold uppercase tracking-widest block mb-1 {% if critical_alerts_count > 0 %}text-rose-600{% else %}text-slate-400{% endif %}">Critical Alerts</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest block mb-1 {% if critical_alerts_count > 0 %}text-rose-600{% else %}text-slate-400{% endif %}">Urgent Alerts</span>
             <p class="text-3xl font-bold font-display leading-none {% if critical_alerts_count > 0 %}text-rose-600{% else %}text-slate-900{% endif %}">{{ critical_alerts_count }}</p>
             <div class="flex items-center gap-1 mt-3 text-xs font-semibold {% if critical_alerts_count > 0 %}text-rose-600{% else %}text-slate-505{% endif %}">
               {% if critical_alerts_count > 0 %}
-              <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              <span>Requiring Intervention</span>
+              <svg class="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <span>Requires Immediate Attention</span>
               {% else %}
-              <span>No Urgent Anomalies</span>
+              <span>✅ No Critical Issues</span>
               {% endif %}
             </div>
           </div>
           <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {% if critical_alerts_count > 0 %}bg-rose-100 text-rose-600{% else %}bg-slate-50 text-slate-450{% endif %}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
         </div>
 
-        <!-- Warning Alerts -->
         <div class="p-5 rounded-2xl border flex justify-between items-start animated-card premium-flat-shadow {% if warning_alerts_count > 0 %}bg-amber-50/50 border-amber-200{% else %}bg-white border-slate-200/80{% endif %}">
           <div class="min-w-0">
-            <span class="text-[10px] font-bold uppercase tracking-widest block mb-1 {% if warning_alerts_count > 0 %}text-amber-600{% else %}text-slate-400{% endif %}">Warning Alerts</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest block mb-1 {% if warning_alerts_count > 0 %}text-amber-600{% else %}text-slate-400{% endif %}">Clinical Warnings</span>
             <p class="text-3xl font-bold font-display leading-none {% if warning_alerts_count > 0 %}text-amber-600{% else %}text-slate-900{% endif %}">{{ warning_alerts_count }}</p>
             <div class="flex items-center gap-1.5 text-xs mt-3 font-semibold {% if warning_alerts_count > 0 %}text-amber-600{% else %}text-slate-505{% endif %}">
               {% if warning_alerts_count > 0 %}
-              <span>Under Stable Observation</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <span>Requires Clinical Review</span>
               {% else %}
-              <span>Normal Variabilities</span>
+              <span>✅ No Warnings</span>
               {% endif %}
             </div>
           </div>
@@ -292,39 +258,32 @@
             </svg>
           </div>
         </div>
-
       </section>
 
       <!-- ============================================ -->
-      <!-- SECTION II: GRID-2 ADAPTIVE TRIAGE DESKS -->
+      <!-- SECTION II: GRID-2 CLINICAL REVIEW DESKS -->
       <!-- ============================================ -->
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        <!-- Urgent Alerts clinical list -->
         <div class="bg-white rounded-2xl border border-slate-200/85 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
           <div class="p-5 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
               <span class="w-2.5 h-2.5 bg-rose-500 rounded-full inline-block vital-pulse-icon"></span>
-              <h3 class="font-extrabold text-[#0f172a] font-display text-base">Geriatric Patient Rescue Triage Alerts</h3>
+              <h3 class="font-extrabold text-[#0f172a] font-display text-base">Patients Requiring Clinical Review</h3>
             </div>
             {% if urgent_alerts %}
             <span class="text-[10px] uppercase tracking-wider font-bold bg-rose-100 text-rose-700 px-3 py-1 rounded-full border border-rose-200">
-              {{ urgent_alerts|length }} Pending Action
+              {{ urgent_alerts|length }} Needs Assessment
             </span>
             {% endif %}
           </div>
-
           <div class="p-4 overflow-y-auto space-y-4 divide-y divide-slate-100/80 flex-1">
             {% if urgent_alerts %}
               {% for alert in urgent_alerts %}
                 <div class="pt-4 first:pt-0 alert-item flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div class="flex gap-3 items-start min-w-0">
-                    <!-- Status dot representation -->
                     <div class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 {% if alert.severity == 'critical' %}bg-rose-500 shadow-[0_0_8px_#ef444455]{% else %}bg-amber-400{% endif %}"></div>
                     <div class="min-w-0">
-                      <!-- Patient Full Name -->
                       <p class="font-bold text-[#0f172a] text-sm">{{ alert.patient.full_name }}</p>
-                      <!-- Alert Title and message -->
                       <p class="text-xs text-slate-600 mt-1 leading-relaxed">
                         <span class="font-semibold text-slate-800">[{{ alert.title }}]</span> — {{ alert.message }}
                       </p>
@@ -334,13 +293,10 @@
                       </span>
                     </div>
                   </div>
-
                   <div class="flex flex-col items-end gap-2.5 sm:shrink-0">
                     <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border {% if alert.severity == 'critical' %}bg-rose-50 text-rose-700 border-rose-200{% else %}bg-amber-50 text-amber-700 border-amber-200{% endif %}">
                       {{ alert.severity|title }}
                     </span>
-                    
-                    <!-- Dispatch Reviewed Event Action -->
                     <form method="POST" action="{% url 'mark_alert_reviewed' alert.id %}" class="w-full">
                       {% csrf_token %}
                       <button type="submit" class="w-full sm:w-auto bg-[#0f172a] hover:bg-teal-650 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-teal-500">
@@ -353,26 +309,24 @@
             {% else %}
               <div class="py-14 text-center text-slate-400 space-y-2">
                 <svg class="w-10 h-10 mx-auto text-slate-300 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <p class="text-xs font-semibold">Triage channels clear. No active alerts flagged.</p>
+                <p class="text-xs font-semibold">No patients requiring clinical review.</p>
               </div>
             {% endif %}
           </div>
         </div>
 
-        <!-- Latest vitals telemetered feeds list -->
         <div class="bg-white rounded-2xl border border-slate-200/85 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
           <div class="p-5 border-b border-slate-200/80 bg-slate-50/50 flex justify-between items-center">
             <div class="flex items-center gap-2.5">
               <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-              <h3 class="font-extrabold text-[#0f172a] font-display text-base">Incoming Patient Vital Records Stream</h3>
+              <h3 class="font-extrabold text-[#0f172a] font-display text-base">Recent Patient Vitals</h3>
             </div>
             {% if latest_readings %}
             <span class="text-[10px] font-bold uppercase tracking-wider bg-sky-50 border border-sky-100 text-sky-700 px-3 py-1 rounded-full">
-              {{ latest_readings|length }} Streams Active
+              {{ latest_readings|length }} Patients Updated
             </span>
             {% endif %}
           </div>
-
           <div class="p-4 overflow-y-auto space-y-4 divide-y divide-slate-150/60 flex-1">
             {% if latest_readings %}
               {% for reading in latest_readings %}
@@ -381,44 +335,32 @@
                     <p class="font-extrabold text-sm text-[#0f172a]">{{ reading.patient.full_name }}</p>
                     <span class="text-[10.5px] text-slate-400 font-mono">{{ reading.created_at }}</span>
                   </div>
-
-                  <!-- Patient Vitals metrics matrix -->
                   <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs text-slate-600">
                     <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
                       <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Blood Pressure</span>
                       <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.systolic_bp }}/{{ reading.diastolic_bp }} <span class="text-[10px] font-normal text-slate-450">mmHg</span></span>
                     </div>
-
                     <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Pulse Rate</span>
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Heart Rate</span>
                       <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.pulse_rate }} <span class="text-[10px] font-light text-slate-420 font-sans">bpm</span></span>
                     </div>
-
                     <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Blood Ox (SpO2)</span>
+                      <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Oxygen Saturation</span>
                       <span class="font-bold text-teal-700 text-sm mt-0.5 block">{{ reading.oxygen_saturation|default:"—" }}%</span>
                     </div>
-
                     <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
                       <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Fasting Glucose</span>
                       <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.fasting_blood_sugar|default:"—" }}</span>
                     </div>
-
                     <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl">
                       <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Random Glucose</span>
                       <span class="font-bold text-[#0f172a] text-sm mt-0.5 block">{{ reading.random_blood_sugar|default:"—" }}</span>
                     </div>
-
-                    <!-- Symptoms block representation -->
                     <div class="bg-slate-50 border border-slate-200/40 px-3 py-2 rounded-xl min-w-0" title="{{ reading.symptoms }}">
                       <span class="text-[9px] font-bold text-slate-400 uppercase block select-none">Symptoms</span>
-                      <span class="font-semibold text-rose-700 text-xs block truncate mt-0.5">
-                        {{ reading.symptoms|default:"None Logged"|truncatechars:18 }}
-                      </span>
+                      <span class="font-semibold text-rose-700 text-xs block truncate mt-0.5">{{ reading.symptoms|default:"None Logged"|truncatechars:18 }}</span>
                     </div>
                   </div>
-
-                  <!-- Accordion expansion details for clinical urinalysis details -->
                   <details class="group">
                     <summary class="inline-flex items-center gap-1.5 focus:outline-none select-none text-xs text-teal-600 font-bold hover:text-teal-800 cursor-pointer pt-1 transition-colors">
                       <span>Clinical Urinalysis Assays</span>
@@ -455,65 +397,60 @@
             {% else %}
               <div class="py-14 text-center text-slate-400 space-y-2">
                 <svg class="w-10 h-10 mx-auto text-slate-300 stroke-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                <p class="text-xs font-semibold text-slate-400">Telemetry logs empty. Connect standard sensor telemetry arrays to round feeds.</p>
+                <p class="text-xs font-semibold text-slate-400">No vitals recorded yet. Start monitoring patients.</p>
               </div>
             {% endif %}
           </div>
         </div>
-
       </section>
 
       <!-- ============================================ -->
-      <!-- SECTION III: MULTI-CHANNEL HEURISTIC CHARTS -->
+      <!-- SECTION III: CLINICAL TRENDS CHARTS -->
       <!-- ============================================ -->
       <section class="bg-white border border-slate-200/85 rounded-2xl p-6 shadow-sm space-y-6">
-        
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <h3 class="font-extrabold text-[#0f172a] text-lg font-display leading-none">Diagnostic Heuristic Trends</h3>
-            <p class="text-xs text-slate-400 mt-1">Cohort-wide remote monitoring baselines mapped across the latest 7 telemetry rounds.</p>
+            <h3 class="font-extrabold text-[#0f172a] text-lg font-display leading-none">Clinical Trends & Vital Signs</h3>
+            <p class="text-xs text-slate-400 mt-1">7-day trending of key patient metrics across your practice</p>
           </div>
-          <span class="text-[10.5px] uppercase tracking-wider font-bold bg-[#fafafa] border border-slate-200 text-slate-500 px-3.5 py-1.5 rounded-full select-none">
-            7-Point Interval Scale
-          </span>
+          <span class="text-[10.5px] uppercase tracking-wider font-bold bg-[#fafafa] border border-slate-200 text-slate-500 px-3.5 py-1.5 rounded-full select-none">Last 7 Days</span>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 pt-2">
           
           <!-- Blood Pressure trends -->
           <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
-            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">A. Arterial Pressure Variabilities (mmHg)</span>
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">Blood Pressure Trends (mmHg)</span>
             <div class="h-60 w-full relative">
               <canvas id="bpTrend"></canvas>
             </div>
           </div>
 
-          <!-- Pulse rate trends -->
+          <!-- Heart Rate trends -->
           <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
-            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">B. Cardiac Pacing Chronometrography (bpm)</span>
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">Heart Rate Trends (bpm)</span>
             <div class="h-60 w-full relative">
               <canvas id="pulseTrend"></canvas>
             </div>
           </div>
 
-          <!-- SpO2 Blood Oxygenation -->
+          <!-- Oxygen Saturation trends -->
           <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
-            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">C. Blood Oxygen Saturation Index (SpO2 %)</span>
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">Oxygen Saturation (SpO2 %)</span>
             <div class="h-60 w-full relative">
               <canvas id="spo2Trend"></canvas>
             </div>
           </div>
 
-          <!-- Fasting Blood Sugar Glycemic trends -->
+          <!-- Fasting Blood Glucose trends -->
           <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-200/60 flex flex-col justify-between">
-            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">D. Circadian Glycemic Variability Index (mg/dL)</span>
+            <span class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest block mb-4">Fasting Blood Glucose (mg/dL)</span>
             <div class="h-60 w-full relative">
               <canvas id="sugarTrend"></canvas>
             </div>
           </div>
 
         </div>
-
       </section>
 
     </div>
@@ -529,14 +466,12 @@
       </svg>
       <span class="text-[9px] font-bold">Round Desk</span>
     </a>
-    
     <a href="#" class="flex flex-col items-center justify-center text-slate-500 min-w-[50px] space-y-0.5 select-none focus:outline-none">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
       </svg>
       <span class="text-[9px] font-semibold">Patients</span>
     </a>
-
     <a href="#" class="flex flex-col items-center justify-center text-slate-500 min-w-[50px] space-y-0.5 select-none focus:outline-none relative">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -549,129 +484,26 @@
   </nav>
 
   <!-- ============================================ -->
-  <!-- 5. CHART.JS TELEMENTRY GRAPH INTEGRATION -->
+  <!-- CHART INITIALIZATION -->
   <!-- ============================================ -->
+  
+  <!-- Pass data from Django to JavaScript -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Common baseline typographic and aesthetic defaults for medical graphs
-      const chartDefaults = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              font: { family: 'Inter', size: 10, weight: 600 },
-              boxWidth: 7,
-              boxHeight: 7,
-              usePointStyle: true,
-              color: '#475569',
-              padding: 14
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { font: { family: 'Inter', size: 9.5, weight: 500 }, color: '#64748b' }
-          },
-          y: {
-            grid: { color: 'rgba(226, 232, 240, 0.55)' },
-            ticks: { font: { family: 'Inter', size: 9.5, weight: 500 }, color: '#64748b' }
-          }
-        },
-        elements: {
-          line: { borderWidth: 2.2, tension: 0.35 },
-          point: { radius: 1.5, hoverRadius: 5 }
-        }
-      };
-
-      // 1. Blood Pressure Trends Diagram
-      const bpCtx = document.getElementById('bpTrend')?.getContext('2d');
-      if (bpCtx) {
-        new Chart(bpCtx, {
-          type: 'line',
-          data: {
-            labels: {{ bp_labels|safe }},
-            datasets: [
-              {
-                label: 'Systolic BP (SYS)',
-                data: {{ systolic_data|safe }},
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.02)',
-                fill: true
-              },
-              {
-                label: 'Diastolic BP (DIA)',
-                data: {{ diastolic_data|safe }},
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.02)',
-                fill: true
-              }
-            ]
-          },
-          options: chartDefaults
-        });
-      }
-
-      // 2. Pulse Rate Diagram
-      const pulseCtx = document.getElementById('pulseTrend')?.getContext('2d');
-      if (pulseCtx) {
-        new Chart(pulseCtx, {
-          type: 'line',
-          data: {
-            labels: {{ bp_labels|safe }},
-            datasets: [{
-              label: 'Pulse Rate (Heart HR)',
-              data: {{ pulse_data|safe }},
-              borderColor: '#0d9488',
-              backgroundColor: 'rgba(13, 148, 136, 0.02)',
-              fill: true
-            }]
-          },
-          options: chartDefaults
-        });
-      }
-
-      // 3. Blood Oxygen SpO2 Diagram
-      const spo2Ctx = document.getElementById('spo2Trend')?.getContext('2d');
-      if (spo2Ctx) {
-        new Chart(spo2Ctx, {
-          type: 'line',
-          data: {
-            labels: {{ bp_labels|safe }},
-            datasets: [{
-              label: 'Saturation Status (SpO2)',
-              data: {{ spo2_data|safe }},
-              borderColor: '#f59e0b',
-              backgroundColor: 'rgba(245, 158, 11, 0.02)',
-              fill: true
-            }]
-          },
-          options: chartDefaults
-        });
-      }
-
-      // 4. Circadian Glycemic Sugar Diagram
-      const sugarCtx = document.getElementById('sugarTrend')?.getContext('2d');
-      if (sugarCtx) {
-        new Chart(sugarCtx, {
-          type: 'line',
-          data: {
-            labels: {{ bp_labels|safe }},
-            datasets: [{
-              label: 'Fasting Blood Sugar (FBS)',
-              data: {{ sugar_data|safe }},
-              borderColor: '#8b5cf6',
-              backgroundColor: 'rgba(139, 92, 246, 0.02)',
-              fill: true
-            }]
-          },
-          options: chartDefaults
-        });
-      }
-    });
+    window.CHART_DATA = {
+      labels: {{ bp_labels|safe }},
+      systolic: {{ systolic_data|safe }},
+      diastolic: {{ diastolic_data|safe }},
+      pulse: {{ pulse_data|safe }},
+      spo2: {{ spo2_data|safe }},
+      sugar: {{ sugar_data|safe }}
+    };
+    
+    // Debug: Log the data to console
+    console.log('CHART_DATA loaded:', window.CHART_DATA);
   </script>
+  
+  <!-- Custom Dashboard JavaScript -->
+  <script src="{% static 'js/dashboard/dashboard.js' %}"></script>
 
 </body>
 </html>

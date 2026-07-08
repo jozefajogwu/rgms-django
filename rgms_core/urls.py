@@ -1,11 +1,13 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from monitoring import views
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
 
     # Public landing page
     path('', views.landing_page, name='home'),
@@ -24,3 +26,6 @@ urlpatterns = [
     # Alerts
     path('alerts/<int:alert_id>/review/', views.mark_alert_reviewed, name='mark_alert_reviewed'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
