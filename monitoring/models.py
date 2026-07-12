@@ -441,3 +441,65 @@ class CaregiverAssignment(models.Model):
     
     def __str__(self):
         return f"{self.caregiver.full_name} → {self.patient.full_name} ({self.get_assignment_type_display()})"
+
+
+class DoctorAssignment(models.Model):
+    """
+    Track doctor assignments and relationships
+    """
+    
+    doctor = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='doctor_assignments',
+        help_text="The doctor providing care"
+    )
+    
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='doctor_assignments',
+        help_text="The patient receiving care"
+    )
+    
+    ASSIGNMENT_TYPE_CHOICES = [
+        ('primary', 'Primary Care Physician'),
+        ('specialist', 'Specialist'),
+        ('consultant', 'Consultant'),
+        ('temporary', 'Temporary/Stand-in'),
+    ]
+    
+    assignment_type = models.CharField(
+        max_length=20,
+        choices=ASSIGNMENT_TYPE_CHOICES,
+        default='primary'
+    )
+    
+    is_active = models.BooleanField(default=True)
+    started_at = models.DateTimeField(auto_now_add=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    
+    class Meta:
+        unique_together = ['doctor', 'patient']
+        ordering = ['-started_at']
+    
+    def __str__(self):
+        doctor_name = self.doctor.get_full_name() or self.doctor.username
+        return f"Dr. {doctor_name} → {self.patient.full_name} ({self.get_assignment_type_display()})"
+
+
+class Doctor(User):
+    """Proxy model for Doctor users"""
+    class Meta:
+        proxy = True
+        verbose_name = "Doctor"
+        verbose_name_plural = "Doctors"
+
+
+class Caregiver(User):
+    """Proxy model for Caregiver users"""
+    class Meta:
+        proxy = True
+        verbose_name = "Caregiver"
+        verbose_name_plural = "Caregivers"

@@ -401,12 +401,19 @@ def add_vital_reading(request):
         return redirect('home')
     
     if request.method == 'POST':
-        form = VitalReadingForm(request.POST)
+        # Create a mutable copy of POST data
+        post_data = request.POST.copy()
+        
+        # Set the patient field explicitly
+        post_data['patient'] = client.id
+        
+        # Create form with modified data
+        form = VitalReadingForm(post_data)
+        
         if form.is_valid():
             reading = form.save(commit=False)
             
             # Ensure the reading is for the logged-in client
-            # (The hidden field in the form already sets this)
             reading.patient = client
             
             # Set source and entered_by
@@ -418,10 +425,6 @@ def add_vital_reading(request):
             
             # Create alerts if needed
             create_alert_for_reading(reading)
-            
-            # ============================================
-            # SUCCESS MESSAGE WITH DOCTOR NOTIFICATION
-            # ============================================
             
             # Get doctor name
             doctor_name = "your doctor"
@@ -451,11 +454,12 @@ def add_vital_reading(request):
             # Add success message
             messages.success(request, success_message)
             
-            # Add extra info as a separate message or in the same message
+            # Add extra info as a separate message
             messages.info(request, extra_message)
             
             return redirect('caregiver_dashboard')
         else:
+            # Form has errors - they will be displayed in the template
             messages.error(request, 'Please correct the errors below.')
     else:
         form = VitalReadingForm()

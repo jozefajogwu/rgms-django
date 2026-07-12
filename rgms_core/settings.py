@@ -106,6 +106,14 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Genesis Portal",
     "welcome_sign": "Welcome to Genesis Portal Admin",
     "copyright": "Genesis Portal © 2026",
+    
+    # Logo settings - Add these!
+    "site_logo": "admin/img/logo.png",  # Path to your logo
+    "site_logo_classes": "img-circle",  # Optional: img-circle, img-fluid, etc.
+    "site_icon": "admin/img/favicon.ico",  # Favicon
+    "login_logo": "admin/img/logo.png",  # Logo on login page
+    "login_logo_classes": "img-fluid",
+    
     "show_sidebar": True,
     "navigation_expanded": True,
     "navigation": [
@@ -195,3 +203,10 @@ DEFAULT_FROM_EMAIL = 'RGMS System <noreply@rgms.com>'
 # EMAIL_HOST_USER = 'your-email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your-app-password'
 # DEFAULT_FROM_EMAIL = 'RGMS System <your-email@gmail.com>'
+
+
+
+# rgms_core/settings.py
+
+# Logout redirect URL
+LOGOUT_REDIRECT_URL = 'home'  # Redirect to homepage after logout
