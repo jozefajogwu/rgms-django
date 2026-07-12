@@ -18,6 +18,9 @@ urlpatterns = [
 
     # Dashboards
     path('doctor/dashboard/', views.doctor_dashboard, name='doctor_dashboard'),
+    path('doctor/patients/', views.doctor_patients_list, name='doctor_patients_list'),
+    path('doctor/triage/', views.triage_desk, name='triage_desk'),
+    path('doctor/live-telemetry/', views.live_telemetry, name='live_telemetry'),
     path('caregiver/dashboard/', views.caregiver_dashboard, name='caregiver_dashboard'),
 
     # Caregiver actions

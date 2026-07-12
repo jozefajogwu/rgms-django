@@ -1,0 +1,475 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triage Desk · RGMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .priority-critical { border-left: 4px solid #dc2626; background: #fef2f2; }
+        .priority-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
+        .priority-stable { border-left: 4px solid #22c55e; background: #f0fdf4; }
+        .animated-card { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animated-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.06); }
+        /* Chart container styles */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        .chart-container .chart-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .chart-container .chart-wrapper {
+            height: 150px;
+            width: 100%;
+            position: relative;
+        }
+        .chart-container .chart-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid rgba(226, 232, 240, 0.4);
+        }
+        .chart-container .chart-stats .stat-value {
+            font-weight: 600;
+            color: #0a1628;
+        }
+        .chart-container .chart-stats .trend-up { color: #ef4444; }
+        .chart-container .chart-stats .trend-down { color: #22c55e; }
+        .chart-container .chart-stats .trend-stable { color: #94a3b8; }
+        .chart-container .chart-stats .stat-label {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-extrabold text-xl">RG</div>
+                <div>
+                    <span class="font-extrabold text-slate-900 text-lg">🚨 RGMS <span class="text-teal-600">Triage</span></span>
+                    <p class="text-xs text-slate-500">Emergency Triage Desk</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-slate-600">Dr. {{ request.user.get_full_name|default:request.user.username }}</span>
+                <a href="{% url 'doctor_dashboard' %}" class="text-sm font-bold text-slate-600 bg-slate-100 px-4 py-2 rounded-lg hover:bg-slate-200 transition">Back to Dashboard</a>
+                <a href="{% url 'logout' %}" class="text-sm font-bold text-rose-600 bg-rose-50 border border-rose-100 px-4 py-2 rounded-lg hover:bg-rose-100 transition">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto p-6">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-slate-900">🚨 Triage Desk</h1>
+            <p class="text-slate-500 mt-1">Prioritize patients based on urgency</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-red-50 p-4 rounded-xl border border-red-200 animated-card">
+                <p class="text-sm text-red-600 font-bold">🚨 Critical</p>
+                <p class="text-2xl font-bold text-red-600">{{ critical_count }}</p>
+                <p class="text-xs text-red-500">Requires immediate attention</p>
+            </div>
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 animated-card">
+                <p class="text-sm text-amber-600 font-bold">⚠️ Warning</p>
+                <p class="text-2xl font-bold text-amber-600">{{ warning_count }}</p>
+                <p class="text-xs text-amber-500">Needs clinical review</p>
+            </div>
+            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 animated-card">
+                <p class="text-sm text-emerald-600 font-bold">✅ Stable</p>
+                <p class="text-2xl font-bold text-emerald-600">{{ stable_count }}</p>
+                <p class="text-xs text-emerald-500">No immediate concerns</p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 animated-card">
+                <p class="text-sm text-slate-600 font-bold">📊 Total</p>
+                <p class="text-2xl font-bold text-slate-900">{{ total_patients }}</p>
+                <p class="text-xs text-slate-500">Patients under care</p>
+            </div>
+        </div>
+
+        <!-- Critical Patients (Top Priority) -->
+        {% if critical_patients %}
+        <div class="mb-8">
+            <h2 class="text-xl font-extrabold text-red-600 mb-4 flex items-center gap-2">
+                <span>🚨</span> Critical - Immediate Action Required
+                <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{{ critical_patients|length }}</span>
+            </h2>
+            <div class="space-y-4">
+                {% for item in critical_patients %}
+                <div class="priority-critical p-4 rounded-xl border border-red-200 shadow-sm animated-card">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <p class="font-bold text-lg text-[#0f172a]">{{ item.patient.full_name }}</p>
+                            <p class="text-sm text-slate-600">{{ item.patient.care_type|title }}</p>
+                            {% if item.latest_reading %}
+                            <p class="text-xs text-slate-400 mt-1">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            {% for alert in item.alerts|slice:":3" %}
+                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">⚠️ {{ alert.title }}</span>
+                            {% endfor %}
+                            <a href="#" class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition">View Details</a>
+                        </div>
+                    </div>
+
+                    <!-- ============================================ -->
+                    <!-- DETAILED CHARTS FOR CRITICAL PATIENTS        -->
+                    <!-- ============================================ -->
+                    {% if item.chart_data.labels %}
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Blood Pressure Chart -->
+                        <div class="chart-container">
+                            <div class="chart-title">💉 Blood Pressure (mmHg)</div>
+                            <div class="chart-wrapper">
+                                <canvas id="triageChartBP_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
+                                <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Heart Rate Chart -->
+                        <div class="chart-container">
+                            <div class="chart-title">❤️ Heart Rate (bpm)</div>
+                            <div class="chart-wrapper">
+                                <canvas id="triageChartHR_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
+                                <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- SpO2 Chart -->
+                        <div class="chart-container">
+                            <div class="chart-title">🫁 Oxygen Saturation (%)</div>
+                            <div class="chart-wrapper">
+                                <canvas id="triageChartSpO2_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_spo2|floatformat:0 }}%</span></span>
+                                <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Blood Sugar Chart -->
+                        <div class="chart-container">
+                            <div class="chart-title">🍬 Blood Sugar (mg/dL)</div>
+                            <div class="chart-wrapper">
+                                <canvas id="triageChartSugar_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_sugar|floatformat:0 }} mg/dL</span></span>
+                                <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        No chart data available for this patient
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Warning Patients -->
+        {% if warning_patients %}
+        <div class="mb-8">
+            <h2 class="text-xl font-extrabold text-amber-600 mb-4 flex items-center gap-2">
+                <span>⚠️</span> Warning - Needs Clinical Review
+                <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{{ warning_patients|length }}</span>
+            </h2>
+            <div class="space-y-4">
+                {% for item in warning_patients %}
+                <div class="priority-warning p-4 rounded-xl border border-amber-200 shadow-sm animated-card">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <p class="font-bold text-lg text-[#0f172a]">{{ item.patient.full_name }}</p>
+                            <p class="text-sm text-slate-600">{{ item.patient.care_type|title }}</p>
+                            {% if item.latest_reading %}
+                            <p class="text-xs text-slate-400 mt-1">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            {% for alert in item.alerts|slice:":3" %}
+                            <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">⚠️ {{ alert.title }}</span>
+                            {% endfor %}
+                            <a href="#" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition">Review</a>
+                        </div>
+                    </div>
+
+                    <!-- Charts for Warning Patients -->
+                    {% if item.chart_data.labels %}
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Blood Pressure Chart -->
+                        <div class="chart-container">
+                            <div class="chart-title">💉 Blood Pressure (mmHg)</div>
+                            <div class="chart-wrapper">
+                                <canvas id="triageChartBP_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
+                                <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Heart Rate Chart -->
+                        <div class="chart-container">
+                            <div class="chart-title">❤️ Heart Rate (bpm)</div>
+                            <div class="chart-wrapper">
+                                <canvas id="triageChartHR_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
+                                <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        No chart data available for this patient
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stable Patients -->
+        {% if stable_patients %}
+        <div>
+            <h2 class="text-xl font-extrabold text-emerald-600 mb-4 flex items-center gap-2">
+                <span>✅</span> Stable - Continue Monitoring
+                <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{{ stable_patients|length }}</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for item in stable_patients %}
+                <div class="priority-stable p-4 rounded-xl border border-emerald-200 shadow-sm animated-card">
+                    <p class="font-bold text-[#0f172a]">{{ item.patient.full_name }}</p>
+                    <p class="text-sm text-slate-500">{{ item.patient.care_type|title }}</p>
+                    {% if item.latest_reading %}
+                    <p class="text-xs text-slate-400 mt-1">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
+                    {% endif %}
+                    <a href="#" class="text-emerald-600 text-xs font-bold hover:text-emerald-800 transition mt-2 inline-block">View Details →</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Empty State -->
+        {% if not critical_patients and not warning_patients and not stable_patients %}
+        <div class="text-center py-16">
+            <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h2 class="text-2xl font-bold text-slate-400">No Patients Assigned</h2>
+            <p class="text-slate-400 mt-2">Patients will appear here once they are assigned to you</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ============================================ -->
+    <!-- CHART.JS SCRIPTS FOR TRIAGE CHARTS           -->
+    <!-- ============================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Full chart creation function for triage
+            function createTriageChart(canvasId, labels, data, color, label, unit) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                
+                // Filter out null/undefined values
+                const validData = data.filter(d => d !== null && d !== undefined);
+                const validLabels = labels.filter((_, i) => data[i] !== null && data[i] !== undefined);
+                
+                if (validData.length < 2) {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '12px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No data available', canvas.width / 2, canvas.height / 2 + 4);
+                    return;
+                }
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: validLabels,
+                        datasets: [{
+                            label: label || '',
+                            data: validData,
+                            borderColor: color || '#3b82f6',
+                            backgroundColor: (color || '#3b82f6') + '15',
+                            borderWidth: 2,
+                            pointRadius: 2,
+                            pointHoverRadius: 5,
+                            fill: true,
+                            tension: 0.3,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: { size: 9, weight: '600' },
+                                    boxWidth: 10,
+                                    boxHeight: 10,
+                                    usePointStyle: true,
+                                    padding: 8
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y.toFixed(1) + (unit || '');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    font: { size: 8 },
+                                    maxRotation: 30,
+                                    autoSkip: true,
+                                    maxTicksLimit: 10
+                                }
+                            },
+                            y: {
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { font: { size: 8 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Create charts for Critical Patients
+            {% for item in critical_patients %}
+                {% if item.chart_data.labels %}
+                    // Blood Pressure (Systolic)
+                    createTriageChart(
+                        'triageChartBP_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.systolic|safe }},
+                        '#ef4444',
+                        'Systolic',
+                        ' mmHg'
+                    );
+                    
+                    // Heart Rate
+                    createTriageChart(
+                        'triageChartHR_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.pulse|safe }},
+                        '#0d9488',
+                        'Heart Rate',
+                        ' bpm'
+                    );
+                    
+                    // SpO2
+                    createTriageChart(
+                        'triageChartSpO2_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.spo2|safe }},
+                        '#f59e0b',
+                        'SpO2',
+                        '%'
+                    );
+                    
+                    // Blood Sugar
+                    createTriageChart(
+                        'triageChartSugar_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.sugar|safe }},
+                        '#8b5cf6',
+                        'Blood Sugar',
+                        ' mg/dL'
+                    );
+                {% endif %}
+            {% endfor %}
+
+            // Create charts for Warning Patients
+            {% for item in warning_patients %}
+                {% if item.chart_data.labels %}
+                    // Blood Pressure (Systolic)
+                    createTriageChart(
+                        'triageChartBP_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.systolic|safe }},
+                        '#ef4444',
+                        'Systolic',
+                        ' mmHg'
+                    );
+                    
+                    // Heart Rate
+                    createTriageChart(
+                        'triageChartHR_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.pulse|safe }},
+                        '#0d9488',
+                        'Heart Rate',
+                        ' bpm'
+                    );
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+
+</body>
+</html>

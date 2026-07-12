@@ -300,23 +300,27 @@ class PatientAdmin(admin.ModelAdmin):
 
 
 # ============================================
-# DOCTOR ASSIGNMENT ADMIN
+# DOCTOR ASSIGNMENT ADMIN - FIXED
 # ============================================
 @admin.register(DoctorAssignment)
 class DoctorAssignmentAdmin(admin.ModelAdmin):
     list_display = ('get_doctor', 'get_patient', 'assignment_type', 'is_active', 'started_at')
-    list_filter = ('assignment_type', 'is_active')
-    search_fields = ('doctor__username', 'patient__full_name')
+    list_filter = ('assignment_type', 'is_active', 'doctor')
+    search_fields = ('doctor__username', 'doctor__first_name', 'doctor__last_name', 'patient__full_name')
+    readonly_fields = ('started_at',)
     
     fieldsets = (
-        ('Assignment', {
-            'fields': ('doctor', 'patient', 'assignment_type')
+        ('👨‍⚕️ Doctor Assignment', {
+            'fields': ('doctor', 'patient', 'assignment_type'),
+            'description': 'Select a doctor and a patient to assign'
         }),
-        ('Status', {
-            'fields': ('is_active', 'ended_at')
+        ('📋 Status', {
+            'fields': ('is_active', 'ended_at'),
+            'description': 'Mark as active if this is the current assignment'
         }),
-        ('Notes', {
-            'fields': ('notes',)
+        ('📝 Notes', {
+            'fields': ('notes',),
+            'classes': ('collapse',)
         }),
     )
     
@@ -327,6 +331,38 @@ class DoctorAssignmentAdmin(admin.ModelAdmin):
     def get_patient(self, obj):
         return obj.patient.full_name
     get_patient.short_description = "Patient"
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Filter dropdowns to show only relevant users"""
+        if db_field.name == "doctor":
+            # Only show users in the Doctors group
+            try:
+                doctors_group = Group.objects.get(name='Doctors')
+                kwargs["queryset"] = User.objects.filter(groups=doctors_group).order_by('username')
+            except Group.DoesNotExist:
+                kwargs["queryset"] = User.objects.filter(is_staff=True).order_by('username')
+        
+        if db_field.name == "patient":
+            # Show all patients, ordered by name
+            kwargs["queryset"] = Patient.objects.all().order_by('full_name')
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def save_model(self, request, obj, form, change):
+        """When saving a doctor assignment, update the patient's assigned_doctor"""
+        super().save_model(request, obj, form, change)
+        
+        # If this is an active primary assignment, update the patient's assigned_doctor
+        if obj.is_active and obj.assignment_type == 'primary':
+            patient = obj.patient
+            patient.assigned_doctor = obj.doctor
+            patient.save()
+    
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 
 # ============================================
@@ -335,9 +371,47 @@ class DoctorAssignmentAdmin(admin.ModelAdmin):
 @admin.register(CaregiverAssignment)
 class CaregiverAssignmentAdmin(admin.ModelAdmin):
     list_display = ('caregiver', 'patient', 'assignment_type', 'is_active', 'started_at')
-    list_filter = ('assignment_type', 'is_active')
+    list_filter = ('assignment_type', 'is_active', 'caregiver')
     search_fields = ('caregiver__full_name', 'patient__full_name')
     readonly_fields = ('started_at',)
+    
+    fieldsets = (
+        ('👩‍⚕️ Caregiver Assignment', {
+            'fields': ('caregiver', 'patient', 'assignment_type'),
+            'description': 'Select a caregiver and a patient to assign'
+        }),
+        ('📋 Status', {
+            'fields': ('is_active', 'ended_at'),
+            'description': 'Mark as active if this is the current assignment'
+        }),
+        ('📝 Notes', {
+            'fields': ('notes',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "caregiver":
+            # Only show users in the Caregivers group
+            try:
+                caregivers_group = Group.objects.get(name='Caregivers')
+                kwargs["queryset"] = User.objects.filter(groups=caregivers_group).order_by('username')
+            except Group.DoesNotExist:
+                kwargs["queryset"] = User.objects.filter(is_staff=True).order_by('username')
+        
+        if db_field.name == "patient":
+            # Show all patients, ordered by name
+            kwargs["queryset"] = Patient.objects.all().order_by('full_name')
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        
+        if obj.is_active and obj.assignment_type == 'primary':
+            patient = obj.patient
+            patient.assigned_caregiver = obj.caregiver
+            patient.save()
 
 
 # ============================================
@@ -347,7 +421,7 @@ class CaregiverAssignmentAdmin(admin.ModelAdmin):
 class VitalReadingAdmin(admin.ModelAdmin):
     list_display = ('patient', 'systolic_bp', 'diastolic_bp', 'pulse_rate', 'created_at')
     search_fields = ('patient__full_name',)
-    list_filter = ('created_at',)
+    list_filter = ('created_at', 'patient__assigned_doctor')
     date_hierarchy = 'created_at'
     readonly_fields = ('created_at',)
 

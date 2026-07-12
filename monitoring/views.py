@@ -52,6 +52,50 @@ def redirect_user_by_role(user):
     return redirect('caregiver_dashboard')
 
 
+def get_patient_chart_data(patient, days=7):
+    """Helper function to get chart data for a patient"""
+    end_date = timezone.now()
+    start_date = end_date - timedelta(days=days)
+    
+    readings = VitalReading.objects.filter(
+        patient=patient,
+        created_at__gte=start_date,
+        created_at__lte=end_date
+    ).order_by('created_at')
+    
+    # Prepare data for charts
+    chart_data = {
+        'labels': [],
+        'systolic': [],
+        'diastolic': [],
+        'pulse': [],
+        'spo2': [],
+        'sugar': [],
+    }
+    
+    for reading in readings:
+        chart_data['labels'].append(reading.created_at.strftime('%Y-%m-%d %H:%M'))
+        chart_data['systolic'].append(float(reading.systolic_bp))
+        chart_data['diastolic'].append(float(reading.diastolic_bp))
+        chart_data['pulse'].append(float(reading.pulse_rate))
+        chart_data['spo2'].append(float(reading.oxygen_saturation) if reading.oxygen_saturation else None)
+        chart_data['sugar'].append(float(reading.fasting_blood_sugar) if reading.fasting_blood_sugar else None)
+    
+    # Calculate stats
+    stats = {
+        'avg_systolic': round(sum(chart_data['systolic']) / len(chart_data['systolic']), 1) if chart_data['systolic'] else 0,
+        'avg_diastolic': round(sum(chart_data['diastolic']) / len(chart_data['diastolic']), 1) if chart_data['diastolic'] else 0,
+        'avg_pulse': round(sum(chart_data['pulse']) / len(chart_data['pulse']), 1) if chart_data['pulse'] else 0,
+        'avg_spo2': round(sum([s for s in chart_data['spo2'] if s]) / len([s for s in chart_data['spo2'] if s]), 1) if chart_data['spo2'] else 0,
+        'avg_sugar': round(sum([s for s in chart_data['sugar'] if s]) / len([s for s in chart_data['sugar'] if s]), 1) if chart_data['sugar'] else 0,
+        'trend': 'up' if chart_data['systolic'] and chart_data['systolic'][-1] > chart_data['systolic'][0] else 'down' if chart_data['systolic'] and chart_data['systolic'][-1] < chart_data['systolic'][0] else 'stable',
+        'readings_count': len(readings),
+        'latest_reading': readings.first() if readings else None,
+    }
+    
+    return chart_data, stats
+
+
 @login_required
 def doctor_dashboard(request):
     """Doctor dashboard - clinical view with charts"""
@@ -166,6 +210,161 @@ def doctor_dashboard(request):
     }
     
     return render(request, 'doctor_dashboard.html', context)
+
+
+@login_required
+def doctor_patients_list(request):
+    """Show all patients assigned to the logged-in doctor"""
+    doctor = request.user
+    
+    # Get all patients assigned to this doctor
+    patients = Patient.objects.filter(assigned_doctor=doctor)
+    
+    # Get latest reading and alert status for each patient
+    patient_data = []
+    for patient in patients:
+        latest_reading = VitalReading.objects.filter(patient=patient).order_by('-created_at').first()
+        active_alerts = Alert.objects.filter(patient=patient, status='unreviewed')
+        critical_alerts = active_alerts.filter(severity='critical')
+        warning_alerts = active_alerts.filter(severity='warning')
+        
+        patient_data.append({
+            'patient': patient,
+            'latest_reading': latest_reading,
+            'alert_count': active_alerts.count(),
+            'has_critical': critical_alerts.exists(),
+            'has_warning': warning_alerts.exists(),
+            'status': 'critical' if critical_alerts.exists() else 'warning' if warning_alerts.exists() else 'stable'
+        })
+    
+    context = {
+        'patients': patient_data,
+        'total_patients': patients.count(),
+        'critical_count': sum(1 for p in patient_data if p['status'] == 'critical'),
+        'warning_count': sum(1 for p in patient_data if p['status'] == 'warning'),
+        'stable_count': sum(1 for p in patient_data if p['status'] == 'stable'),
+        'doctor_name': doctor.get_full_name() or doctor.username,
+    }
+    
+    return render(request, 'doctor_patients_list.html', context)
+
+
+@login_required
+def triage_desk(request):
+    """Triage desk with detailed charts for clinical review"""
+    doctor = request.user
+    
+    # Get all patients assigned to this doctor
+    patients = Patient.objects.filter(assigned_doctor=doctor)
+    
+    # Get patients with critical alerts (highest priority)
+    critical_patients = []
+    warning_patients = []
+    stable_patients = []
+    
+    for patient in patients:
+        active_alerts = Alert.objects.filter(patient=patient, status='unreviewed')
+        critical_alerts = active_alerts.filter(severity='critical')
+        warning_alerts = active_alerts.filter(severity='warning')
+        latest_reading = VitalReading.objects.filter(patient=patient).order_by('-created_at').first()
+        
+        # Get chart data for the patient (last 14 days for triage)
+        chart_data, stats = get_patient_chart_data(patient, days=14)
+        
+        patient_info = {
+            'patient': patient,
+            'latest_reading': latest_reading,
+            'alerts': active_alerts,
+            'alert_count': active_alerts.count(),
+            'last_reading_time': latest_reading.created_at if latest_reading else None,
+            'chart_data': chart_data,
+            'stats': stats,
+        }
+        
+        if critical_alerts.exists():
+            patient_info['priority'] = 'critical'
+            critical_patients.append(patient_info)
+        elif warning_alerts.exists():
+            patient_info['priority'] = 'warning'
+            warning_patients.append(patient_info)
+        else:
+            patient_info['priority'] = 'stable'
+            stable_patients.append(patient_info)
+    
+    context = {
+        'critical_patients': critical_patients,
+        'warning_patients': warning_patients,
+        'stable_patients': stable_patients,
+        'total_patients': patients.count(),
+        'critical_count': len(critical_patients),
+        'warning_count': len(warning_patients),
+        'stable_count': len(stable_patients),
+    }
+    
+    return render(request, 'triage_desk.html', context)
+
+
+@login_required
+def live_telemetry(request):
+    """Live telemetry dashboard with real-time charts"""
+    doctor = request.user
+    
+    # Get all patients assigned to this doctor
+    patients = Patient.objects.filter(assigned_doctor=doctor)
+    
+    # Get latest readings and alerts for each patient
+    telemetry_data = []
+    critical_count = 0
+    warning_count = 0
+    stable_count = 0
+    no_data_count = 0
+    
+    for patient in patients:
+        latest_reading = VitalReading.objects.filter(patient=patient).order_by('-created_at').first()
+        active_alerts = Alert.objects.filter(patient=patient, status='unreviewed')
+        critical_alerts = active_alerts.filter(severity='critical')
+        warning_alerts = active_alerts.filter(severity='warning')
+        
+        # Get chart data for the patient (last 7 days for live telemetry)
+        chart_data, stats = get_patient_chart_data(patient, days=7)
+        
+        # Determine status
+        if latest_reading:
+            if critical_alerts.exists():
+                status = 'critical'
+                critical_count += 1
+            elif warning_alerts.exists():
+                status = 'warning'
+                warning_count += 1
+            else:
+                status = 'stable'
+                stable_count += 1
+        else:
+            status = 'no_data'
+            no_data_count += 1
+        
+        telemetry_data.append({
+            'patient': patient,
+            'latest_reading': latest_reading,
+            'alerts': active_alerts[:3],  # Show up to 3 alerts
+            'status': status,
+            'last_update': latest_reading.created_at if latest_reading else None,
+            'has_reading': latest_reading is not None,
+            'chart_data': chart_data,
+            'stats': stats,
+        })
+    
+    context = {
+        'telemetry_data': telemetry_data,
+        'total_patients': patients.count(),
+        'critical_count': critical_count,
+        'warning_count': warning_count,
+        'stable_count': stable_count,
+        'no_data_count': no_data_count,
+        'doctor_name': doctor.get_full_name() or doctor.username,
+    }
+    
+    return render(request, 'live_telemetry.html', context)
 
 
 @login_required

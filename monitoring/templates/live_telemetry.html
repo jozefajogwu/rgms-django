@@ -1,0 +1,410 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Telemetry · RGMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .status-critical { border-left: 4px solid #dc2626; background: #fef2f2; }
+        .status-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
+        .status-stable { border-left: 4px solid #22c55e; background: #f0fdf4; }
+        .status-no-data { border-left: 4px solid #94a3b8; background: #f1f5f9; }
+        .animated-card { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animated-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.06); }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+        .pulse-dot { animation: pulse-dot 1.5s infinite; }
+        /* Mini chart styles */
+        .mini-chart-container {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        .mini-chart-container .chart-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .mini-chart-container .chart-wrapper {
+            height: 40px;
+            width: 100%;
+            position: relative;
+        }
+        .mini-chart-container .chart-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .mini-chart-container .chart-stats .trend-up { color: #ef4444; }
+        .mini-chart-container .chart-stats .trend-down { color: #22c55e; }
+        .mini-chart-container .chart-stats .trend-stable { color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-extrabold text-xl">RG</div>
+                <div>
+                    <span class="font-extrabold text-slate-900 text-lg">📡 RGMS <span class="text-teal-600">Telemetry</span></span>
+                    <p class="text-xs text-slate-500">Real-time Patient Monitoring</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-slate-600">Dr. {{ doctor_name }}</span>
+                <span class="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+                    Live
+                </span>
+                <a href="{% url 'doctor_dashboard' %}" class="text-sm font-bold text-slate-600 bg-slate-100 px-4 py-2 rounded-lg hover:bg-slate-200 transition">Back</a>
+                <a href="{% url 'logout' %}" class="text-sm font-bold text-rose-600 bg-rose-50 border border-rose-100 px-4 py-2 rounded-lg hover:bg-rose-100 transition">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto p-6">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-slate-900">📡 Live Telemetry Dashboard</h1>
+            <p class="text-slate-500 mt-1">Real-time vital signs monitoring</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm animated-card">
+                <p class="text-sm text-slate-500">Total Patients</p>
+                <p class="text-2xl font-bold text-slate-900">{{ total_patients }}</p>
+            </div>
+            <div class="bg-red-50 p-4 rounded-xl border border-red-200 animated-card">
+                <p class="text-sm text-red-600 font-bold">🔴 Critical</p>
+                <p class="text-2xl font-bold text-red-600">{{ critical_count }}</p>
+                <p class="text-xs text-red-500">Requires immediate attention</p>
+            </div>
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 animated-card">
+                <p class="text-sm text-amber-600 font-bold">🟡 Warning</p>
+                <p class="text-2xl font-bold text-amber-600">{{ warning_count }}</p>
+                <p class="text-xs text-amber-500">Needs clinical review</p>
+            </div>
+            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 animated-card">
+                <p class="text-sm text-emerald-600 font-bold">🟢 Stable</p>
+                <p class="text-2xl font-bold text-emerald-600">{{ stable_count }}</p>
+                <p class="text-xs text-emerald-500">No immediate concerns</p>
+            </div>
+        </div>
+
+        <!-- Telemetry Data -->
+        <div class="space-y-4">
+            {% for item in telemetry_data %}
+            <div class="p-4 rounded-xl border shadow-sm animated-card 
+                {% if item.status == 'critical' %}status-critical border-red-200
+                {% elif item.status == 'warning' %}status-warning border-amber-200
+                {% elif item.status == 'stable' %}status-stable border-emerald-200
+                {% else %}status-no-data border-slate-200{% endif %}">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <!-- Patient Info -->
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg
+                            {% if item.status == 'critical' %}bg-red-500
+                            {% elif item.status == 'warning' %}bg-amber-500
+                            {% elif item.status == 'stable' %}bg-emerald-500
+                            {% else %}bg-slate-400{% endif %}">
+                            {{ item.patient.full_name|slice:":2"|upper }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-[#0f172a] text-lg">{{ item.patient.full_name }}</p>
+                            <p class="text-sm text-slate-500">{{ item.patient.care_type|title }}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                {% if item.has_reading %}
+                                <span class="flex items-center gap-1 text-xs text-emerald-600">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot"></span>
+                                    Live
+                                </span>
+                                <span class="text-xs text-slate-400">•</span>
+                                <span class="text-xs text-slate-400">{{ item.last_update|timesince }} ago</span>
+                                {% else %}
+                                <span class="text-xs text-slate-400">No readings yet</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <div>
+                        {% if item.status == 'critical' %}
+                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse">🚨 CRITICAL</span>
+                        {% elif item.status == 'warning' %}
+                        <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">⚠️ WARNING</span>
+                        {% elif item.status == 'stable' %}
+                        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">✅ STABLE</span>
+                        {% else %}
+                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold">📊 NO DATA</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Vitals Display -->
+                {% if item.latest_reading %}
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                        <p class="text-xs text-slate-500">❤️ Heart Rate</p>
+                        <p class="text-lg font-bold {% if item.latest_reading.pulse_rate > 100 or item.latest_reading.pulse_rate < 60 %}text-red-600{% else %}text-slate-900{% endif %}">
+                            {{ item.latest_reading.pulse_rate }} <span class="text-sm font-normal text-slate-400">bpm</span>
+                        </p>
+                    </div>
+                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                        <p class="text-xs text-slate-500">💉 Blood Pressure</p>
+                        <p class="text-lg font-bold {% if item.latest_reading.systolic_bp >= 141 or item.latest_reading.diastolic_bp >= 91 %}text-red-600{% else %}text-slate-900{% endif %}">
+                            {{ item.latest_reading.systolic_bp }}/{{ item.latest_reading.diastolic_bp }} <span class="text-sm font-normal text-slate-400">mmHg</span>
+                        </p>
+                    </div>
+                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                        <p class="text-xs text-slate-500">🫁 SpO2</p>
+                        <p class="text-lg font-bold {% if item.latest_reading.oxygen_saturation and item.latest_reading.oxygen_saturation < 95 %}text-red-600{% else %}text-slate-900{% endif %}">
+                            {{ item.latest_reading.oxygen_saturation|default:"—" }} <span class="text-sm font-normal text-slate-400">%</span>
+                        </p>
+                    </div>
+                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                        <p class="text-xs text-slate-500">🍬 Blood Sugar</p>
+                        <p class="text-lg font-bold text-slate-900">
+                            {{ item.latest_reading.fasting_blood_sugar|default:"—" }} <span class="text-sm font-normal text-slate-400">mg/dL</span>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- ============================================ -->
+                <!-- MINI CHARTS FOR LIVE TELEMETRY                 -->
+                <!-- ============================================ -->
+                {% if item.has_reading and item.chart_data.labels %}
+                <div class="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <!-- Heart Rate Mini Chart -->
+                    <div class="mini-chart-container">
+                        <p class="chart-label">❤️ Heart Rate</p>
+                        <div class="chart-wrapper">
+                            <canvas id="miniChartHR_{{ item.patient.id }}"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <span>{{ item.stats.avg_pulse|floatformat:0 }} bpm</span>
+                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                {{ item.stats.trend|title }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Blood Pressure Mini Chart -->
+                    <div class="mini-chart-container">
+                        <p class="chart-label">💉 Blood Pressure</p>
+                        <div class="chart-wrapper">
+                            <canvas id="miniChartBP_{{ item.patient.id }}"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <span>{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span>
+                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                {{ item.stats.trend|title }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- SpO2 Mini Chart -->
+                    <div class="mini-chart-container">
+                        <p class="chart-label">🫁 SpO2</p>
+                        <div class="chart-wrapper">
+                            <canvas id="miniChartSpO2_{{ item.patient.id }}"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <span>{{ item.stats.avg_spo2|floatformat:0 }}%</span>
+                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                {{ item.stats.trend|title }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Blood Sugar Mini Chart -->
+                    <div class="mini-chart-container">
+                        <p class="chart-label">🍬 Blood Sugar</p>
+                        <div class="chart-wrapper">
+                            <canvas id="miniChartSugar_{{ item.patient.id }}"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <span>{{ item.stats.avg_sugar|floatformat:0 }} mg/dL</span>
+                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                {{ item.stats.trend|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Alerts -->
+                {% if item.alerts %}
+                <div class="mt-3 flex flex-wrap gap-2">
+                    {% for alert in item.alerts %}
+                    <span class="text-xs bg-red-50 text-red-700 px-2 py-1 rounded-full border border-red-200">
+                        ⚠️ {{ alert.title }}
+                    </span>
+                    {% endfor %}
+                    {% if item.alerts|length > 3 %}
+                    <span class="text-xs text-slate-400">+{{ item.alerts|length|add:"-3" }} more</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="text-center py-16">
+                <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <h2 class="text-2xl font-bold text-slate-400">No Patients Assigned</h2>
+                <p class="text-slate-400 mt-2">Patients will appear here once assigned to you</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Auto-refresh Note -->
+        <div class="mt-8 text-center text-xs text-slate-400 border-t border-slate-200 pt-6">
+            <p>🔄 Data updates automatically every 30 seconds</p>
+            <p class="mt-1">Last updated: {% now "F j, Y H:i:s" %}</p>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- CHART.JS SCRIPTS FOR MINI CHARTS             -->
+    <!-- ============================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mini chart creation function
+            function createMiniChart(canvasId, labels, data, color) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                
+                // Filter out null/undefined values
+                const validData = data.filter(d => d !== null && d !== undefined);
+                const validLabels = labels.filter((_, i) => data[i] !== null && data[i] !== undefined);
+                
+                if (validData.length < 2) {
+                    // Show "No data" message if not enough points
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '8px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No data', canvas.width / 2, canvas.height / 2 + 3);
+                    return;
+                }
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: validLabels,
+                        datasets: [{
+                            data: validData,
+                            borderColor: color || '#3b82f6',
+                            backgroundColor: (color || '#3b82f6') + '22',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            fill: true,
+                            tension: 0.3,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                enabled: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y.toFixed(1);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { 
+                                display: false,
+                                grid: { display: false }
+                            },
+                            y: { 
+                                display: false,
+                                grid: { display: false }
+                            }
+                        },
+                        elements: {
+                            line: { tension: 0.3 }
+                        }
+                    }
+                });
+            }
+
+            // Create mini charts for each patient
+            {% for item in telemetry_data %}
+                {% if item.has_reading %}
+                    // Heart Rate
+                    createMiniChart(
+                        'miniChartHR_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.pulse|safe }},
+                        '#0d9488'
+                    );
+                    
+                    // Blood Pressure (using systolic)
+                    createMiniChart(
+                        'miniChartBP_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.systolic|safe }},
+                        '#ef4444'
+                    );
+                    
+                    // SpO2
+                    createMiniChart(
+                        'miniChartSpO2_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.spo2|safe }},
+                        '#f59e0b'
+                    );
+                    
+                    // Blood Sugar
+                    createMiniChart(
+                        'miniChartSugar_{{ item.patient.id }}',
+                        {{ item.chart_data.labels|safe }},
+                        {{ item.chart_data.sugar|safe }},
+                        '#8b5cf6'
+                    );
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+
+    <!-- Auto-refresh Script -->
+    <script>
+        // Auto-refresh the page every 30 seconds to simulate live telemetry
+        setTimeout(function() {
+            location.reload();
+        }, 30000); // 30 seconds
+
+        console.log('📡 Live Telemetry Active - Auto-refresh every 30 seconds');
+    </script>
+
+</body>
+</html>
