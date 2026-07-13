@@ -3,12 +3,33 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RGMSPortal · Secure Login</title>
+    <title>RGMS Portal · Secure Login</title>
+    {% load static %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
     <style>
         /* ----- GLOBAL DESIGN SYSTEM ----- */
+        :root {
+            --white: #FFFFFF;
+            --bg: #f8f9fa;
+            --navy: #211568;
+            --navy-light: #3a2a8a;
+            --red: #DC3545;
+            --red-glow: rgba(220, 53, 69, 0.25);
+            --red-pale: #fde8ea;
+            --sky-blue: #AED9F6;
+            --cyan: #00A3E0;
+            --cyan-glow: rgba(0, 163, 224, 0.2);
+            --text: #1a1a2e;
+            --muted: #6c757d;
+            --border: #e9ecef;
+            --sans: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --montserrat: 'Montserrat', 'Lato', sans-serif;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -20,9 +41,9 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #031220;
-            color: #000000;
+            font-family: var(--sans);
+            background: var(--navy);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -31,7 +52,7 @@
             overflow-x: hidden;
         }
 
-        /* ----- ANIMATED BACKGROUND (subtle) ----- */
+        /* ----- ANIMATED BACKGROUND ----- */
         .bg-ambient {
             position: fixed;
             inset: 0;
@@ -49,7 +70,7 @@
         .bg-orb:nth-child(1) {
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(19, 170, 154, 0.20), transparent 70%);
+            background: radial-gradient(circle, rgba(220, 53, 69, 0.25), transparent 70%);
             top: -200px;
             right: -100px;
             animation-duration: 32s;
@@ -57,7 +78,7 @@
         .bg-orb:nth-child(2) {
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(19, 170, 154, 0.10), transparent 70%);
+            background: radial-gradient(circle, rgba(0, 163, 224, 0.15), transparent 70%);
             bottom: -150px;
             left: -100px;
             animation-duration: 26s;
@@ -72,7 +93,7 @@
             }
         }
 
-        /* ----- HEADER (minimal, dark) ----- */
+        /* ----- HEADER ----- */
         header {
             position: relative;
             z-index: 10;
@@ -81,6 +102,7 @@
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            border-bottom: 2px solid var(--red);
             animation: fadeDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         @keyframes fadeDown {
@@ -100,31 +122,37 @@
             gap: 14px;
             text-decoration: none;
         }
+        .header-logo img {
+            height: 44px;
+            width: auto;
+            border-radius: 10px;
+        }
         .logo-mark {
             width: 44px;
             height: 44px;
-            background: #13AA9A;
+            background: var(--red);
             border-radius: 14px;
             display: grid;
             place-items: center;
-            color: #ffffff;
+            color: var(--white);
             font-size: 20px;
             font-weight: 800;
-            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.30);
+            box-shadow: 0 4px 20px var(--red-glow);
             flex-shrink: 0;
             letter-spacing: -0.5px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .logo-text {
             font-size: 20px;
             font-weight: 800;
-            color: #ffffff;
-            letter-spacing: -0.3px;
+            color: var(--white);
+            letter-spacing: 1px;
             text-shadow: 0 2px 12px rgba(0, 0, 0, 0.20);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
         }
         .logo-text span {
-            color: #13AA9A;
+            color: var(--cyan);
         }
 
         .header-nav {
@@ -133,13 +161,15 @@
             gap: 36px;
         }
         .header-nav a {
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.50);
+            color: rgba(255, 255, 255, 0.5);
             text-decoration: none;
             transition: color 0.3s ease;
             position: relative;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .header-nav a::after {
             content: '';
@@ -148,21 +178,22 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: #13AA9A;
+            background: var(--red);
             border-radius: 2px;
             transition: width 0.4s ease;
         }
         .header-nav a:hover {
-            color: #ffffff;
+            color: var(--white);
         }
         .header-nav a:hover::after {
             width: 100%;
         }
         .header-nav a.active {
-            color: #ffffff;
+            color: var(--white);
         }
         .header-nav a.active::after {
             width: 100%;
+            background: var(--cyan);
         }
 
         .header-home-btn {
@@ -173,17 +204,20 @@
             background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--white);
+            border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 40px;
             font-size: 13px;
             font-weight: 700;
             text-decoration: none;
             transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .header-home-btn:hover {
-            background: rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--red);
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
@@ -199,17 +233,17 @@
             padding: 24px 20px 40px;
         }
 
-        /* ----- LOGIN SHELL (clean, structured) ----- */
+        /* ----- LOGIN SHELL ----- */
         .login-shell {
             width: 100%;
             max-width: 520px;
-            background: #ffffff;
+            background: var(--white);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border-radius: 20px;
             padding: 48px 44px 40px;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.40);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 2px solid var(--red);
             animation: slideReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
             animation-delay: 0.2s;
         }
@@ -229,43 +263,54 @@
             text-align: center;
             margin-bottom: 32px;
         }
+        .login-brand .brand-logo {
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .login-brand .brand-logo img {
+            height: 64px;
+            width: auto;
+            border-radius: 12px;
+        }
         .login-brand .brand-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 56px;
             height: 56px;
-            background: #13AA9A;
+            background: var(--red);
             border-radius: 16px;
-            color: #ffffff;
+            color: var(--white);
             font-size: 26px;
             font-weight: 800;
-            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.30);
+            box-shadow: 0 4px 20px var(--red-glow);
             margin-bottom: 12px;
             letter-spacing: -0.5px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .login-brand h1 {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
             font-size: 24px;
             font-weight: 700;
-            color: #000000;
-            letter-spacing: -0.3px;
+            color: var(--navy);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         .login-brand .tagline {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            color: #13AA9A;
+            color: var(--red);
             margin-top: 4px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .login-brand .sub-text {
             font-size: 13px;
-            color: #718096;
+            color: var(--muted);
             margin-top: 4px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--sans);
+            font-weight: 400;
         }
 
         /* ----- ROLE SELECTOR ----- */
@@ -283,20 +328,23 @@
             border: none;
             background: transparent;
             border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: #718096;
+            font-family: var(--montserrat);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--muted);
             cursor: pointer;
             transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .role-btn.active {
-            background: #ffffff;
-            color: #000000;
+            background: var(--white);
+            color: var(--navy);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 2px solid var(--red);
         }
         .role-btn:hover:not(.active) {
-            color: #000000;
+            color: var(--navy);
         }
 
         /* ----- FORM FIELDS ----- */
@@ -307,21 +355,21 @@
             display: block;
             font-size: 10.5px;
             font-weight: 700;
-            color: #475569;
+            color: var(--navy);
             letter-spacing: 0.08em;
             text-transform: uppercase;
             margin-bottom: 6px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .field-input {
             width: 100%;
             background: #f8fafc;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border);
             border-radius: 10px;
             padding: 12px 16px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--sans);
             font-size: 14px;
-            color: #000000;
+            color: var(--text);
             transition: all 0.3s ease;
             outline: none;
         }
@@ -330,9 +378,9 @@
             font-weight: 400;
         }
         .field-input:focus {
-            border-color: #13AA9A;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(19, 170, 154, 0.08);
+            border-color: var(--red);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--red-glow);
         }
 
         /* password field with toggle */
@@ -355,10 +403,10 @@
             transition: color 0.3s ease;
             padding: 4px;
             border-radius: 6px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--sans);
         }
         .pwd-toggle:hover {
-            color: #000000;
+            color: var(--navy);
             background: rgba(0, 0, 0, 0.04);
         }
 
@@ -374,27 +422,29 @@
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            font-weight: 500;
-            color: #475569;
+            font-weight: 600;
+            color: var(--navy);
             cursor: pointer;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--sans);
         }
         .remember-me input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            accent-color: #13AA9A;
+            accent-color: var(--red);
             cursor: pointer;
         }
         .reset-link {
             font-size: 13px;
             font-weight: 600;
-            color: #13AA9A;
+            color: var(--red);
             text-decoration: none;
             transition: color 0.3s ease;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .reset-link:hover {
-            color: #0d8a7e;
+            color: var(--navy);
         }
 
         /* ----- SUBMIT BUTTON ----- */
@@ -405,21 +455,22 @@
             justify-content: center;
             gap: 10px;
             padding: 14px;
-            background: #13AA9A;
-            color: #ffffff;
+            background: var(--red);
+            color: var(--white);
             border: none;
             border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-size: 15px;
+            font-family: var(--montserrat);
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.30);
+            box-shadow: 0 4px 20px var(--red-glow);
             transition: all 0.35s ease;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(19, 170, 154, 0.40);
+            box-shadow: 0 8px 32px var(--red-glow);
         }
         .submit-btn:active {
             transform: translateY(0);
@@ -437,11 +488,11 @@
             text-align: center;
             margin-top: 20px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.05em;
-            color: #94a3b8;
+            color: var(--muted);
             text-transform: uppercase;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
 
         /* error message */
@@ -449,15 +500,15 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            background: #fef2f2;
-            border: 1px solid #fca5a5;
+            background: var(--red-pale);
+            border: 1px solid var(--red);
             border-radius: 10px;
             padding: 10px 14px;
             font-size: 13px;
-            font-weight: 600;
-            color: #dc2626;
+            font-weight: 700;
+            color: var(--red);
             margin-bottom: 18px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--sans);
             animation: errorShake 0.5s ease;
         }
         @keyframes errorShake {
@@ -488,7 +539,7 @@
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            border-top: 2px solid var(--red);
             animation: fadeDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
             animation-delay: 0.3s;
         }
@@ -497,28 +548,36 @@
             align-items: center;
             gap: 12px;
         }
+        .footer-left img {
+            height: 28px;
+            width: auto;
+            border-radius: 6px;
+        }
         .footer-mark {
             width: 28px;
             height: 28px;
-            background: #13AA9A;
+            background: var(--red);
             border-radius: 8px;
             display: grid;
             place-items: center;
-            color: #ffffff;
+            color: var(--white);
             font-size: 12px;
             font-weight: 900;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .footer-brand {
             font-size: 13px;
             font-weight: 700;
             color: rgba(255, 255, 255, 0.45);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .footer-copy {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.22);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--sans);
+            font-weight: 400;
         }
         .footer-links {
             display: flex;
@@ -530,7 +589,9 @@
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .footer-links a:hover {
             color: rgba(255, 255, 255, 0.55);
@@ -548,7 +609,7 @@
             }
             .header-home-btn {
                 padding: 6px 16px;
-                font-size: 12px;
+                font-size: 11px;
             }
             .page-body {
                 padding: 16px 12px 32px;
@@ -556,6 +617,9 @@
             .login-shell {
                 padding: 32px 20px 28px;
                 max-width: 100%;
+            }
+            .login-brand .brand-logo img {
+                height: 48px;
             }
             .login-brand .brand-icon {
                 width: 48px;
@@ -566,7 +630,7 @@
                 font-size: 20px;
             }
             .role-btn {
-                font-size: 13px;
+                font-size: 12px;
                 padding: 8px 12px;
             }
             .options-row {
@@ -599,14 +663,14 @@
     <!-- ══ HEADER ══ -->
     <header>
         <a href="{% url 'home' %}" class="header-logo">
-            <div class="logo-mark">+</div>
+            <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'">
             <span class="logo-text">RG<span>MS</span></span>
         </a>
 
         <nav class="header-nav">
             <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'home' %}#features">Features</a>
-            <a href="{% url 'home' %}#oversight">Clinical Oversight</a>
+            <li><a href="{% url 'admin:index' %}">Admin Login</a></li>
+                  <li><a href="https://genesismedevac.com/" target="_blank">Genesis Medivac</a></li>
             <a href="{% url 'login' %}" class="active">Login</a>
         </nav>
 
@@ -620,8 +684,10 @@
 
             <!-- BRAND -->
             <div class="login-brand">
-                <div class="brand-icon">+</div>
-                <h1>RGMSPortal</h1>
+                <div class="brand-logo">
+                    <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'">
+                </div>
+                <h1>RGMS Portal</h1>
                 <div class="tagline">Secure Login</div>
                 <p class="sub-text">Access your medical monitoring environment</p>
             </div>
@@ -686,7 +752,7 @@
     <!-- ══ FOOTER ══ -->
     <footer>
         <div class="footer-left">
-            <div class="footer-mark">+</div>
+            <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'" style="height:28px; width:auto; border-radius:6px;">
             <span class="footer-brand">RGMS</span>
             <span class="footer-copy">— Remote Geriatric Monitoring System</span>
         </div>
