@@ -1,5 +1,3 @@
-# monitoring/admin.py
-
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
@@ -88,11 +86,10 @@ class DoctorAdmin(admin.ModelAdmin):
             # Set staff status
             obj.is_staff = True
             
-            # Save the user FIRST to get an ID
+            # SAVE FIRST to get an ID
             obj.save()
             
             # NOW add the groups after the user has an ID
-            # Get the Doctors group
             doctors_group, _ = Group.objects.get_or_create(name='Doctors')
             obj.groups.add(doctors_group)
         else:
@@ -108,7 +105,6 @@ class DoctorAdmin(admin.ModelAdmin):
             obj.save()
     
     def save_form(self, request, form, change):
-        """Save the form and return the object"""
         return form.save(commit=False)
     
     def get_queryset(self, request):
@@ -165,6 +161,7 @@ class CaregiverAdmin(admin.ModelAdmin):
         """
         Save the caregiver user properly with groups after saving
         """
+        # If this is a new user, create it first without groups
         if not obj.pk:
             # Set password if provided
             password = form.cleaned_data.get('password')
@@ -176,7 +173,7 @@ class CaregiverAdmin(admin.ModelAdmin):
             # Set staff status
             obj.is_staff = True
             
-            # Save the user FIRST to get an ID
+            # SAVE FIRST to get an ID
             obj.save()
             
             # NOW add the groups after the user has an ID
@@ -195,7 +192,6 @@ class CaregiverAdmin(admin.ModelAdmin):
             obj.save()
     
     def save_form(self, request, form, change):
-        """Save the form and return the object"""
         return form.save(commit=False)
     
     def get_queryset(self, request):
