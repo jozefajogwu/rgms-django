@@ -1,14 +1,36 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Vital Entry | RGMS</title>
+    <title>Client Vital Entry · RGMS</title>
+    <!-- Google Fonts: Montserrat + Lato -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
     <style>
-        /* ----- RESET & BASE ----- */
+        /* ----- GLOBAL DESIGN SYSTEM (Genesis Medevac) ----- */
+        :root {
+            --navy: #211568;
+            --navy-light: #3a2a8a;
+            --red: #DC3545;
+            --red-glow: rgba(220, 53, 69, 0.25);
+            --red-pale: #fde8ea;
+            --sky-blue: #AED9F6;
+            --cyan: #00A3E0;
+            --cyan-glow: rgba(0, 163, 224, 0.2);
+            --white: #FFFFFF;
+            --bg: #f8f9fa;
+            --text: #1a1a2e;
+            --muted: #6c757d;
+            --border: #e9ecef;
+            --montserrat: 'Montserrat', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --shadow: 0 4px 20px rgba(33, 21, 104, 0.06);
+            --shadow-lg: 0 20px 60px rgba(33, 21, 104, 0.08);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,9 +38,9 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(145deg, #f0f4f9 0%, #e8edf5 100%);
-            color: #0a1628;
+            font-family: var(--lato);
+            background: var(--navy);
+            color: var(--text);
             min-height: 100vh;
             padding: 32px 24px;
             display: flex;
@@ -26,8 +48,51 @@
             justify-content: center;
         }
 
+        /* ----- ANIMATED BACKGROUND ----- */
+        .bg-ambient {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            animation: orbDrift 28s ease-in-out infinite alternate;
+        }
+        .bg-orb:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(220, 53, 69, 0.25), transparent 70%);
+            top: -200px;
+            right: -100px;
+            animation-duration: 32s;
+        }
+        .bg-orb:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 163, 224, 0.15), transparent 70%);
+            bottom: -150px;
+            left: -100px;
+            animation-duration: 26s;
+            animation-delay: -8s;
+        }
+        @keyframes orbDrift {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                transform: translate(40px, -20px) scale(1.1);
+            }
+        }
+
         /* ----- MAIN CONTAINER ----- */
         .container {
+            position: relative;
+            z-index: 5;
             max-width: 860px;
             width: 100%;
             margin: 0 auto;
@@ -38,37 +103,40 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            color: #13AA9A;
-            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 700;
             font-size: 14px;
             text-decoration: none;
             padding: 8px 4px 20px 4px;
             transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 0.2px;
+            font-family: var(--montserrat);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .back-link:hover {
-            color: #0d8a7e;
+            color: var(--white);
             transform: translateX(-4px);
         }
         .back-link svg {
             width: 20px;
             height: 20px;
             stroke-width: 2.5;
+            stroke: currentColor;
         }
 
         /* ----- FORM CARD ----- */
         .form-card {
-            background: #ffffff;
+            background: var(--white);
             border-radius: 24px;
-            border: 1px solid rgba(226, 232, 240, 0.6);
+            border: 2px solid var(--red);
             padding: 48px 52px;
-            box-shadow: 0 20px 60px -12px rgba(10, 22, 40, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.40);
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .form-card:hover {
-            box-shadow: 0 24px 72px -16px rgba(10, 22, 40, 0.12);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.50);
         }
 
         /* ----- HEADER ----- */
@@ -78,7 +146,7 @@
             justify-content: space-between;
             margin-bottom: 32px;
             padding-bottom: 24px;
-            border-bottom: 2px solid #f1f5f9;
+            border-bottom: 2px solid var(--red);
             flex-wrap: wrap;
             gap: 16px;
         }
@@ -92,39 +160,40 @@
         .form-header-left .icon-wrapper {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, #13AA9A 0%, #0d8a7e 100%);
+            background: linear-gradient(135deg, var(--red), #b02a37);
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 8px;
-            box-shadow: 0 4px 16px rgba(19, 170, 154, 0.25);
+            box-shadow: 0 4px 16px var(--red-glow);
         }
 
         .form-header-left .icon-wrapper svg {
             width: 24px;
             height: 24px;
-            stroke: white;
+            stroke: var(--white);
             stroke-width: 2;
         }
 
         .form-header h1 {
             font-size: 28px;
             font-weight: 700;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: -0.5px;
+            color: var(--navy);
+            font-family: var(--montserrat);
+            letter-spacing: 0.5px;
             line-height: 1.2;
+            text-transform: uppercase;
         }
 
         .form-header h1 span {
-            color: #13AA9A;
+            color: var(--red);
         }
 
         .form-header .subtitle {
             font-size: 14px;
-            color: #718096;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
             margin-top: 2px;
         }
 
@@ -139,44 +208,47 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: linear-gradient(135deg, #dbeafe, #eff6ff);
-            color: #1e40af;
+            background: var(--red-pale);
+            color: var(--red);
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.3px;
-            border: 1px solid rgba(59, 130, 246, 0.15);
+            border: 1px solid var(--red);
             white-space: nowrap;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
         }
 
         .badge-self svg {
             width: 14px;
             height: 14px;
-            stroke: #1e40af;
+            stroke: var(--red);
             stroke-width: 2.5;
         }
 
         .badge-required {
-            background: #fef2f2;
-            color: #dc2626;
+            background: var(--red-pale);
+            color: var(--red);
             padding: 4px 12px;
             border-radius: 12px;
             font-size: 10px;
             font-weight: 600;
             letter-spacing: 0.3px;
-            border: 1px solid rgba(220, 38, 38, 0.1);
+            border: 1px solid var(--red);
+            font-family: var(--montserrat);
         }
 
         /* ----- MESSAGES ----- */
         .msg-success {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            border: 1px solid #22c55e;
             border-radius: 12px;
             padding: 14px 20px;
-            color: #15803d;
+            color: #16a34a;
             font-weight: 500;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--lato);
             margin-bottom: 24px;
             display: flex;
             align-items: center;
@@ -186,17 +258,17 @@
         .msg-success svg {
             width: 20px;
             height: 20px;
-            stroke: #15803d;
+            stroke: #16a34a;
             stroke-width: 2.5;
             flex-shrink: 0;
         }
 
         /* ============================================ */
-        /* ERROR SUMMARY - ADD THIS SECTION */
+        /* ERROR SUMMARY */
         /* ============================================ */
         .error-summary {
-            background: #fef2f2;
-            border: 1px solid #fca5a5;
+            background: var(--red-pale);
+            border: 1px solid var(--red);
             border-radius: 12px;
             padding: 16px 20px;
             margin-bottom: 24px;
@@ -211,7 +283,7 @@
         .error-summary .error-header svg {
             width: 20px;
             height: 20px;
-            stroke: #dc2626;
+            stroke: var(--red);
             stroke-width: 2.5;
             flex-shrink: 0;
             margin-top: 2px;
@@ -219,8 +291,11 @@
 
         .error-summary .error-title {
             font-weight: 700;
-            color: #dc2626;
+            color: var(--red);
             font-size: 14px;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .error-summary .error-list {
@@ -230,12 +305,13 @@
         }
 
         .error-summary .error-list li {
-            color: #dc2626;
+            color: var(--red);
             font-size: 13px;
             margin-top: 2px;
             display: flex;
             align-items: flex-start;
             gap: 6px;
+            font-family: var(--lato);
         }
 
         .error-summary .error-list li::before {
@@ -248,7 +324,7 @@
             background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             border-radius: 16px;
             padding: 16px 20px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             display: flex;
             align-items: center;
             gap: 16px;
@@ -259,15 +335,15 @@
         .client-info-card .avatar {
             width: 44px;
             height: 44px;
-            background: linear-gradient(135deg, #13AA9A, #0d8a7e);
+            background: linear-gradient(135deg, var(--red), #b02a37);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--white);
             font-weight: 700;
             font-size: 16px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
             flex-shrink: 0;
         }
 
@@ -278,31 +354,37 @@
         .client-info-card .info .label {
             font-size: 11px;
             font-weight: 600;
-            color: #94a3b8;
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-family: var(--montserrat);
         }
 
         .client-info-card .info .name {
             font-size: 16px;
             font-weight: 700;
-            color: #0a1628;
+            color: var(--navy);
+            font-family: var(--montserrat);
         }
 
         .client-info-card .info .email {
             font-size: 13px;
-            color: #64748b;
+            color: var(--muted);
+            font-family: var(--lato);
         }
 
         .client-info-card .status-badge {
             font-size: 11px;
             font-weight: 600;
-            color: #13AA9A;
-            background: rgba(19, 170, 154, 0.1);
+            color: var(--red);
+            background: var(--red-pale);
             padding: 4px 14px;
             border-radius: 20px;
-            border: 1px solid rgba(19, 170, 154, 0.15);
+            border: 1px solid var(--red);
             white-space: nowrap;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* ----- FORM ELEMENTS ----- */
@@ -321,24 +403,27 @@
 
         .field-group label {
             font-size: 13px;
-            font-weight: 600;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 0.2px;
+            font-weight: 700;
+            color: var(--navy);
+            font-family: var(--montserrat);
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             gap: 6px;
+            text-transform: uppercase;
         }
 
         .field-group label .required {
-            color: #ef4444;
+            color: var(--red);
             font-size: 16px;
         }
 
         .field-group label .unit {
             font-weight: 400;
-            color: #94a3b8;
+            color: var(--muted);
             font-size: 12px;
+            font-family: var(--lato);
+            text-transform: none;
         }
 
         .field-group input,
@@ -347,11 +432,11 @@
             width: 100%;
             padding: 12px 16px;
             background: #fafbfc;
-            border: 1.5px solid #e2e8f0;
+            border: 2px solid var(--border);
             border-radius: 12px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--lato);
             font-size: 14px;
-            color: #0a1628;
+            color: var(--text);
             transition: all 0.2s ease;
             outline: none;
         }
@@ -359,29 +444,30 @@
         .field-group input:focus,
         .field-group select:focus,
         .field-group textarea:focus {
-            border-color: #13AA9A;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(19, 170, 154, 0.08);
+            border-color: var(--red);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--red-glow);
         }
 
         /* Error state for form fields */
         .field-group input.error,
         .field-group select.error,
         .field-group textarea.error {
-            border-color: #dc2626;
-            background: #fef2f2;
+            border-color: var(--red);
+            background: var(--red-pale);
         }
 
         .field-group input.error:focus,
         .field-group select.error:focus,
         .field-group textarea.error:focus {
-            border-color: #dc2626;
-            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+            border-color: var(--red);
+            box-shadow: 0 0 0 4px var(--red-glow);
         }
 
         .field-group input::placeholder,
         .field-group textarea::placeholder {
             color: #a0aec0;
+            font-family: var(--lato);
         }
 
         .field-group textarea {
@@ -400,18 +486,19 @@
 
         .field-group .error-text {
             font-size: 12px;
-            color: #dc2626;
-            font-family: 'Inter', sans-serif;
+            color: var(--red);
+            font-family: var(--lato);
             margin-top: 2px;
             display: flex;
             align-items: center;
             gap: 4px;
+            font-weight: 600;
         }
 
         .field-group .help-text {
             font-size: 12px;
-            color: #94a3b8;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
             margin-top: 2px;
             font-style: italic;
         }
@@ -438,7 +525,7 @@
         /* ----- SECTION DIVIDER ----- */
         .section-divider {
             border: none;
-            border-top: 2px solid #f1f5f9;
+            border-top: 2px solid var(--red);
             margin: 4px 0 8px 0;
         }
 
@@ -449,11 +536,13 @@
         .section-header h2 {
             font-size: 18px;
             font-weight: 700;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
+            color: var(--navy);
+            font-family: var(--montserrat);
             display: flex;
             align-items: center;
             gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .section-header h2 .section-icon {
@@ -462,8 +551,8 @@
 
         .section-header p {
             font-size: 13px;
-            color: #718096;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
             margin-top: 2px;
             margin-left: 32px;
         }
@@ -472,18 +561,19 @@
         .submit-btn {
             width: 100%;
             padding: 18px 24px;
-            background: linear-gradient(135deg, #13AA9A 0%, #0d8a7e 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--red), #b02a37);
+            color: var(--white);
             border: none;
             border-radius: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
             font-size: 17px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.25);
+            box-shadow: 0 4px 20px var(--red-glow);
             margin-top: 8px;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -492,7 +582,7 @@
 
         .submit-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 32px rgba(19, 170, 154, 0.35);
+            box-shadow: 0 8px 32px var(--red-glow);
         }
 
         .submit-btn:active {
@@ -502,7 +592,7 @@
         .submit-btn svg {
             width: 20px;
             height: 20px;
-            stroke: white;
+            stroke: var(--white);
             stroke-width: 2.5;
         }
 
@@ -602,21 +692,27 @@
         .field-group input:focus,
         .field-group select:focus,
         .field-group textarea:focus {
-            border-color: #13AA9A;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(19, 170, 154, 0.08);
+            border-color: var(--red);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--red-glow);
         }
 
         /* Subtle hover on form fields */
         .field-group input:hover,
         .field-group select:hover,
         .field-group textarea:hover {
-            border-color: #cbd5e1;
+            border-color: var(--red);
         }
     </style>
 </head>
 
 <body>
+
+    <!-- ══ AMBIENT BACKGROUND ══ -->
+    <div class="bg-ambient">
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+    </div>
 
     <div class="container">
 
@@ -654,7 +750,7 @@
             </div>
 
             <!-- ============================================ -->
-            <!-- ERROR SUMMARY - ADDED HERE -->
+            <!-- ERROR SUMMARY -->
             <!-- ============================================ -->
             {% if form.errors %}
             <div class="error-summary">

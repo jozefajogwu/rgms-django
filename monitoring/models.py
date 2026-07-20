@@ -251,7 +251,7 @@ class VitalReading(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # ============================================
-    # URINALYSIS FIELDS
+    # URINALYSIS FIELDS - UPDATED: Empty by default
     # ============================================
     URINE_RESULT_CHOICES = [
         ('negative', 'Negative'),
@@ -275,40 +275,59 @@ class VitalReading(models.Model):
         ('plus_4', '++++'),
     ]
 
+    # Updated: Empty by default instead of 'negative'
     urine_glucose = models.CharField(
         max_length=20,
         choices=URINE_RESULT_CHOICES,
-        default='negative'
+        blank=True,
+        null=True,
+        default=None,
+        help_text="Leave empty if not tested"
     )
 
     urine_protein = models.CharField(
         max_length=20,
         choices=URINE_RESULT_CHOICES,
-        default='negative'
+        blank=True,
+        null=True,
+        default=None,
+        help_text="Leave empty if not tested"
     )
 
     urine_acetone = models.CharField(
         max_length=20,
         choices=URINE_RESULT_CHOICES,
-        default='negative'
+        blank=True,
+        null=True,
+        default=None,
+        help_text="Leave empty if not tested"
     )
 
     urine_bilirubin = models.CharField(
         max_length=20,
         choices=URINE_RESULT_CHOICES,
-        default='negative'
+        blank=True,
+        null=True,
+        default=None,
+        help_text="Leave empty if not tested"
     )
 
     urine_urobilinogen = models.CharField(
         max_length=30,
         choices=UROBILINOGEN_CHOICES,
-        default='weakly_positive'
+        blank=True,
+        null=True,
+        default=None,
+        help_text="Leave empty if not tested"
     )
 
     urine_nitrite = models.CharField(
         max_length=20,
         choices=NITRITE_CHOICES,
-        default='negative'
+        blank=True,
+        null=True,
+        default=None,
+        help_text="Leave empty if not tested"
     )
 
     class Meta:

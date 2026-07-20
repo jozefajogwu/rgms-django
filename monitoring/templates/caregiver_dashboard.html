@@ -1,14 +1,36 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Portal | RGMS</title>
+    <title>Client Portal · RGMS</title>
+    <!-- Google Fonts: Montserrat + Lato -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
     <style>
-        /* ----- GLOBAL DESIGN SYSTEM ----- */
+        /* ----- GLOBAL DESIGN SYSTEM (Genesis Medevac) ----- */
+        :root {
+            --navy: #211568;
+            --navy-light: #3a2a8a;
+            --red: #DC3545;
+            --red-glow: rgba(220, 53, 69, 0.25);
+            --red-pale: #fde8ea;
+            --sky-blue: #AED9F6;
+            --cyan: #00A3E0;
+            --cyan-glow: rgba(0, 163, 224, 0.2);
+            --white: #FFFFFF;
+            --bg: #f8f9fa;
+            --text: #1a1a2e;
+            --muted: #6c757d;
+            --border: #e9ecef;
+            --montserrat: 'Montserrat', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --shadow: 0 4px 20px rgba(33, 21, 104, 0.06);
+            --shadow-lg: 0 20px 60px rgba(33, 21, 104, 0.08);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -20,23 +42,23 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f0f4f9;
-            color: #0a1628;
+            font-family: var(--lato);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        /* ----- SIDEBAR (dark with teal accents, white text) ----- */
+        /* ----- SIDEBAR (Navy with Red Accents) ----- */
         .sidebar {
             position: fixed;
             left: 0;
             top: 0;
             bottom: 0;
             width: 240px;
-            background: #031220;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--navy);
+            border-right: 2px solid var(--red);
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
@@ -53,39 +75,45 @@
             margin-bottom: 20px;
         }
 
+        .sidebar-brand img {
+            height: 40px;
+            width: auto;
+            border-radius: 8px;
+        }
+
         .brand-icon {
             width: 40px;
             height: 40px;
-            background: #13AA9A;
+            background: var(--red);
             border-radius: 12px;
             display: grid;
             place-items: center;
-            color: #ffffff;
+            color: var(--white);
             font-size: 18px;
             font-weight: 800;
-            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.30);
+            box-shadow: 0 4px 20px var(--red-glow);
             flex-shrink: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
 
         .brand-text {
             font-size: 16px;
             font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.3px;
-            font-family: 'Inter', sans-serif;
+            color: var(--white);
+            letter-spacing: 1px;
+            font-family: var(--montserrat);
+            text-transform: uppercase;
         }
         .brand-text span {
-            color: #13AA9A;
+            color: var(--red);
         }
         .brand-sub {
             font-size: 10px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.5);
             font-weight: 500;
             letter-spacing: 0.05em;
             text-transform: uppercase;
-            font-family: 'Inter', sans-serif;
-            opacity: 0.7;
+            font-family: var(--montserrat);
         }
 
         /* Role Badges in Sidebar */
@@ -105,9 +133,9 @@
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
-        .role-badge-side.patient { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-        .role-badge-side.caregiver { background: rgba(19, 170, 154, 0.2); color: #13AA9A; }
-        .role-badge-side.client { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .role-badge-side.patient { background: var(--red-pale); color: var(--red); border: 1px solid var(--red); }
+        .role-badge-side.caregiver { background: rgba(0, 163, 224, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+        .role-badge-side.client { background: rgba(33, 21, 104, 0.2); color: var(--navy-light); border: 1px solid var(--navy-light); }
 
         .sidebar-nav {
             flex: 1;
@@ -119,12 +147,11 @@
         .nav-label {
             font-size: 10px;
             font-weight: 600;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
             letter-spacing: 0.08em;
             padding: 12px 8px 6px 8px;
-            font-family: 'Inter', sans-serif;
-            opacity: 0.5;
+            font-family: var(--montserrat);
         }
 
         .nav-item {
@@ -133,28 +160,26 @@
             gap: 12px;
             padding: 10px 12px;
             border-radius: 10px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             transition: all 0.25s ease;
             text-decoration: none;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
             font-size: 13px;
             font-weight: 500;
             border: none;
             background: transparent;
             width: 100%;
             text-align: left;
-            opacity: 0.7;
         }
         .nav-item:hover {
             background: rgba(255, 255, 255, 0.05);
-            opacity: 1;
+            color: var(--white);
         }
         .nav-item.active {
-            background: rgba(19, 170, 154, 0.15);
-            color: #13AA9A;
-            border: 1px solid rgba(19, 170, 154, 0.15);
-            opacity: 1;
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--white);
+            border: 1px solid var(--red);
         }
         .nav-item svg {
             width: 18px;
@@ -169,13 +194,12 @@
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
-            color: #ffffff;
-            opacity: 0.6;
+            color: rgba(255, 255, 255, 0.6);
         }
         .nav-item.active .badge {
-            background: rgba(19, 170, 154, 0.15);
-            color: #13AA9A;
-            opacity: 1;
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--white);
+            border: 1px solid var(--red);
         }
 
         .sidebar-footer {
@@ -190,23 +214,21 @@
             gap: 12px;
             padding: 10px 12px;
             border-radius: 10px;
-            color: #ffffff;
+            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             transition: all 0.25s ease;
             text-decoration: none;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
             font-size: 13px;
             font-weight: 500;
             border: none;
             background: transparent;
             width: 100%;
             text-align: left;
-            opacity: 0.7;
         }
         .logout-item:hover {
-            background: rgba(239, 68, 68, 0.08);
-            color: #ef4444;
-            opacity: 1;
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--red);
         }
         .logout-item svg {
             width: 18px;
@@ -222,7 +244,7 @@
             position: relative;
             z-index: 5;
             min-height: 100vh;
-            background: #ffffff;
+            background: var(--white);
             padding: 24px 32px 32px 32px;
         }
 
@@ -232,21 +254,22 @@
             align-items: center;
             justify-content: space-between;
             padding-bottom: 20px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 2px solid var(--red);
             margin-bottom: 28px;
         }
 
         .topbar-left h1 {
             font-size: 22px;
             font-weight: 700;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: -0.3px;
+            color: var(--navy);
+            font-family: var(--montserrat);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .topbar-left p {
             font-size: 13px;
-            color: #718096;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
             margin-top: 2px;
         }
         .topbar-left .role-tags {
@@ -262,9 +285,9 @@
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
-        .role-tag.patient { background: #dbeafe; color: #1e40af; }
-        .role-tag.caregiver { background: #d1fae5; color: #065f46; }
-        .role-tag.client { background: #ede9fe; color: #5b21b6; }
+        .role-tag.patient { background: var(--red-pale); color: var(--red); border: 1px solid var(--red); }
+        .role-tag.caregiver { background: #e8f4fc; color: var(--cyan); border: 1px solid var(--cyan); }
+        .role-tag.client { background: #e8e5f0; color: var(--navy); border: 1px solid var(--navy); }
 
         .topbar-right {
             display: flex;
@@ -275,29 +298,29 @@
             width: 38px;
             height: 38px;
             border-radius: 50%;
-            background: #13AA9A;
+            background: var(--red);
             display: grid;
             place-items: center;
-            color: #ffffff;
+            color: var(--white);
             font-weight: 700;
             font-size: 13px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .topbar-right .welcome {
             font-size: 13px;
-            color: #475569;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
         }
 
         /* ----- MESSAGES ----- */
         .msg-success {
             background: #f0fdf4;
-            border: 1px solid #bbf7d0;
+            border: 1px solid #22c55e;
             border-radius: 12px;
             padding: 12px 18px;
             color: #16a34a;
             font-weight: 500;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--lato);
             margin-bottom: 24px;
         }
 
@@ -310,49 +333,53 @@
         }
 
         .stat-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: var(--white);
+            border: 1px solid var(--border);
             border-radius: 14px;
             padding: 18px 20px;
             transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            box-shadow: var(--shadow);
         }
         .stat-card:hover {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            box-shadow: var(--shadow-lg);
             transform: translateY(-2px);
+            border-color: var(--red);
         }
 
         .stat-card .label {
             font-size: 11px;
             font-weight: 600;
-            color: #718096;
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .stat-card .value {
             font-size: 30px;
             font-weight: 800;
-            color: #0a1628;
+            color: var(--navy);
             margin-top: 2px;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
             letter-spacing: -0.5px;
+        }
+        .stat-card .value.red {
+            color: var(--red);
         }
         .stat-card .sub {
             font-size: 11px;
-            color: #94a3b8;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
             margin-top: 2px;
         }
         .stat-card .sub.has-alerts {
-            color: #ef4444;
+            color: var(--red);
             font-weight: 600;
         }
 
-        /* ----- QUICK ACTION CARD (teal accent) ----- */
+        /* ----- QUICK ACTION CARD ----- */
         .quick-action-card {
-            background: #f0fdfa;
-            border: 1px solid #99f6e4;
+            background: linear-gradient(135deg, var(--navy), var(--navy-light));
+            border: 2px solid var(--red);
             border-radius: 14px;
             padding: 18px 20px;
             display: flex;
@@ -361,29 +388,29 @@
             transition: all 0.3s ease;
             cursor: pointer;
             text-decoration: none;
+            box-shadow: 0 4px 20px rgba(33, 21, 104, 0.15);
         }
         .quick-action-card:hover {
-            background: #ccfbf1;
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(19, 170, 154, 0.10);
+            box-shadow: 0 8px 30px rgba(33, 21, 104, 0.25);
         }
         .quick-action-card .label {
             font-size: 11px;
             font-weight: 600;
-            color: #0d9488;
+            color: rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--montserrat);
         }
         .quick-action-card .value {
             font-size: 18px;
             font-weight: 700;
-            color: #0d9488;
-            font-family: 'Inter', sans-serif;
+            color: var(--white);
+            font-family: var(--montserrat);
         }
         .quick-action-card .arrow {
             font-size: 20px;
-            color: #0d9488;
+            color: var(--white);
             transition: transform 0.3s ease;
         }
         .quick-action-card:hover .arrow {
@@ -399,11 +426,11 @@
         }
 
         .card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: var(--white);
+            border: 1px solid var(--border);
             border-radius: 14px;
             padding: 20px 22px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            box-shadow: var(--shadow);
         }
 
         .card-header {
@@ -416,8 +443,10 @@
         .card-title {
             font-size: 16px;
             font-weight: 700;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
+            color: var(--navy);
+            font-family: var(--montserrat);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .card-badge {
@@ -426,12 +455,13 @@
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
-            color: #475569;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--montserrat);
         }
         .card-badge.alert-badge {
-            background: #fee2e2;
-            color: #dc2626;
+            background: var(--red-pale);
+            color: var(--red);
+            border: 1px solid var(--red);
         }
 
         /* ----- SEARCH BAR ----- */
@@ -444,10 +474,10 @@
             flex: 1;
             padding: 10px 14px;
             background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 10px;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            font-family: var(--lato);
             font-size: 13px;
             outline: none;
             transition: all 0.3s ease;
@@ -456,29 +486,29 @@
             color: #94a3b8;
         }
         .search-bar input:focus {
-            border-color: #13AA9A;
-            box-shadow: 0 0 0 3px rgba(19, 170, 154, 0.10);
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px var(--red-glow);
         }
         .search-bar select {
             padding: 10px 14px;
             background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 10px;
-            color: #475569;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
             font-size: 13px;
             outline: none;
             cursor: pointer;
             transition: all 0.3s ease;
         }
         .search-bar select:focus {
-            border-color: #13AA9A;
-            box-shadow: 0 0 0 3px rgba(19, 170, 154, 0.10);
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px var(--red-glow);
         }
 
         /* ----- PATIENT ITEMS ----- */
         .patient-item {
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px 14px;
             margin-bottom: 8px;
@@ -493,30 +523,30 @@
         }
         .patient-item:hover {
             background: #f1f5f9;
-            border-color: #cbd5e1;
+            border-color: var(--red);
         }
         .patient-item .name {
             font-weight: 600;
             font-size: 14px;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            font-family: var(--montserrat);
         }
         .patient-item .status {
             font-size: 11px;
             font-weight: 500;
-            color: #94a3b8;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
         }
         .patient-item .status.active {
-            color: #13AA9A;
+            color: var(--cyan);
         }
         .patient-item .status.critical {
-            color: #ef4444;
+            color: var(--red);
         }
 
         /* ----- READING ITEMS ----- */
         .reading-item {
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 10px;
@@ -528,36 +558,37 @@
         }
         .reading-item:hover {
             background: #f1f5f9;
-            border-color: #cbd5e1;
+            border-color: var(--red);
         }
         .reading-item .name {
             font-weight: 600;
             font-size: 14px;
-            color: #0a1628;
-            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            font-family: var(--montserrat);
             margin-bottom: 4px;
         }
         .reading-item .meta {
             font-size: 12px;
-            color: #718096;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
         }
         .reading-item .meta .self-tag {
-            background: #dbeafe;
-            color: #1e40af;
+            background: var(--red-pale);
+            color: var(--red);
             padding: 1px 8px;
             border-radius: 8px;
             font-size: 10px;
             font-weight: 600;
+            border: 1px solid var(--red);
         }
 
         /* ----- ALERT ITEMS ----- */
         .alert-item {
-            border: 1px solid #fecaca;
+            border: 1px solid var(--red);
             border-radius: 10px;
             padding: 12px 14px;
             margin-bottom: 8px;
-            background: #fef2f2;
+            background: var(--red-pale);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -573,15 +604,18 @@
         .alert-item .alert-title {
             font-weight: 600;
             font-size: 13px;
-            color: #dc2626;
+            color: var(--red);
+            font-family: var(--montserrat);
         }
         .alert-item .alert-patient {
             font-size: 12px;
-            color: #475569;
+            color: var(--muted);
+            font-family: var(--lato);
         }
         .alert-item .alert-time {
             font-size: 10px;
-            color: #94a3b8;
+            color: var(--muted);
+            font-family: var(--lato);
         }
         .alert-item .alert-severity {
             font-size: 10px;
@@ -589,14 +623,15 @@
             padding: 2px 10px;
             border-radius: 12px;
             text-transform: uppercase;
+            font-family: var(--montserrat);
         }
         .alert-item .alert-severity.critical {
-            background: #dc2626;
-            color: #ffffff;
+            background: var(--red);
+            color: var(--white);
         }
         .alert-item .alert-severity.warning {
-            background: #f59e0b;
-            color: #ffffff;
+            background: #f97316;
+            color: var(--white);
         }
 
         /* ----- SCROLL AREA ----- */
@@ -612,13 +647,13 @@
             background: transparent;
         }
         .scroll-area::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
+            background: var(--border);
             border-radius: 4px;
         }
 
         .empty-state {
-            color: #94a3b8;
-            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-family: var(--lato);
             font-size: 13px;
             text-align: center;
             padding: 32px 0;
@@ -643,7 +678,7 @@
             display: block;
             width: 24px;
             height: 2px;
-            background: #0a1628;
+            background: var(--text);
             border-radius: 2px;
             transition: all 0.3s ease;
         }
@@ -770,10 +805,10 @@
     <!-- ══ SIDEBAR ══ -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon">+</div>
+            <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'">
             <div>
                 <div class="brand-text">RG<span>MS</span></div>
-                <div class="brand-sub">CLIENT PORTAL</div>
+                <div class="brand-sub">Client Portal</div>
             </div>
         </div>
 
@@ -814,8 +849,8 @@
                 <span class="badge">{{ total_my_readings }}</span>
             </a>
 
-            <a href="{% url 'add_vital_reading' %}" class="nav-item" style="color:#13AA9A; opacity:1;">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="#13AA9A"/></svg>
+            <a href="{% url 'add_vital_reading' %}" class="nav-item" style="color:var(--cyan); opacity:1;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="var(--cyan)"/></svg>
                 Add New Reading
             </a>
 
@@ -830,7 +865,7 @@
             <a href="#" class="nav-item">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 Alerts
-                <span class="badge" style="background:rgba(239,68,68,0.15);color:#ef4444;opacity:1;">{{ total_alerts }}</span>
+                <span class="badge" style="background:rgba(220,53,69,0.15);color:var(--red);border:1px solid var(--red);">{{ total_alerts }}</span>
             </a>
         </nav>
 
@@ -891,7 +926,7 @@
             </div>
             <div class="stat-card">
                 <div class="label">Active Alerts</div>
-                <div class="value {% if total_alerts > 0 %}text-red-600{% endif %}">{{ total_alerts }}</div>
+                <div class="value red">{{ total_alerts }}</div>
                 <div class="sub {% if total_alerts > 0 %}has-alerts{% endif %}">
                     {% if total_alerts > 0 %}
                     ⚠️ Needs attention
@@ -942,7 +977,7 @@
                     <div class="reading-item">
                         <div class="name">
                             {{ reading.patient.full_name }}
-                            <span class="self-tag" style="background:#dbeafe;color:#1e40af;padding:1px 8px;border-radius:8px;font-size:10px;font-weight:600;margin-left:6px;">Me</span>
+                            <span class="self-tag">Me</span>
                         </div>
                         <div class="meta">
                             BP {{ reading.systolic_bp }}/{{ reading.diastolic_bp }} ·
@@ -952,7 +987,7 @@
                         <div class="meta" style="font-size:11px;margin-top:4px;color:#94a3b8;">
                             {{ reading.created_at }}
                             {% if reading.is_abnormal %}
-                            <span style="color:#ef4444;font-weight:600;margin-left:8px;">⚠️ Review</span>
+                            <span style="color:var(--red);font-weight:600;margin-left:8px;">⚠️ Review</span>
                             {% else %}
                             <span style="color:#16a34a;font-weight:600;margin-left:8px;">✅ Normal</span>
                             {% endif %}
@@ -1024,41 +1059,42 @@
         </div>
 
         <!-- CARE TEAM SECTION -->
-<div style="margin-top:24px;padding:16px 20px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0;">
-    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
-        <div>
-            <span style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">My Care Team</span>
-            <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;">
+        <div style="margin-top:24px;padding:16px 20px;background:#f8fafc;border-radius:14px;border:2px solid var(--red);">
+            <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
                 <div>
-                    <span style="font-size:13px;font-weight:600;color:#0a1628;">👨‍⚕️ Doctor</span>
-                    <span style="font-size:13px;color:#475569;margin-left:6px;">
-                        {% if client.assigned_doctor %}
-                            Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username }}
-                        {% else %}
-                            <span style="color:#94a3b8;">Not assigned</span>
-                        {% endif %}
-                    </span>
-                </div>
-                <div>
-                    <span style="font-size:13px;font-weight:600;color:#0a1628;">👩‍⚕️ Caregiver</span>
-                    <span style="font-size:13px;color:#475569;margin-left:6px;">
-                        {% if client.assigned_caregiver %}
-                            {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username }}
-                        {% else %}
-                            <span style="color:#94a3b8;">Not assigned</span>
-                        {% endif %}
-                    </span>
-                </div>
-                <div>
-                    <span style="font-size:13px;font-weight:600;color:#0a1628;">📋 Care Type</span>
-                    <span style="font-size:13px;color:#475569;margin-left:6px;">
-                        {{ client.get_care_type_display }}
-                    </span>
+                    <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;font-family:var(--montserrat);">My Care Team</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;">
+                        <div>
+                            <span style="font-size:13px;font-weight:600;color:var(--navy);font-family:var(--montserrat);">👨‍⚕️ Doctor</span>
+                            <span style="font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--lato);">
+                                {% if client.assigned_doctor %}
+                                    Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username }}
+                                {% else %}
+                                    <span style="color:#94a3b8;">Not assigned</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <span style="font-size:13px;font-weight:600;color:var(--navy);font-family:var(--montserrat);">👩‍⚕️ Caregiver</span>
+                            <span style="font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--lato);">
+                                {% if client.assigned_caregiver %}
+                                    {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username }}
+                                {% else %}
+                                    <span style="color:#94a3b8;">Not assigned</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <span style="font-size:13px;font-weight:600;color:var(--navy);font-family:var(--montserrat);">📋 Care Type</span>
+                            <span style="font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--lato);">
+                                {{ client.get_care_type_display }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
     </main>
 
     <script>
