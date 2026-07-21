@@ -5,36 +5,512 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Telemetry · RGMS</title>
+    
+    <!-- Add favicon -->
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Google Fonts - Montserrat + Lato -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Dashboard CSS -->
+    <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
-        .status-critical { border-left: 4px solid #dc2626; background: #fef2f2; }
-        .status-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
-        .status-stable { border-left: 4px solid #22c55e; background: #f0fdf4; }
-        .status-no-data { border-left: 4px solid #94a3b8; background: #f1f5f9; }
-        .animated-card { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-        .animated-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.06); }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
+        /* ============================================ */
+        /* OVERRIDE STYLES - Genesis Medevac Darker Purple */
+        /* ============================================ */
+        :root {
+            --navy: #1a0a3e;
+            --navy-dark: #0a0518;
+            --navy-light: #2d1a5e;
+            --red: #DC3545;
+            --red-dark: #b02a37;
+            --red-glow: rgba(220, 53, 69, 0.25);
+            --red-pale: #fde8ea;
+            --red-gradient: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
+            --white: #FFFFFF;
+            --bg: #f8fafc;
+            --text: #1a1a2e;
+            --muted: #6c757d;
+            --border: #e9ecef;
+            --montserrat: 'Montserrat', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --inter: 'Inter', sans-serif;
+            --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
+            --shadow-lg: 0 20px 60px rgba(26, 10, 62, 0.12);
+            --shadow-xl: 0 30px 80px rgba(26, 10, 62, 0.16);
+            --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
+            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .pulse-dot { animation: pulse-dot 1.5s infinite; }
+
+        body {
+            font-family: var(--lato);
+            background-color: var(--bg);
+            letter-spacing: -0.011em;
+            color: var(--text);
+        }
+        
+        .font-display {
+            font-family: var(--montserrat);
+        }
+
+        /* ============================================ */
+        /* MODERN GRADIENT SIDEBAR */
+        /* ============================================ */
+        .gradient-sidebar {
+            background: linear-gradient(180deg, #0a0518 0%, #1a0a3e 50%, #0a0518 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            position: relative;
+            overflow: hidden;
+            width: 280px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .gradient-sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle at 70% 30%, rgba(220, 53, 69, 0.06), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Brand Section */
+        .gradient-sidebar .sidebar-brand {
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .gradient-sidebar .sidebar-brand .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--red-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+            position: relative;
+            font-family: var(--montserrat);
+        }
+
+        .gradient-sidebar .sidebar-brand .brand-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .gradient-sidebar .sidebar-brand .brand-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: white;
+            font-family: var(--montserrat);
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .gradient-sidebar .sidebar-brand .brand-text span {
+            color: var(--red);
+        }
+
+        .gradient-sidebar .sidebar-brand .brand-sub {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Navigation */
+        .gradient-sidebar .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .gradient-sidebar .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            margin: 2px 0;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: var(--transition-bounce);
+            position: relative;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: var(--inter);
+        }
+
+        .gradient-sidebar .nav-item .icon-wrapper {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.04);
+            transition: var(--transition-bounce);
+            flex-shrink: 0;
+        }
+
+        .gradient-sidebar .nav-item .icon-wrapper svg {
+            width: 20px;
+            height: 20px;
+            transition: var(--transition);
+        }
+
+        .gradient-sidebar .nav-item .nav-label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .gradient-sidebar .nav-item .badge {
+            font-size: 10px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: var(--transition);
+        }
+
+        .gradient-sidebar .nav-item .badge-red {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(220, 53, 69, 0.15);
+        }
+
+        .gradient-sidebar .nav-item .badge-amber {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .gradient-sidebar .nav-item .badge-sky {
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.12);
+        }
+
+        .gradient-sidebar .nav-item .badge-live {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(220, 53, 69, 0.15);
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Hover State */
+        .gradient-sidebar .nav-item:hover {
+            color: white;
+            transform: translateX(6px);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .gradient-sidebar .nav-item:hover .icon-wrapper {
+            background: rgba(220, 53, 69, 0.12);
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        .gradient-sidebar .nav-item:hover .icon-wrapper svg {
+            color: var(--red);
+        }
+
+        .gradient-sidebar .nav-item:hover .badge {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Active State */
+        .gradient-sidebar .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.12), rgba(220, 53, 69, 0.02));
+            border: 1px solid rgba(220, 53, 69, 0.08);
+            box-shadow: 0 4px 20px rgba(220, 53, 69, 0.06);
+        }
+
+        .gradient-sidebar .nav-item.active .icon-wrapper {
+            background: rgba(220, 53, 69, 0.18);
+            box-shadow: 0 0 30px rgba(220, 53, 69, 0.08);
+        }
+
+        .gradient-sidebar .nav-item.active .icon-wrapper svg {
+            color: var(--red);
+        }
+
+        .gradient-sidebar .nav-item.active .badge {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* User Section */
+        .gradient-sidebar .sidebar-user {
+            padding: 16px 20px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+            position: relative;
+            z-index: 1;
+        }
+
+        .gradient-sidebar .sidebar-user .user-card {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+            cursor: default;
+        }
+
+        .gradient-sidebar .sidebar-user .user-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .gradient-sidebar .sidebar-user .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--red-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
+            font-family: var(--montserrat);
+        }
+
+        .gradient-sidebar .sidebar-user .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .gradient-sidebar .sidebar-user .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            font-family: var(--montserrat);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gradient-sidebar .sidebar-user .user-role {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        .gradient-sidebar .sidebar-user .user-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+            animation: pulse-dot 2s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.7;
+            }
+        }
+
+        .gradient-sidebar .logout-btn {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 16px;
+            background: rgba(220, 53, 69, 0.08);
+            color: var(--red);
+            border: 1px solid rgba(220, 53, 69, 0.08);
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: var(--transition);
+            cursor: pointer;
+            font-family: var(--montserrat);
+            text-decoration: none;
+        }
+
+        .gradient-sidebar .logout-btn:hover {
+            background: rgba(220, 53, 69, 0.15);
+            border-color: rgba(220, 53, 69, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(220, 53, 69, 0.08);
+        }
+
+        .gradient-sidebar .logout-btn svg {
+            width: 16px;
+            height: 16px;
+            transition: var(--transition);
+        }
+
+        .gradient-sidebar .logout-btn:hover svg {
+            transform: translateX(2px) rotate(2deg);
+        }
+
+        /* ============================================ */
+        /* TELEMETRY STYLES */
+        /* ============================================ */
+        .status-critical { 
+            border-left: 4px solid #dc2626; 
+            background: #fef2f2; 
+        }
+        .status-warning { 
+            border-left: 4px solid #f59e0b; 
+            background: #fffbeb; 
+        }
+        .status-stable { 
+            border-left: 4px solid #22c55e; 
+            background: #f0fdf4; 
+        }
+        .status-no-data { 
+            border-left: 4px solid #94a3b8; 
+            background: #f1f5f9; 
+        }
+        
+        .animated-card { 
+            transition: var(--transition); 
+        }
+        .animated-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: var(--shadow-lg); 
+        }
+
+        .premium-flat-shadow {
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--red);
+        }
+
+        .stat-card .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: var(--montserrat);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--navy);
+            font-family: var(--montserrat);
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-sub {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .stat-card.red { 
+            background: #fef2f2; 
+            border-color: #fca5a5; 
+        }
+        .stat-card.red .stat-value { color: #dc2626; }
+        .stat-card.red .stat-label { color: #dc2626; }
+        
+        .stat-card.amber { 
+            background: #fffbeb; 
+            border-color: #fcd34d; 
+        }
+        .stat-card.amber .stat-value { color: #d97706; }
+        .stat-card.amber .stat-label { color: #d97706; }
+        
+        .stat-card.emerald { 
+            background: #f0fdf4; 
+            border-color: #86efac; 
+        }
+        .stat-card.emerald .stat-value { color: #16a34a; }
+        .stat-card.emerald .stat-label { color: #16a34a; }
+
         /* Mini chart styles */
         .mini-chart-container {
             background: rgba(255, 255, 255, 0.5);
             padding: 8px;
             border-radius: 8px;
             border: 1px solid rgba(226, 232, 240, 0.6);
+            transition: var(--transition);
+        }
+        .mini-chart-container:hover {
+            border-color: var(--red);
+            box-shadow: var(--shadow-md);
         }
         .mini-chart-container .chart-label {
             font-size: 9px;
             font-weight: 600;
-            color: #94a3b8;
+            color: var(--navy);
             text-transform: uppercase;
             letter-spacing: 0.03em;
+            font-family: var(--montserrat);
         }
         .mini-chart-container .chart-wrapper {
             height: 40px;
@@ -45,245 +521,348 @@
             display: flex;
             justify-content: space-between;
             font-size: 9px;
-            color: #94a3b8;
+            color: var(--muted);
             margin-top: 2px;
+            font-weight: 600;
         }
         .mini-chart-container .chart-stats .trend-up { color: #ef4444; }
         .mini-chart-container .chart-stats .trend-down { color: #22c55e; }
-        .mini-chart-container .chart-stats .trend-stable { color: #94a3b8; }
+        .mini-chart-container .chart-stats .trend-stable { color: var(--muted); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .gradient-sidebar {
+                display: none !important;
+            }
+            .main-content {
+                padding: 16px !important;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+            .stat-card {
+                padding: 12px !important;
+            }
+            .stat-value {
+                font-size: 18px !important;
+            }
+            .stat-label {
+                font-size: 8px !important;
+            }
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col md:flex-row antialiased select-none">
 
-    <!-- Navigation -->
-    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-teal-700 flex items-center justify-center text-white font-extrabold text-xl">RG</div>
-                <div>
-                    <span class="font-extrabold text-slate-900 text-lg">📡 RGMS <span class="text-teal-600">Telemetry</span></span>
-                    <p class="text-xs text-slate-500">Real-time Patient Monitoring</p>
+    <!-- ============================================ -->
+    <!-- 1. LEFT SIDEBAR NAVIGATION (DESKTOP) - Modern Gradient Sidebar -->
+    <!-- ============================================ -->
+    <aside class="gradient-sidebar hidden md:flex">
+        <!-- Brand Section -->
+        <div class="sidebar-brand">
+            <div class="brand-icon">RG</div>
+            <div>
+                <div class="brand-text">RGMS <span>Portal</span></div>
+                <span class="brand-sub">Clinical Care Suite</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+            <!-- Dashboard -->
+            <a href="{% url 'doctor_dashboard' %}" class="nav-item">
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    </svg>
                 </div>
+                <span class="nav-label">Dashboard</span>
+            </a>
+
+            <!-- Patients List -->
+            <a href="{% url 'doctor_patients_list' %}" class="nav-item">
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Patients List</span>
+                <span class="badge">{{ total_patients }}</span>
+            </a>
+
+            <!-- Live Telemetry (Active) -->
+            <a href="{% url 'live_telemetry' %}" class="nav-item active">
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5 text-[#DC3545]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Live Telemetry</span>
+                <span class="badge badge-red badge-live">Live</span>
+            </a>
+
+            <!-- Triage Desk -->
+            <a href="{% url 'triage_desk' %}" class="nav-item">
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Triage Desk</span>
+                <span class="badge">0</span>
+            </a>
+        </nav>
+
+        <!-- User Section -->
+        <div class="sidebar-user">
+            <div class="user-card">
+                <div class="user-avatar">{{ user.first_name|first|default:user.username|first|upper }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="user-role">Geriatrics Unit</div>
+                </div>
+                <div class="user-status"></div>
+            </div>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span>End Session</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ============================================ -->
+    <!-- 2. MAIN CONTENT -->
+    <!-- ============================================ -->
+    <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+
+        <!-- Header -->
+        <header class="bg-white border-b-2 border-[#DC3545] px-6 md:px-8 py-4 flex items-center justify-between shadow-sm shrink-0 z-40">
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight text-[#1a0a3e] font-display">📡 Live Telemetry Dashboard</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Real-time vital signs monitoring</p>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-sm text-slate-600">Dr. {{ doctor_name }}</span>
+                <span class="text-sm text-slate-600 hidden sm:block">Dr. {{ doctor_name }}</span>
                 <span class="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
                     Live
                 </span>
-                <a href="{% url 'doctor_dashboard' %}" class="text-sm font-bold text-slate-600 bg-slate-100 px-4 py-2 rounded-lg hover:bg-slate-200 transition">Back</a>
-                <a href="{% url 'logout' %}" class="text-sm font-bold text-rose-600 bg-rose-50 border border-rose-100 px-4 py-2 rounded-lg hover:bg-rose-100 transition">Logout</a>
+                <a href="{% url 'doctor_dashboard' %}" class="text-sm font-bold text-[#1a0a3e] bg-slate-100 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-200 transition">Back</a>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto p-6">
+        <!-- Scrollable Content -->
+        <div class="main-content flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
 
-        <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-extrabold text-slate-900">📡 Live Telemetry Dashboard</h1>
-            <p class="text-slate-500 mt-1">Real-time vital signs monitoring</p>
-        </div>
+            <!-- Stats Grid -->
+            <div class="stats-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="stat-card animated-card">
+                    <span class="stat-label">Total Patients</span>
+                    <p class="stat-value">{{ total_patients }}</p>
+                </div>
+                <div class="stat-card red animated-card">
+                    <span class="stat-label">🔴 Critical</span>
+                    <p class="stat-value">{{ critical_count }}</p>
+                    <p class="stat-sub">Requires immediate attention</p>
+                </div>
+                <div class="stat-card amber animated-card">
+                    <span class="stat-label">🟡 Warning</span>
+                    <p class="stat-value">{{ warning_count }}</p>
+                    <p class="stat-sub">Needs clinical review</p>
+                </div>
+                <div class="stat-card emerald animated-card">
+                    <span class="stat-label">🟢 Stable</span>
+                    <p class="stat-value">{{ stable_count }}</p>
+                    <p class="stat-sub">No immediate concerns</p>
+                </div>
+            </div>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm animated-card">
-                <p class="text-sm text-slate-500">Total Patients</p>
-                <p class="text-2xl font-bold text-slate-900">{{ total_patients }}</p>
-            </div>
-            <div class="bg-red-50 p-4 rounded-xl border border-red-200 animated-card">
-                <p class="text-sm text-red-600 font-bold">🔴 Critical</p>
-                <p class="text-2xl font-bold text-red-600">{{ critical_count }}</p>
-                <p class="text-xs text-red-500">Requires immediate attention</p>
-            </div>
-            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 animated-card">
-                <p class="text-sm text-amber-600 font-bold">🟡 Warning</p>
-                <p class="text-2xl font-bold text-amber-600">{{ warning_count }}</p>
-                <p class="text-xs text-amber-500">Needs clinical review</p>
-            </div>
-            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 animated-card">
-                <p class="text-sm text-emerald-600 font-bold">🟢 Stable</p>
-                <p class="text-2xl font-bold text-emerald-600">{{ stable_count }}</p>
-                <p class="text-xs text-emerald-500">No immediate concerns</p>
-            </div>
-        </div>
-
-        <!-- Telemetry Data -->
-        <div class="space-y-4">
-            {% for item in telemetry_data %}
-            <div class="p-4 rounded-xl border shadow-sm animated-card 
-                {% if item.status == 'critical' %}status-critical border-red-200
-                {% elif item.status == 'warning' %}status-warning border-amber-200
-                {% elif item.status == 'stable' %}status-stable border-emerald-200
-                {% else %}status-no-data border-slate-200{% endif %}">
-                
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <!-- Patient Info -->
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg
-                            {% if item.status == 'critical' %}bg-red-500
-                            {% elif item.status == 'warning' %}bg-amber-500
-                            {% elif item.status == 'stable' %}bg-emerald-500
-                            {% else %}bg-slate-400{% endif %}">
-                            {{ item.patient.full_name|slice:":2"|upper }}
+            <!-- Telemetry Data -->
+            <div class="space-y-4">
+                {% for item in telemetry_data %}
+                <div class="p-4 rounded-xl border shadow-sm animated-card 
+                    {% if item.status == 'critical' %}status-critical border-red-200
+                    {% elif item.status == 'warning' %}status-warning border-amber-200
+                    {% elif item.status == 'stable' %}status-stable border-emerald-200
+                    {% else %}status-no-data border-slate-200{% endif %}">
+                    
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <!-- Patient Info -->
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg
+                                {% if item.status == 'critical' %}bg-red-500
+                                {% elif item.status == 'warning' %}bg-amber-500
+                                {% elif item.status == 'stable' %}bg-emerald-500
+                                {% else %}bg-slate-400{% endif %}">
+                                {{ item.patient.full_name|slice:":2"|upper }}
+                            </div>
+                            <div>
+                                <p class="font-bold text-[#1a0a3e] text-lg">{{ item.patient.full_name }}</p>
+                                <p class="text-sm text-slate-500">{{ item.patient.care_type|title }}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    {% if item.has_reading %}
+                                    <span class="flex items-center gap-1 text-xs text-emerald-600">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot"></span>
+                                        Live
+                                    </span>
+                                    <span class="text-xs text-slate-400">•</span>
+                                    <span class="text-xs text-slate-400">{{ item.last_update|timesince }} ago</span>
+                                    {% else %}
+                                    <span class="text-xs text-slate-400">No readings yet</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Status Badge -->
                         <div>
-                            <p class="font-bold text-[#0f172a] text-lg">{{ item.patient.full_name }}</p>
-                            <p class="text-sm text-slate-500">{{ item.patient.care_type|title }}</p>
-                            <div class="flex items-center gap-2 mt-1">
-                                {% if item.has_reading %}
-                                <span class="flex items-center gap-1 text-xs text-emerald-600">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot"></span>
-                                    Live
+                            {% if item.status == 'critical' %}
+                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse border border-red-200">🚨 CRITICAL</span>
+                            {% elif item.status == 'warning' %}
+                            <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200">⚠️ WARNING</span>
+                            {% elif item.status == 'stable' %}
+                            <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">✅ STABLE</span>
+                            {% else %}
+                            <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">📊 NO DATA</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Vitals Display -->
+                    {% if item.latest_reading %}
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                        <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                            <p class="text-xs text-slate-500">❤️ Heart Rate</p>
+                            <p class="text-lg font-bold {% if item.latest_reading.pulse_rate > 100 or item.latest_reading.pulse_rate < 60 %}text-red-600{% else %}text-[#1a0a3e]{% endif %}">
+                                {{ item.latest_reading.pulse_rate }} <span class="text-sm font-normal text-slate-400">bpm</span>
+                            </p>
+                        </div>
+                        <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                            <p class="text-xs text-slate-500">💉 Blood Pressure</p>
+                            <p class="text-lg font-bold {% if item.latest_reading.systolic_bp >= 141 or item.latest_reading.diastolic_bp >= 91 %}text-red-600{% else %}text-[#1a0a3e]{% endif %}">
+                                {{ item.latest_reading.systolic_bp }}/{{ item.latest_reading.diastolic_bp }} <span class="text-sm font-normal text-slate-400">mmHg</span>
+                            </p>
+                        </div>
+                        <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                            <p class="text-xs text-slate-500">🫁 SpO2</p>
+                            <p class="text-lg font-bold {% if item.latest_reading.oxygen_saturation and item.latest_reading.oxygen_saturation < 95 %}text-red-600{% else %}text-[#1a0a3e]{% endif %}">
+                                {{ item.latest_reading.oxygen_saturation|default:"—" }} <span class="text-sm font-normal text-slate-400">%</span>
+                            </p>
+                        </div>
+                        <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
+                            <p class="text-xs text-slate-500">🍬 Blood Sugar</p>
+                            <p class="text-lg font-bold text-[#1a0a3e]">
+                                {{ item.latest_reading.fasting_blood_sugar|default:"—" }} <span class="text-sm font-normal text-slate-400">mg/dL</span>
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- ============================================ -->
+                    <!-- MINI CHARTS FOR LIVE TELEMETRY                 -->
+                    <!-- ============================================ -->
+                    {% if item.has_reading and item.chart_data.labels %}
+                    <div class="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <!-- Heart Rate Mini Chart -->
+                        <div class="mini-chart-container">
+                            <p class="chart-label">❤️ Heart Rate</p>
+                            <div class="chart-wrapper">
+                                <canvas id="miniChartHR_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span>{{ item.stats.avg_pulse|floatformat:0 }} bpm</span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    {{ item.stats.trend|title }}
                                 </span>
-                                <span class="text-xs text-slate-400">•</span>
-                                <span class="text-xs text-slate-400">{{ item.last_update|timesince }} ago</span>
-                                {% else %}
-                                <span class="text-xs text-slate-400">No readings yet</span>
-                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Blood Pressure Mini Chart -->
+                        <div class="mini-chart-container">
+                            <p class="chart-label">💉 Blood Pressure</p>
+                            <div class="chart-wrapper">
+                                <canvas id="miniChartBP_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span>{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- SpO2 Mini Chart -->
+                        <div class="mini-chart-container">
+                            <p class="chart-label">🫁 SpO2</p>
+                            <div class="chart-wrapper">
+                                <canvas id="miniChartSpO2_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span>{{ item.stats.avg_spo2|floatformat:0 }}%</span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    {{ item.stats.trend|title }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Blood Sugar Mini Chart -->
+                        <div class="mini-chart-container">
+                            <p class="chart-label">🍬 Blood Sugar</p>
+                            <div class="chart-wrapper">
+                                <canvas id="miniChartSugar_{{ item.patient.id }}"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <span>{{ item.stats.avg_sugar|floatformat:0 }} mg/dL</span>
+                                <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
+                                    {{ item.stats.trend|title }}
+                                </span>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
 
-                    <!-- Status Badge -->
-                    <div>
-                        {% if item.status == 'critical' %}
-                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse">🚨 CRITICAL</span>
-                        {% elif item.status == 'warning' %}
-                        <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">⚠️ WARNING</span>
-                        {% elif item.status == 'stable' %}
-                        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">✅ STABLE</span>
-                        {% else %}
-                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold">📊 NO DATA</span>
+                    <!-- Alerts -->
+                    {% if item.alerts %}
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        {% for alert in item.alerts %}
+                        <span class="text-xs bg-[#fde8ea] text-[#DC3545] px-2 py-1 rounded-full border border-[#DC3545]">
+                            ⚠️ {{ alert.title }}
+                        </span>
+                        {% endfor %}
+                        {% if item.alerts|length > 3 %}
+                        <span class="text-xs text-slate-400">+{{ item.alerts|length|add:"-3" }} more</span>
                         {% endif %}
                     </div>
-                </div>
-
-                <!-- Vitals Display -->
-                {% if item.latest_reading %}
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
-                        <p class="text-xs text-slate-500">❤️ Heart Rate</p>
-                        <p class="text-lg font-bold {% if item.latest_reading.pulse_rate > 100 or item.latest_reading.pulse_rate < 60 %}text-red-600{% else %}text-slate-900{% endif %}">
-                            {{ item.latest_reading.pulse_rate }} <span class="text-sm font-normal text-slate-400">bpm</span>
-                        </p>
-                    </div>
-                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
-                        <p class="text-xs text-slate-500">💉 Blood Pressure</p>
-                        <p class="text-lg font-bold {% if item.latest_reading.systolic_bp >= 141 or item.latest_reading.diastolic_bp >= 91 %}text-red-600{% else %}text-slate-900{% endif %}">
-                            {{ item.latest_reading.systolic_bp }}/{{ item.latest_reading.diastolic_bp }} <span class="text-sm font-normal text-slate-400">mmHg</span>
-                        </p>
-                    </div>
-                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
-                        <p class="text-xs text-slate-500">🫁 SpO2</p>
-                        <p class="text-lg font-bold {% if item.latest_reading.oxygen_saturation and item.latest_reading.oxygen_saturation < 95 %}text-red-600{% else %}text-slate-900{% endif %}">
-                            {{ item.latest_reading.oxygen_saturation|default:"—" }} <span class="text-sm font-normal text-slate-400">%</span>
-                        </p>
-                    </div>
-                    <div class="bg-white/50 p-3 rounded-lg border border-slate-200/60">
-                        <p class="text-xs text-slate-500">🍬 Blood Sugar</p>
-                        <p class="text-lg font-bold text-slate-900">
-                            {{ item.latest_reading.fasting_blood_sugar|default:"—" }} <span class="text-sm font-normal text-slate-400">mg/dL</span>
-                        </p>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- ============================================ -->
-                <!-- MINI CHARTS FOR LIVE TELEMETRY                 -->
-                <!-- ============================================ -->
-                {% if item.has_reading and item.chart_data.labels %}
-                <div class="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <!-- Heart Rate Mini Chart -->
-                    <div class="mini-chart-container">
-                        <p class="chart-label">❤️ Heart Rate</p>
-                        <div class="chart-wrapper">
-                            <canvas id="miniChartHR_{{ item.patient.id }}"></canvas>
-                        </div>
-                        <div class="chart-stats">
-                            <span>{{ item.stats.avg_pulse|floatformat:0 }} bpm</span>
-                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                {{ item.stats.trend|title }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Blood Pressure Mini Chart -->
-                    <div class="mini-chart-container">
-                        <p class="chart-label">💉 Blood Pressure</p>
-                        <div class="chart-wrapper">
-                            <canvas id="miniChartBP_{{ item.patient.id }}"></canvas>
-                        </div>
-                        <div class="chart-stats">
-                            <span>{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span>
-                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                {{ item.stats.trend|title }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- SpO2 Mini Chart -->
-                    <div class="mini-chart-container">
-                        <p class="chart-label">🫁 SpO2</p>
-                        <div class="chart-wrapper">
-                            <canvas id="miniChartSpO2_{{ item.patient.id }}"></canvas>
-                        </div>
-                        <div class="chart-stats">
-                            <span>{{ item.stats.avg_spo2|floatformat:0 }}%</span>
-                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                {{ item.stats.trend|title }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Blood Sugar Mini Chart -->
-                    <div class="mini-chart-container">
-                        <p class="chart-label">🍬 Blood Sugar</p>
-                        <div class="chart-wrapper">
-                            <canvas id="miniChartSugar_{{ item.patient.id }}"></canvas>
-                        </div>
-                        <div class="chart-stats">
-                            <span>{{ item.stats.avg_sugar|floatformat:0 }} mg/dL</span>
-                            <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                {{ item.stats.trend|title }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Alerts -->
-                {% if item.alerts %}
-                <div class="mt-3 flex flex-wrap gap-2">
-                    {% for alert in item.alerts %}
-                    <span class="text-xs bg-red-50 text-red-700 px-2 py-1 rounded-full border border-red-200">
-                        ⚠️ {{ alert.title }}
-                    </span>
-                    {% endfor %}
-                    {% if item.alerts|length > 3 %}
-                    <span class="text-xs text-slate-400">+{{ item.alerts|length|add:"-3" }} more</span>
                     {% endif %}
                 </div>
-                {% endif %}
+                {% empty %}
+                <div class="text-center py-16">
+                    <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <h2 class="text-2xl font-bold text-slate-400">No Patients Assigned</h2>
+                    <p class="text-slate-400 mt-2">Patients will appear here once assigned to you</p>
+                </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <div class="text-center py-16">
-                <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <h2 class="text-2xl font-bold text-slate-400">No Patients Assigned</h2>
-                <p class="text-slate-400 mt-2">Patients will appear here once assigned to you</p>
-            </div>
-            {% endfor %}
-        </div>
 
-        <!-- Auto-refresh Note -->
-        <div class="mt-8 text-center text-xs text-slate-400 border-t border-slate-200 pt-6">
-            <p>🔄 Data updates automatically every 30 seconds</p>
-            <p class="mt-1">Last updated: {% now "F j, Y H:i:s" %}</p>
+            <!-- Auto-refresh Note -->
+            <div class="mt-8 text-center text-xs text-slate-400 border-t border-[#DC3545] pt-6">
+                <p class="text-[#1a0a3e] font-semibold">🔄 Data updates automatically every 30 seconds</p>
+                <p class="mt-1">Last updated: {% now "F j, Y H:i:s" %}</p>
+            </div>
         </div>
-    </div>
+    </main>
 
     <!-- ============================================ -->
     <!-- CHART.JS SCRIPTS FOR MINI CHARTS             -->
