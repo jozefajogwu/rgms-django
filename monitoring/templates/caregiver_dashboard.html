@@ -5,32 +5,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Portal · RGMS</title>
-     <!-- Add favicon -->
+    
+    <!-- Add favicon -->
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+    
     <!-- Google Fonts: Montserrat + Lato -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
+    <!-- Custom Dashboard CSS -->
+    <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
+
     <style>
-        /* ----- GLOBAL DESIGN SYSTEM (Genesis Medevac) ----- */
+        /* ============================================ */
+        /* OVERRIDE STYLES - Genesis Medevac Darker Purple */
+        /* ============================================ */
         :root {
-            --navy: #211568;
-            --navy-light: #3a2a8a;
+            --navy: #1a0a3e;
+            --navy-dark: #0a0518;
+            --navy-light: #2d1a5e;
             --red: #DC3545;
+            --red-dark: #b02a37;
             --red-glow: rgba(220, 53, 69, 0.25);
             --red-pale: #fde8ea;
-            --sky-blue: #AED9F6;
-            --cyan: #00A3E0;
-            --cyan-glow: rgba(0, 163, 224, 0.2);
+            --red-gradient: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
+            --yellow: #FFD700;
+            --yellow-glow: rgba(255, 215, 0, 0.25);
             --white: #FFFFFF;
-            --bg: #f8f9fa;
+            --bg: #f8fafc;
             --text: #1a1a2e;
             --muted: #6c757d;
             --border: #e9ecef;
             --montserrat: 'Montserrat', sans-serif;
             --lato: 'Lato', sans-serif;
-            --shadow: 0 4px 20px rgba(33, 21, 104, 0.06);
-            --shadow-lg: 0 20px 60px rgba(33, 21, 104, 0.08);
+            --inter: 'Inter', sans-serif;
+            --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
+            --shadow-lg: 0 20px 60px rgba(26, 10, 62, 0.12);
+            --shadow-xl: 0 30px 80px rgba(26, 10, 62, 0.16);
+            --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
+            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         * {
@@ -38,6 +52,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
         html {
             height: 100%;
             -webkit-font-smoothing: antialiased;
@@ -45,212 +60,443 @@
 
         body {
             font-family: var(--lato);
-            background: var(--bg);
+            background-color: var(--bg);
             color: var(--text);
             min-height: 100vh;
             display: flex;
             line-height: 1.6;
         }
 
-        /* ----- SIDEBAR (Navy with Red Accents) ----- */
-        .sidebar {
+        .font-display {
+            font-family: var(--montserrat);
+        }
+
+        /* ============================================ */
+        /* MODERN GRADIENT SIDEBAR - White Text & Yellow Accents */
+        /* ============================================ */
+        .gradient-sidebar {
             position: fixed;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 240px;
-            background: var(--navy);
-            border-right: 2px solid var(--red);
-            padding: 24px 16px;
+            width: 280px;
+            background: linear-gradient(180deg, #0a0518 0%, #1a0a3e 50%, #0a0518 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 0;
             display: flex;
             flex-direction: column;
             z-index: 100;
             transition: transform 0.3s ease;
+            overflow: hidden;
         }
 
-        .sidebar-brand {
+        .gradient-sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle at 70% 30%, rgba(255, 215, 0, 0.06), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Brand Section */
+        .gradient-sidebar .sidebar-brand {
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 0 8px 24px 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 20px;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
         }
 
-        .sidebar-brand img {
-            height: 40px;
-            width: auto;
-            border-radius: 8px;
-        }
-
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--red);
+        .gradient-sidebar .sidebar-brand .brand-icon {
+            width: 48px;
+            height: 48px;
             border-radius: 12px;
-            display: grid;
-            place-items: center;
-            color: var(--white);
+            background: var(--red-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+            position: relative;
+            font-family: var(--montserrat);
+        }
+
+        .gradient-sidebar .sidebar-brand .brand-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .gradient-sidebar .sidebar-brand .brand-text {
             font-size: 18px;
             font-weight: 800;
-            box-shadow: 0 4px 20px var(--red-glow);
-            flex-shrink: 0;
+            color: var(--white);
             font-family: var(--montserrat);
+            letter-spacing: -0.3px;
+            line-height: 1.2;
         }
 
-        .brand-text {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--white);
-            letter-spacing: 1px;
-            font-family: var(--montserrat);
-            text-transform: uppercase;
+        .gradient-sidebar .sidebar-brand .brand-text span {
+            color: var(--yellow);
         }
-        .brand-text span {
-            color: var(--red);
-        }
-        .brand-sub {
+
+        .gradient-sidebar .sidebar-brand .brand-sub {
             font-size: 10px;
             color: rgba(255, 255, 255, 0.5);
-            font-weight: 500;
-            letter-spacing: 0.05em;
             text-transform: uppercase;
-            font-family: var(--montserrat);
+            letter-spacing: 0.15em;
+            font-weight: 600;
+            display: block;
+            margin-top: 2px;
         }
 
         /* Role Badges in Sidebar */
-        .role-badges-sidebar {
+        .gradient-sidebar .role-badges-sidebar {
             display: flex;
             flex-wrap: wrap;
             gap: 4px;
-            padding: 12px 8px;
+            padding: 12px 20px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
         }
-        .role-badge-side {
+
+        .gradient-sidebar .role-badge-side {
             font-size: 9px;
             font-weight: 600;
-            padding: 3px 10px;
+            padding: 3px 12px;
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
-        .role-badge-side.patient { background: var(--red-pale); color: var(--red); border: 1px solid var(--red); }
-        .role-badge-side.caregiver { background: rgba(0, 163, 224, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }
-        .role-badge-side.client { background: rgba(33, 21, 104, 0.2); color: var(--navy-light); border: 1px solid var(--navy-light); }
-
-        .sidebar-nav {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .gradient-sidebar .role-badge-side.patient { 
+            background: rgba(220, 53, 69, 0.15); 
+            color: var(--red); 
+            border: 1px solid rgba(220, 53, 69, 0.2); 
+        }
+        .gradient-sidebar .role-badge-side.caregiver { 
+            background: rgba(255, 215, 0, 0.12); 
+            color: var(--yellow); 
+            border: 1px solid rgba(255, 215, 0, 0.2); 
+        }
+        .gradient-sidebar .role-badge-side.client { 
+            background: rgba(255, 255, 255, 0.06); 
+            color: rgba(255, 255, 255, 0.7); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
         }
 
-        .nav-label {
+        /* Navigation */
+        .gradient-sidebar .sidebar-nav {
+            padding: 12px 12px;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        .gradient-sidebar .nav-label {
             font-size: 10px;
             font-weight: 600;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 12px 12px 6px 12px;
+            font-family: var(--montserrat);
+        }
+
+        .gradient-sidebar .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            margin: 2px 0;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition-bounce);
+            position: relative;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: var(--inter);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .gradient-sidebar .nav-item .icon-wrapper {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.04);
+            transition: var(--transition-bounce);
+            flex-shrink: 0;
+        }
+
+        .gradient-sidebar .nav-item .icon-wrapper svg {
+            width: 20px;
+            height: 20px;
+            transition: var(--transition);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .gradient-sidebar .nav-item .nav-label {
+            flex: 1;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0;
+        }
+
+        .gradient-sidebar .nav-item .badge {
+            font-size: 10px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: var(--transition);
+        }
+
+        .gradient-sidebar .nav-item .badge-red {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(220, 53, 69, 0.15);
+        }
+
+        .gradient-sidebar .nav-item .badge-yellow {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--yellow);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        /* Hover State */
+        .gradient-sidebar .nav-item:hover {
+            color: var(--white);
+            transform: translateX(6px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .gradient-sidebar .nav-item:hover .icon-wrapper {
+            background: rgba(255, 215, 0, 0.12);
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        .gradient-sidebar .nav-item:hover .icon-wrapper svg {
+            color: var(--yellow);
+        }
+
+        .gradient-sidebar .nav-item:hover .nav-label {
+            color: var(--white);
+        }
+
+        .gradient-sidebar .nav-item:hover .badge {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Active State */
+        .gradient-sidebar .nav-item.active {
+            color: var(--white);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.02));
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.06);
+        }
+
+        .gradient-sidebar .nav-item.active .icon-wrapper {
+            background: rgba(255, 215, 0, 0.15);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.08);
+        }
+
+        .gradient-sidebar .nav-item.active .icon-wrapper svg {
+            color: var(--yellow);
+        }
+
+        .gradient-sidebar .nav-item.active .nav-label {
+            color: var(--yellow);
+        }
+
+        .gradient-sidebar .nav-item.active .badge {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Add New Reading - Special Style */
+        .gradient-sidebar .nav-item.add-reading {
+            color: var(--yellow);
+            opacity: 1;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .gradient-sidebar .nav-item.add-reading .icon-wrapper {
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        .gradient-sidebar .nav-item.add-reading .icon-wrapper svg {
+            color: var(--yellow);
+        }
+
+        .gradient-sidebar .nav-item.add-reading .nav-label {
+            color: var(--yellow);
+        }
+
+        .gradient-sidebar .nav-item.add-reading:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        /* User Section */
+        .gradient-sidebar .sidebar-user {
+            padding: 16px 20px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+            position: relative;
+            z-index: 1;
+        }
+
+        .gradient-sidebar .sidebar-user .user-card {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+            cursor: default;
+        }
+
+        .gradient-sidebar .sidebar-user .user-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .gradient-sidebar .sidebar-user .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--red-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
+            font-family: var(--montserrat);
+        }
+
+        .gradient-sidebar .sidebar-user .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .gradient-sidebar .sidebar-user .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--white);
+            font-family: var(--montserrat);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gradient-sidebar .sidebar-user .user-role {
+            font-size: 9px;
             color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            padding: 12px 8px 6px 8px;
-            font-family: var(--montserrat);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            transition: all 0.25s ease;
-            text-decoration: none;
-            font-family: var(--montserrat);
-            font-size: 13px;
-            font-weight: 500;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--white);
-        }
-        .nav-item.active {
-            background: rgba(220, 53, 69, 0.15);
-            color: var(--white);
-            border: 1px solid var(--red);
-        }
-        .nav-item svg {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            stroke-width: 1.8;
-        }
-        .nav-item .badge {
-            margin-left: auto;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 11px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        .nav-item.active .badge {
-            background: rgba(220, 53, 69, 0.2);
-            color: var(--white);
-            border: 1px solid var(--red);
         }
 
-        .sidebar-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 16px;
-            margin-top: auto;
+        .gradient-sidebar .sidebar-user .user-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+            animation: pulse-dot 2s infinite;
+            flex-shrink: 0;
         }
 
-        .logout-item {
+        @keyframes pulse-dot {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.7;
+            }
+        }
+
+        .gradient-sidebar .logout-btn {
+            margin-top: 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            transition: all 0.25s ease;
-            text-decoration: none;
-            font-family: var(--montserrat);
-            font-size: 13px;
-            font-weight: 500;
-            border: none;
-            background: transparent;
+            justify-content: center;
+            gap: 8px;
             width: 100%;
-            text-align: left;
-        }
-        .logout-item:hover {
-            background: rgba(220, 53, 69, 0.15);
+            padding: 10px 16px;
+            background: rgba(220, 53, 69, 0.08);
             color: var(--red);
-        }
-        .logout-item svg {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            stroke-width: 1.8;
+            border: 1px solid rgba(220, 53, 69, 0.08);
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: var(--transition);
+            cursor: pointer;
+            font-family: var(--montserrat);
+            text-decoration: none;
         }
 
-        /* ----- MAIN CONTENT (white background) ----- */
+        .gradient-sidebar .logout-btn:hover {
+            background: rgba(220, 53, 69, 0.15);
+            border-color: rgba(220, 53, 69, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(220, 53, 69, 0.08);
+        }
+
+        .gradient-sidebar .logout-btn svg {
+            width: 16px;
+            height: 16px;
+            transition: var(--transition);
+        }
+
+        .gradient-sidebar .logout-btn:hover svg {
+            transform: translateX(2px) rotate(2deg);
+        }
+
+        /* ============================================ */
+        /* MAIN CONTENT */
+        /* ============================================ */
         .main-content {
-            margin-left: 240px;
+            margin-left: 280px;
             flex: 1;
             position: relative;
             z-index: 5;
             min-height: 100vh;
-            background: var(--white);
+            background: var(--bg);
             padding: 24px 32px 32px 32px;
         }
 
-        /* ----- TOP BAR ----- */
+        /* TOP BAR */
         .topbar {
             display: flex;
             align-items: center;
@@ -282,14 +528,14 @@
         .topbar-left .role-tag {
             font-size: 10px;
             font-weight: 600;
-            padding: 2px 10px;
+            padding: 2px 12px;
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.03em;
         }
         .role-tag.patient { background: var(--red-pale); color: var(--red); border: 1px solid var(--red); }
-        .role-tag.caregiver { background: #e8f4fc; color: var(--cyan); border: 1px solid var(--cyan); }
-        .role-tag.client { background: #e8e5f0; color: var(--navy); border: 1px solid var(--navy); }
+        .role-tag.caregiver { background: rgba(255, 215, 0, 0.15); color: #b8960f; border: 1px solid rgba(255, 215, 0, 0.3); }
+        .role-tag.client { background: rgba(26, 10, 62, 0.08); color: var(--navy); border: 1px solid var(--navy); }
 
         .topbar-right {
             display: flex;
@@ -300,13 +546,14 @@
             width: 38px;
             height: 38px;
             border-radius: 50%;
-            background: var(--red);
+            background: var(--red-gradient);
             display: grid;
             place-items: center;
             color: var(--white);
             font-weight: 700;
             font-size: 13px;
             font-family: var(--montserrat);
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
         }
         .topbar-right .welcome {
             font-size: 13px;
@@ -314,7 +561,45 @@
             font-family: var(--lato);
         }
 
-        /* ----- MESSAGES ----- */
+        /* Mobile Hamburger */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .hamburger:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--navy);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar Overlay (Mobile) */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 10, 62, 0.5);
+            z-index: 90;
+        }
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        /* ============================================ */
+        /* CARDS & STATS */
+        /* ============================================ */
         .msg-success {
             background: #f0fdf4;
             border: 1px solid #22c55e;
@@ -326,7 +611,6 @@
             margin-bottom: 24px;
         }
 
-        /* ----- STATS ROW ----- */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -339,18 +623,18 @@
             border: 1px solid var(--border);
             border-radius: 14px;
             padding: 18px 20px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             box-shadow: var(--shadow);
         }
         .stat-card:hover {
             box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
+            transform: translateY(-4px);
             border-color: var(--red);
         }
 
         .stat-card .label {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -378,7 +662,6 @@
             font-weight: 600;
         }
 
-        /* ----- QUICK ACTION CARD ----- */
         .quick-action-card {
             background: linear-gradient(135deg, var(--navy), var(--navy-light));
             border: 2px solid var(--red);
@@ -387,14 +670,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             cursor: pointer;
             text-decoration: none;
-            box-shadow: 0 4px 20px rgba(33, 21, 104, 0.15);
+            box-shadow: 0 4px 20px rgba(26, 10, 62, 0.15);
         }
         .quick-action-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(33, 21, 104, 0.25);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(26, 10, 62, 0.25);
         }
         .quick-action-card .label {
             font-size: 11px;
@@ -416,10 +699,10 @@
             transition: transform 0.3s ease;
         }
         .quick-action-card:hover .arrow {
-            transform: translateX(4px);
+            transform: translateX(6px);
         }
 
-        /* ----- GRID 2 ----- */
+        /* GRID 2 */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -433,6 +716,11 @@
             border-radius: 14px;
             padding: 20px 22px;
             box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .card:hover {
+            border-color: var(--red);
+            box-shadow: var(--shadow-lg);
         }
 
         .card-header {
@@ -466,55 +754,38 @@
             border: 1px solid var(--red);
         }
 
-        /* ----- SEARCH BAR ----- */
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 14px;
+        /* Scroll Area */
+        .scroll-area {
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
-        .search-bar input {
-            flex: 1;
-            padding: 10px 14px;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text);
-            font-family: var(--lato);
-            font-size: 13px;
-            outline: none;
-            transition: all 0.3s ease;
+        .scroll-area::-webkit-scrollbar {
+            width: 4px;
         }
-        .search-bar input::placeholder {
-            color: #94a3b8;
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
         }
-        .search-bar input:focus {
-            border-color: var(--red);
-            box-shadow: 0 0 0 3px var(--red-glow);
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
         }
-        .search-bar select {
-            padding: 10px 14px;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 10px;
+
+        .empty-state {
             color: var(--muted);
             font-family: var(--lato);
             font-size: 13px;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .search-bar select:focus {
-            border-color: var(--red);
-            box-shadow: 0 0 0 3px var(--red-glow);
+            text-align: center;
+            padding: 32px 0;
         }
 
-        /* ----- PATIENT ITEMS ----- */
+        /* Patient Items */
         .patient-item {
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px 14px;
             margin-bottom: 8px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             background: #fafbfc;
             display: flex;
             align-items: center;
@@ -546,13 +817,13 @@
             color: var(--red);
         }
 
-        /* ----- READING ITEMS ----- */
+        /* Reading Items */
         .reading-item {
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 10px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             background: #fafbfc;
         }
         .reading-item:last-child {
@@ -584,7 +855,7 @@
             border: 1px solid var(--red);
         }
 
-        /* ----- ALERT ITEMS ----- */
+        /* Alert Items */
         .alert-item {
             border: 1px solid var(--red);
             border-radius: 10px;
@@ -636,56 +907,60 @@
             color: var(--white);
         }
 
-        /* ----- SCROLL AREA ----- */
-        .scroll-area {
-            max-height: 340px;
-            overflow-y: auto;
-            padding-right: 4px;
+        /* Care Team Section */
+        .care-team-section {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: var(--white);
+            border-radius: 14px;
+            border: 2px solid var(--red);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
         }
-        .scroll-area::-webkit-scrollbar {
-            width: 4px;
+        .care-team-section:hover {
+            box-shadow: var(--shadow-lg);
         }
-        .scroll-area::-webkit-scrollbar-track {
-            background: transparent;
+        .care-team-section .team-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: var(--montserrat);
         }
-        .scroll-area::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
+        .care-team-section .team-item {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 4px;
         }
-
-        .empty-state {
+        .care-team-section .team-item .item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .care-team-section .team-item .item .icon {
+            font-size: 14px;
+        }
+        .care-team-section .team-item .item .label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy);
+            font-family: var(--montserrat);
+        }
+        .care-team-section .team-item .item .value {
+            font-size: 13px;
             color: var(--muted);
             font-family: var(--lato);
-            font-size: 13px;
-            text-align: center;
-            padding: 32px 0;
+        }
+        .care-team-section .team-item .item .value.not-assigned {
+            color: #94a3b8;
+            font-style: italic;
         }
 
-        /* ----- MOBILE HAMBURGER ----- */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .hamburger:hover {
-            background: #f1f5f9;
-        }
-        .hamburger span {
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: var(--text);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        /* ----- RESPONSIVE ----- */
+        /* ============================================ */
+        /* RESPONSIVE */
+        /* ============================================ */
         @media (max-width: 1024px) {
             .stats-row {
                 grid-template-columns: repeat(2, 1fr);
@@ -693,11 +968,11 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar {
+            .gradient-sidebar {
                 transform: translateX(-100%);
                 width: 280px;
             }
-            .sidebar.open {
+            .gradient-sidebar.open {
                 transform: translateX(0);
             }
 
@@ -745,14 +1020,6 @@
                 padding: 16px;
             }
 
-            .search-bar {
-                flex-wrap: wrap;
-            }
-            .search-bar select {
-                flex: 1;
-                min-width: 120px;
-            }
-
             .quick-action-card {
                 padding: 14px 16px;
             }
@@ -760,15 +1027,9 @@
                 font-size: 15px;
             }
 
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 90;
-            }
-            .sidebar-overlay.open {
-                display: block;
+            .care-team-section .team-item {
+                flex-direction: column;
+                gap: 8px;
             }
         }
 
@@ -801,20 +1062,25 @@
 
 <body>
 
-    <!-- ══ SIDEBAR OVERLAY (mobile) ══ -->
+    <!-- ============================================ -->
+    <!-- SIDEBAR OVERLAY (Mobile) -->
+    <!-- ============================================ -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- ══ SIDEBAR ══ -->
-    <aside class="sidebar" id="sidebar">
+    <!-- ============================================ -->
+    <!-- MODERN GRADIENT SIDEBAR -->
+    <!-- ============================================ -->
+    <aside class="gradient-sidebar" id="sidebar">
+        <!-- Brand Section -->
         <div class="sidebar-brand">
-            <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'">
+            <div class="brand-icon">RG</div>
             <div>
-                <div class="brand-text">RG<span>MS</span></div>
-                <div class="brand-sub">Client Portal</div>
+                <div class="brand-text">RGMS <span>Portal</span></div>
+                <span class="brand-sub">Client Portal</span>
             </div>
         </div>
 
-        <!-- Role Badges in Sidebar -->
+        <!-- Role Badges -->
         <div class="role-badges-sidebar">
             {% if client.is_patient %}
             <span class="role-badge-side patient">🧑‍⚕️ Patient</span>
@@ -827,59 +1093,99 @@
             {% endif %}
         </div>
 
+        <!-- Navigation -->
         <nav class="sidebar-nav">
             <div class="nav-label">Main</div>
 
             <a href="#" class="nav-item active">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                Dashboard
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Dashboard</span>
             </a>
 
             <a href="#" class="nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                {% if client.is_caregiver %}
-                Patients I Care For
-                {% else %}
-                My Records
-                {% endif %}
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <span class="nav-label">
+                    {% if client.is_caregiver %}
+                    Patients I Care For
+                    {% else %}
+                    My Records
+                    {% endif %}
+                </span>
                 <span class="badge">{{ total_my_readings }}</span>
             </a>
 
             <a href="#" class="nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                Health Records
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Health Records</span>
                 <span class="badge">{{ total_my_readings }}</span>
             </a>
 
-            <a href="{% url 'add_vital_reading' %}" class="nav-item" style="color:var(--cyan); opacity:1;">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="var(--cyan)"/></svg>
-                Add New Reading
+            <a href="{% url 'add_vital_reading' %}" class="nav-item add-reading">
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 4v16M4 12h16"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Add New Reading</span>
             </a>
 
             <div class="nav-label">Overview</div>
 
             <a href="#" class="nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                Recent Readings
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Recent Readings</span>
                 <span class="badge">{{ total_my_readings }}</span>
             </a>
 
             <a href="#" class="nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Alerts
-                <span class="badge" style="background:rgba(220,53,69,0.15);color:var(--red);border:1px solid var(--red);">{{ total_alerts }}</span>
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <span class="nav-label">Alerts</span>
+                <span class="badge badge-red">{{ total_alerts }}</span>
             </a>
         </nav>
 
-        <div class="sidebar-footer">
-            <a href="{% url 'logout' %}" class="logout-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Logout
+        <!-- User Section -->
+        <div class="sidebar-user">
+            <div class="user-card">
+                <div class="user-avatar">{{ client.full_name|slice:":2"|upper }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ client.full_name }}</div>
+                    <div class="user-role">Client Portal</div>
+                </div>
+                <div class="user-status"></div>
+            </div>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span>End Session</span>
             </a>
         </div>
     </aside>
 
-    <!-- ══ MAIN CONTENT ══ -->
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
     <main class="main-content">
 
         <!-- TOP BAR -->
@@ -1061,44 +1367,44 @@
         </div>
 
         <!-- CARE TEAM SECTION -->
-        <div style="margin-top:24px;padding:16px 20px;background:#f8fafc;border-radius:14px;border:2px solid var(--red);">
-            <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
-                <div>
-                    <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;font-family:var(--montserrat);">My Care Team</span>
-                    <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;">
-                        <div>
-                            <span style="font-size:13px;font-weight:600;color:var(--navy);font-family:var(--montserrat);">👨‍⚕️ Doctor</span>
-                            <span style="font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--lato);">
-                                {% if client.assigned_doctor %}
-                                    Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username }}
-                                {% else %}
-                                    <span style="color:#94a3b8;">Not assigned</span>
-                                {% endif %}
-                            </span>
-                        </div>
-                        <div>
-                            <span style="font-size:13px;font-weight:600;color:var(--navy);font-family:var(--montserrat);">👩‍⚕️ Caregiver</span>
-                            <span style="font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--lato);">
-                                {% if client.assigned_caregiver %}
-                                    {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username }}
-                                {% else %}
-                                    <span style="color:#94a3b8;">Not assigned</span>
-                                {% endif %}
-                            </span>
-                        </div>
-                        <div>
-                            <span style="font-size:13px;font-weight:600;color:var(--navy);font-family:var(--montserrat);">📋 Care Type</span>
-                            <span style="font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--lato);">
-                                {{ client.get_care_type_display }}
-                            </span>
-                        </div>
-                    </div>
+        <div class="care-team-section">
+            <div class="team-label">My Care Team</div>
+            <div class="team-item">
+                <div class="item">
+                    <span class="icon">👨‍⚕️</span>
+                    <span class="label">Doctor:</span>
+                    <span class="value {% if not client.assigned_doctor %}not-assigned{% endif %}">
+                        {% if client.assigned_doctor %}
+                            Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username }}
+                        {% else %}
+                            Not assigned
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="item">
+                    <span class="icon">👩‍⚕️</span>
+                    <span class="label">Caregiver:</span>
+                    <span class="value {% if not client.assigned_caregiver %}not-assigned{% endif %}">
+                        {% if client.assigned_caregiver %}
+                            {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username }}
+                        {% else %}
+                            Not assigned
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="item">
+                    <span class="icon">📋</span>
+                    <span class="label">Care Type:</span>
+                    <span class="value">{{ client.get_care_type_display }}</span>
                 </div>
             </div>
         </div>
 
     </main>
 
+    <!-- ============================================ -->
+    <!-- MOBILE MENU JAVASCRIPT -->
+    <!-- ============================================ -->
     <script>
         // Mobile sidebar toggle
         const hamburger = document.getElementById('hamburgerBtn');
@@ -1120,10 +1426,17 @@
         });
 
         // Close sidebar on nav item click (mobile)
-        document.querySelectorAll('.nav-item, .logout-item').forEach(item => {
+        document.querySelectorAll('.nav-item, .logout-btn').forEach(item => {
             item.addEventListener('click', () => {
                 if (window.innerWidth <= 768) toggleSidebar(false);
             });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && sidebar.classList.contains('open')) {
+                toggleSidebar(false);
+            }
         });
     </script>
 
