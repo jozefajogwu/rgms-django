@@ -1244,19 +1244,31 @@
                 </div>
             </div>
             <div class="stat-card">
-                <div class="label">{% if client.is_caregiver %}People I Care For{% else %}My Care Team{% endif %}</div>
+                <div class="label">My Care Team</div>
                 <div class="value">
                     {% if client.is_caregiver %}
-                    {{ patients_caring_for.count }}
+                        {{ patients_caring_for.count }}
                     {% else %}
-                    {{ client.assigned_doctor.get_full_name|default:"—" }}
+                        {% if client.assigned_doctor %}
+                            Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username|truncatechars:12 }}
+                        {% elif client.assigned_caregiver %}
+                            {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username|truncatechars:12 }}
+                        {% else %}
+                            —
+                        {% endif %}
                     {% endif %}
                 </div>
                 <div class="sub">
                     {% if client.is_caregiver %}
-                    Patients under your care
+                        Patients under your care
                     {% else %}
-                    {% if client.assigned_doctor %}Doctor assigned{% else %}No doctor assigned{% endif %}
+                        {% if client.assigned_doctor %}
+                            👨‍⚕️ Doctor assigned
+                        {% elif client.assigned_caregiver %}
+                            👩‍⚕️ Caregiver assigned
+                        {% else %}
+                            No care team assigned
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -1377,7 +1389,7 @@
                         {% if client.assigned_doctor %}
                             Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username }}
                         {% else %}
-                            Not assigned
+                            <span style="color:#94a3b8;font-style:italic;">Not assigned</span>
                         {% endif %}
                     </span>
                 </div>
@@ -1388,14 +1400,14 @@
                         {% if client.assigned_caregiver %}
                             {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username }}
                         {% else %}
-                            Not assigned
+                            <span style="color:#94a3b8;font-style:italic;">Not assigned</span>
                         {% endif %}
                     </span>
                 </div>
                 <div class="item">
                     <span class="icon">📋</span>
                     <span class="label">Care Type:</span>
-                    <span class="value">{{ client.get_care_type_display }}</span>
+                    <span class="value">{{ client.get_care_type_display|default:"Not specified" }}</span>
                 </div>
             </div>
         </div>
