@@ -5,6 +5,9 @@ Django settings for rgms_core project.
 import os
 from pathlib import Path
 from decouple import config
+import dj_database_url
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,13 +63,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rgms_core.wsgi.application'
 
-# Database
+# ============================================
+# DATABASE CONFIGURATION - FIXED
+# ============================================
+# First, define DATABASES with SQLite as default
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Then, optionally override with PostgreSQL from environment
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Use PostgreSQL from DATABASE_URL
+    DATABASES['default'] = dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    print(f"✅ Using PostgreSQL database")
+else:
+    # If no DATABASE_URL, use SQLite (for local development)
+    print("ℹ️ Using SQLite database (set DATABASE_URL for PostgreSQL)")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -107,11 +128,11 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Welcome to Genesis Portal Admin",
     "copyright": "Genesis Portal © 2026",
     
-    # Logo settings - Add these!
-    "site_logo": "admin/img/logo.png",  # Path to your logo
-    "site_logo_classes": "img-circle",  # Optional: img-circle, img-fluid, etc.
-    "site_icon": "admin/img/favicon.ico",  # Favicon
-    "login_logo": "admin/img/logo.png",  # Logo on login page
+    # Logo settings
+    "site_logo": "admin/img/logo.png",
+    "site_logo_classes": "img-circle",
+    "site_icon": "admin/img/favicon.ico",
+    "login_logo": "admin/img/logo.png",
     "login_logo_classes": "img-fluid",
     
     "show_sidebar": True,
@@ -189,24 +210,10 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
-
 # Email Configuration
 # For testing (prints email to console)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'RGMS System <noreply@rgms.com>'
-
-# For production (Gmail)
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-app-password'
-# DEFAULT_FROM_EMAIL = 'RGMS System <your-email@gmail.com>'
-
-
-
-# rgms_core/settings.py
 
 # Logout redirect URL
 LOGOUT_REDIRECT_URL = 'home'  # Redirect to homepage after logout
