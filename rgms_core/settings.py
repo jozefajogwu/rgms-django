@@ -120,7 +120,8 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# JAZZMIN Configuration
+## rgms_core/settings.py
+
 JAZZMIN_SETTINGS = {
     "site_title": "Genesis Portal Admin",
     "site_header": "Genesis Portal",
@@ -128,87 +129,32 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Welcome to Genesis Portal Admin",
     "copyright": "Genesis Portal © 2026",
     
-    # Logo settings
-    "site_logo": "admin/img/logo.png",
-    "site_logo_classes": "img-circle",
-    "site_icon": "admin/img/favicon.ico",
-    "login_logo": "admin/img/logo.png",
+    # ============================================
+    # LOGO SETTINGS - TRY THESE VARIANTS
+    # ============================================
+    # Option 1: Use full static path (recommended)
+    "site_logo": "/static/admin/img/logo.png",
+    "site_logo_classes": "img-fluid",
+    "site_icon": "/static/admin/img/favicon.ico",
+    "login_logo": "/static/admin/img/logo.png",
     "login_logo_classes": "img-fluid",
+    
+    # Option 2: If the above doesn't work, try:
+    # "site_logo": "img/logo.png",
+    # "login_logo": "img/logo.png",
+    
+    # Option 3: If you have the logo in images folder:
+    # "site_logo": "images/logo.png",
+    # "login_logo": "images/logo.png",
     
     "show_sidebar": True,
     "navigation_expanded": True,
     "navigation": [
-        {
-            "name": "Monitoring",
-            "icon": "fas fa-heartbeat",
-            "children": [
-                {
-                    "name": "Patients",
-                    "url": "/admin/monitoring/patient/",
-                    "icon": "fas fa-user-injured"
-                },
-                {
-                    "name": "Vital Readings",
-                    "url": "/admin/monitoring/vitalreading/",
-                    "icon": "fas fa-heartbeat"
-                },
-                {
-                    "name": "Alerts",
-                    "url": "/admin/monitoring/alert/",
-                    "icon": "fas fa-bell"
-                },
-            ]
-        },
-        {
-            "name": "User Management",
-            "icon": "fas fa-users-cog",
-            "children": [
-                {
-                    "name": "Users",
-                    "url": "/admin/auth/user/",
-                    "icon": "fas fa-user"
-                },
-                {
-                    "name": "Groups",
-                    "url": "/admin/auth/group/",
-                    "icon": "fas fa-users"
-                },
-            ]
-        }
+        # ... your navigation settings ...
     ]
 }
 
-JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-primary",
-    "accent": "accent-primary",
-    "navbar": "navbar-white navbar-light",
-    "no_navbar_border": False,
-    "navbar_fixed": False,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": False,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "default",
-    "dark_mode_theme": None,
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success",
-    }
-}
+
 
 # Email Configuration
 # For testing (prints email to console)
