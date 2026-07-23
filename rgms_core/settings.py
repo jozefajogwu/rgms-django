@@ -122,6 +122,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ## rgms_core/settings.py
 
+# ============================================
+# JAZZMIN CONFIGURATION
+# ============================================
 JAZZMIN_SETTINGS = {
     "site_title": "Genesis Portal Admin",
     "site_header": "Genesis Portal",
@@ -130,31 +133,102 @@ JAZZMIN_SETTINGS = {
     "copyright": "Genesis Portal © 2026",
     
     # ============================================
-    # LOGO SETTINGS - TRY THESE VARIANTS
+    # LOGO SETTINGS - TRY THESE OPTIONS
     # ============================================
-    # Option 1: Use full static path (recommended)
+    
+    # Option 1: Try with leading slash (RECOMMENDED)
     "site_logo": "/static/admin/img/logo.png",
-    "site_logo_classes": "img-fluid",
+    "site_logo_classes": "img-fluid",  # Changed from img-circle
     "site_icon": "/static/admin/img/favicon.ico",
     "login_logo": "/static/admin/img/logo.png",
     "login_logo_classes": "img-fluid",
     
-    # Option 2: If the above doesn't work, try:
+    # Option 2: If Option 1 doesn't work, try using images folder
+    # "site_logo": "/static/images/logo.png",
+    # "login_logo": "/static/images/logo.png",
+    
+    # Option 3: If Option 2 doesn't work, try without leading slash
+    # "site_logo": "admin/img/logo.png",
+    # "login_logo": "admin/img/logo.png",
+    
+    # Option 4: Try using STATIC_URL
     # "site_logo": "img/logo.png",
     # "login_logo": "img/logo.png",
-    
-    # Option 3: If you have the logo in images folder:
-    # "site_logo": "images/logo.png",
-    # "login_logo": "images/logo.png",
     
     "show_sidebar": True,
     "navigation_expanded": True,
     "navigation": [
-        # ... your navigation settings ...
+        {
+            "name": "Monitoring",
+            "icon": "fas fa-heartbeat",
+            "children": [
+                {
+                    "name": "Patients",
+                    "url": "/admin/monitoring/patient/",
+                    "icon": "fas fa-user-injured"
+                },
+                {
+                    "name": "Vital Readings",
+                    "url": "/admin/monitoring/vitalreading/",
+                    "icon": "fas fa-heartbeat"
+                },
+                {
+                    "name": "Alerts",
+                    "url": "/admin/monitoring/alert/",
+                    "icon": "fas fa-bell"
+                },
+            ]
+        },
+        {
+            "name": "User Management",
+            "icon": "fas fa-users-cog",
+            "children": [
+                {
+                    "name": "Users",
+                    "url": "/admin/auth/user/",
+                    "icon": "fas fa-user"
+                },
+                {
+                    "name": "Groups",
+                    "url": "/admin/auth/group/",
+                    "icon": "fas fa-users"
+                },
+            ]
+        }
     ]
 }
 
-
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    }
+}
 
 # Email Configuration
 # For testing (prints email to console)
