@@ -73,23 +73,24 @@ class Patient(models.Model):
     )
 
     # ============================================
-    # CARE TEAM (Who cares for this person)
+    # CARE TEAM (Who cares for this person) - UPDATED to use new Doctor/Caregiver models
     # ============================================
     assigned_doctor = models.ForeignKey(
-        User,
+        'Doctor',  # Changed from User to Doctor model
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='doctor_patients'
+        related_name='doctor_patients',
+        help_text="The doctor assigned to this patient"
     )
 
     assigned_caregiver = models.ForeignKey(
-        User,
+        'Caregiver',  # Changed from User to Caregiver model
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='caregiver_patients',
-        help_text="The person who provides care for this client"
+        help_text="The caregiver assigned to this patient"
     )
     
     # ============================================
@@ -468,7 +469,7 @@ class DoctorAssignment(models.Model):
     """
     
     doctor = models.ForeignKey(
-        User,
+        'Doctor',  # Updated to use Doctor model
         on_delete=models.CASCADE,
         related_name='doctor_assignments',
         help_text="The doctor providing care"
@@ -504,21 +505,97 @@ class DoctorAssignment(models.Model):
         ordering = ['-started_at']
     
     def __str__(self):
-        doctor_name = self.doctor.get_full_name() or self.doctor.username
+        doctor_name = self.doctor.user.get_full_name() or self.doctor.user.username
         return f"Dr. {doctor_name} → {self.patient.full_name} ({self.get_assignment_type_display()})"
 
 
-class Doctor(User):
-    """Proxy model for Doctor users"""
+# ============================================
+# NEW: Regular Doctor Model (NOT a proxy)
+# ============================================
+class Doctor(models.Model):
+    """
+    Doctor model - Regular model with its own table
+    Works like Patient model
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='doctor_profile'
+    )
+    specialty = models.CharField(max_length=100, blank=True)
+    license_number = models.CharField(max_length=50, blank=True, unique=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+    
+    def get_full_name(self):
+        return self.user.get_full_name()
+    
+    @property
+    def username(self):
+        return self.user.username
+    
+    @property
+    def email(self):
+        return self.user.email
+    
+    @property
+    def first_name(self):
+        return self.user.first_name
+    
+    @property
+    def last_name(self):
+        return self.user.last_name
+    
     class Meta:
-        proxy = True
         verbose_name = "Doctor"
         verbose_name_plural = "Doctors"
+        ordering = ['-created_at']
 
 
-class Caregiver(User):
-    """Proxy model for Caregiver users"""
+# ============================================
+# NEW: Regular Caregiver Model (NOT a proxy)
+# ============================================
+class Caregiver(models.Model):
+    """
+    Caregiver model - Regular model with its own table
+    Works like Patient model
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='caregiver_profile'
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+    
+    def get_full_name(self):
+        return self.user.get_full_name()
+    
+    @property
+    def username(self):
+        return self.user.username
+    
+    @property
+    def email(self):
+        return self.user.email
+    
+    @property
+    def first_name(self):
+        return self.user.first_name
+    
+    @property
+    def last_name(self):
+        return self.user.last_name
+    
     class Meta:
-        proxy = True
         verbose_name = "Caregiver"
         verbose_name_plural = "Caregivers"
+        ordering = ['-created_at']
