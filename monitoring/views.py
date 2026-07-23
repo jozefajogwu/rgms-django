@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.db.models import Count, Avg, Q
 from datetime import timedelta
@@ -26,6 +27,8 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            # ✅ Fix user groups on login
+            fix_user_groups(user)
             return redirect_user_by_role(user)
         messages.error(request, 'Invalid username or password.')
 
@@ -37,18 +40,48 @@ def logout_view(request):
     return redirect('home')
 
 
+def fix_user_groups(user):
+    """
+    ✅ NEW: Ensure user is in the correct groups based on their assignments
+    """
+    # Get or create groups
+    doctors_group, _ = Group.objects.get_or_create(name='Doctors')
+    caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
+    patients_group, _ = Group.objects.get_or_create(name='Patients')
+    
+    # Check if this user is assigned as a doctor to any patient
+    if Patient.objects.filter(assigned_doctor=user).exists():
+        user.groups.add(doctors_group)
+    
+    # Check if this user is assigned as a caregiver to any patient
+    if Patient.objects.filter(assigned_caregiver=user).exists():
+        user.groups.add(caregivers_group)
+    
+    # Check if this user has a patient profile
+    try:
+        patient_profile = user.client_profile
+        if patient_profile.is_patient:
+            user.groups.add(patients_group)
+        if patient_profile.is_caregiver:
+            user.groups.add(caregivers_group)
+    except Patient.DoesNotExist:
+        pass
+
+
 def redirect_user_by_role(user):
     """Redirect users based on their role"""
     # Superusers go to admin
     if user.is_superuser:
         return redirect('admin:index')
     
+    # ✅ Ensure user groups are correct before redirecting
+    fix_user_groups(user)
+    
     # Doctors go to doctor dashboard (clinical view with charts)
     if user.groups.filter(name='Doctors').exists():
         return redirect('doctor_dashboard')
     
     # Everyone else (patients, caregivers, clients) go to caregiver dashboard
-    # Since Patient = Caregiver = Client, they all use the same dashboard
     return redirect('caregiver_dashboard')
 
 
@@ -100,6 +133,9 @@ def get_patient_chart_data(patient, days=7):
 def doctor_dashboard(request):
     """Doctor dashboard - clinical view with charts"""
     doctor = request.user
+    
+    # ✅ Fix user groups on dashboard load
+    fix_user_groups(doctor)
     
     # Get all patients assigned to this doctor
     patients = Patient.objects.filter(assigned_doctor=doctor)
@@ -217,6 +253,9 @@ def doctor_patients_list(request):
     """Show all patients assigned to the logged-in doctor"""
     doctor = request.user
     
+    # ✅ Fix user groups on page load
+    fix_user_groups(doctor)
+    
     # Get all patients assigned to this doctor
     patients = Patient.objects.filter(assigned_doctor=doctor)
     
@@ -253,6 +292,9 @@ def doctor_patients_list(request):
 def triage_desk(request):
     """Triage desk with detailed charts for clinical review"""
     doctor = request.user
+    
+    # ✅ Fix user groups on page load
+    fix_user_groups(doctor)
     
     # Get all patients assigned to this doctor
     patients = Patient.objects.filter(assigned_doctor=doctor)
@@ -308,6 +350,9 @@ def triage_desk(request):
 def live_telemetry(request):
     """Live telemetry dashboard with real-time charts"""
     doctor = request.user
+    
+    # ✅ Fix user groups on page load
+    fix_user_groups(doctor)
     
     # Get all patients assigned to this doctor
     patients = Patient.objects.filter(assigned_doctor=doctor)
@@ -373,6 +418,9 @@ def caregiver_dashboard(request):
     Unified dashboard for Client/Patient/Caregiver
     Since Patient = Caregiver = Client, this one dashboard serves all roles
     """
+    
+    # ✅ Fix user groups on page load
+    fix_user_groups(request.user)
     
     # Get the current user's client profile
     try:

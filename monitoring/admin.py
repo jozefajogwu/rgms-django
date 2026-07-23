@@ -31,19 +31,34 @@ class CustomUserAdmin(BaseUserAdmin):
             return ", ".join([g.name for g in roles])
         return "No Role"
     get_roles.short_description = "Roles"
+    
+    def save_model(self, request, obj, form, change):
+        """✅ NEW: Ensure users are properly saved with groups"""
+        super().save_model(request, obj, form, change)
+        
+        # If this user is a staff member but not in any group, add to appropriate group
+        if obj.is_staff and not obj.groups.exists() and not obj.is_superuser:
+            # Check if they're assigned as a doctor
+            if Patient.objects.filter(assigned_doctor=obj).exists():
+                doctors_group, _ = Group.objects.get_or_create(name='Doctors')
+                obj.groups.add(doctors_group)
+            # Check if they're assigned as a caregiver
+            elif Patient.objects.filter(assigned_caregiver=obj).exists():
+                caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
+                obj.groups.add(caregivers_group)
 
 
 # ============================================
-# DOCTOR ADMIN - FIXED
+# DOCTOR ADMIN - IMPROVED
 # ============================================
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
     """
-    Simplified Doctor management under Monitoring section
+    Improved Doctor management under Monitoring section
     """
-    list_display = ('username', 'get_full_name', 'email', 'get_patient_count', 'is_active')
+    list_display = ('username', 'get_full_name', 'email', 'get_patient_count', 'is_active', 'in_doctors_group')
     search_fields = ('username', 'first_name', 'last_name', 'email')
-    list_filter = ('is_active', 'is_staff')
+    list_filter = ('is_active', 'is_staff', 'groups')
     
     fieldsets = (
         ('Doctor Information', {
@@ -58,7 +73,7 @@ class DoctorAdmin(admin.ModelAdmin):
         }),
         ('Groups', {
             'fields': ('groups',),
-            'description': 'Select "Doctors" group to assign doctor role'
+            'description': '✅ Select "Doctors" group to assign doctor role (auto-assigned)'
         }),
     )
     
@@ -70,11 +85,21 @@ class DoctorAdmin(admin.ModelAdmin):
         return Patient.objects.filter(assigned_doctor=obj).count()
     get_patient_count.short_description = "Patients"
     
+    def in_doctors_group(self, obj):
+        """✅ NEW: Show if user is in Doctors group"""
+        if obj.groups.filter(name='Doctors').exists():
+            return mark_safe('✅ Yes')
+        return mark_safe('❌ No')
+    in_doctors_group.short_description = "In Doctors Group"
+    
     def save_model(self, request, obj, form, change):
         """
-        Save the doctor user properly with groups after saving
+        ✅ IMPROVED: Save the doctor user with proper group assignment
         """
-        # If this is a new user, create it first without groups
+        # Get or create Doctors group
+        doctors_group, _ = Group.objects.get_or_create(name='Doctors')
+        
+        # If this is a new user
         if not obj.pk:
             # Set password if provided
             password = form.cleaned_data.get('password')
@@ -89,26 +114,39 @@ class DoctorAdmin(admin.ModelAdmin):
             # SAVE FIRST to get an ID
             obj.save()
             
-            # NOW add the groups after the user has an ID
-            doctors_group, _ = Group.objects.get_or_create(name='Doctors')
+            # ✅ ADD TO DOCTORS GROUP
             obj.groups.add(doctors_group)
+            messages.info(request, f'✅ {obj.username} added to Doctors group')
+            
         else:
-            # For existing users, just save
+            # For existing users
             if form.cleaned_data.get('password'):
                 obj.set_password(form.cleaned_data.get('password'))
             
-            # Ensure they're in the Doctors group
-            if not obj.groups.filter(name='Doctors').exists():
-                doctors_group, _ = Group.objects.get_or_create(name='Doctors')
-                obj.groups.add(doctors_group)
-            
             obj.save()
+            
+            # ✅ ENSURE THEY'RE IN DOCTORS GROUP
+            if not obj.groups.filter(name='Doctors').exists():
+                obj.groups.add(doctors_group)
+                messages.info(request, f'✅ {obj.username} added to Doctors group')
+        
+        # ✅ Also add to Doctors group if they're assigned to any patient
+        if Patient.objects.filter(assigned_doctor=obj).exists():
+            if not obj.groups.filter(name='Doctors').exists():
+                obj.groups.add(doctors_group)
+                messages.info(request, f'✅ {obj.username} added to Doctors group (has patients)')
+        
+        # ✅ Save again if groups were changed
+        obj.save()
     
     def save_form(self, request, form, change):
         return form.save(commit=False)
     
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(groups__name='Doctors')
+        # Show users who should be doctors (in Doctors group OR assigned as doctor)
+        return super().get_queryset(request).filter(
+            Q(groups__name='Doctors') | Q(assigned_doctor_patients__isnull=False)
+        ).distinct()
     
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -121,16 +159,16 @@ class DoctorAdmin(admin.ModelAdmin):
 
 
 # ============================================
-# CAREGIVER ADMIN - FIXED
+# CAREGIVER ADMIN - IMPROVED
 # ============================================
 @admin.register(Caregiver)
 class CaregiverAdmin(admin.ModelAdmin):
     """
-    Simplified Caregiver management under Monitoring section
+    Improved Caregiver management under Monitoring section
     """
-    list_display = ('username', 'get_full_name', 'email', 'get_patient_count', 'is_active')
+    list_display = ('username', 'get_full_name', 'email', 'get_patient_count', 'is_active', 'in_caregivers_group')
     search_fields = ('username', 'first_name', 'last_name', 'email')
-    list_filter = ('is_active', 'is_staff')
+    list_filter = ('is_active', 'is_staff', 'groups')
     
     fieldsets = (
         ('Caregiver Information', {
@@ -145,7 +183,7 @@ class CaregiverAdmin(admin.ModelAdmin):
         }),
         ('Groups', {
             'fields': ('groups',),
-            'description': 'Select "Caregivers" group to assign caregiver role'
+            'description': '✅ Select "Caregivers" group to assign caregiver role (auto-assigned)'
         }),
     )
     
@@ -157,11 +195,21 @@ class CaregiverAdmin(admin.ModelAdmin):
         return Patient.objects.filter(assigned_caregiver=obj).count()
     get_patient_count.short_description = "Patients"
     
+    def in_caregivers_group(self, obj):
+        """✅ NEW: Show if user is in Caregivers group"""
+        if obj.groups.filter(name='Caregivers').exists():
+            return mark_safe('✅ Yes')
+        return mark_safe('❌ No')
+    in_caregivers_group.short_description = "In Caregivers Group"
+    
     def save_model(self, request, obj, form, change):
         """
-        Save the caregiver user properly with groups after saving
+        ✅ IMPROVED: Save the caregiver user with proper group assignment
         """
-        # If this is a new user, create it first without groups
+        # Get or create Caregivers group
+        caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
+        
+        # If this is a new user
         if not obj.pk:
             # Set password if provided
             password = form.cleaned_data.get('password')
@@ -176,26 +224,39 @@ class CaregiverAdmin(admin.ModelAdmin):
             # SAVE FIRST to get an ID
             obj.save()
             
-            # NOW add the groups after the user has an ID
-            caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
+            # ✅ ADD TO CAREGIVERS GROUP
             obj.groups.add(caregivers_group)
+            messages.info(request, f'✅ {obj.username} added to Caregivers group')
+            
         else:
-            # For existing users, just save
+            # For existing users
             if form.cleaned_data.get('password'):
                 obj.set_password(form.cleaned_data.get('password'))
             
-            # Ensure they're in the Caregivers group
-            if not obj.groups.filter(name='Caregivers').exists():
-                caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
-                obj.groups.add(caregivers_group)
-            
             obj.save()
+            
+            # ✅ ENSURE THEY'RE IN CAREGIVERS GROUP
+            if not obj.groups.filter(name='Caregivers').exists():
+                obj.groups.add(caregivers_group)
+                messages.info(request, f'✅ {obj.username} added to Caregivers group')
+        
+        # ✅ Also add to Caregivers group if they're assigned to any patient
+        if Patient.objects.filter(assigned_caregiver=obj).exists():
+            if not obj.groups.filter(name='Caregivers').exists():
+                obj.groups.add(caregivers_group)
+                messages.info(request, f'✅ {obj.username} added to Caregivers group (has patients)')
+        
+        # ✅ Save again if groups were changed
+        obj.save()
     
     def save_form(self, request, form, change):
         return form.save(commit=False)
     
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(groups__name='Caregivers')
+        # Show users who should be caregivers (in Caregivers group OR assigned as caregiver)
+        return super().get_queryset(request).filter(
+            Q(groups__name='Caregivers') | Q(assigned_caregiver_patients__isnull=False)
+        ).distinct()
     
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -274,6 +335,10 @@ class PatientAdminForm(forms.ModelForm):
             user.save()
             patient.user = user
             
+            # ✅ NEW: Add patient to Patients group
+            patients_group, _ = Group.objects.get_or_create(name='Patients')
+            user.groups.add(patients_group)
+            
             self._user_created = True
             self._username = username
             self._password = password
@@ -281,8 +346,29 @@ class PatientAdminForm(forms.ModelForm):
         if commit:
             patient.save()
             self.save_m2m()
+            
+            # ✅ NEW: After saving, ensure proper group assignments
+            self._assign_user_groups(patient)
         
         return patient
+    
+    def _assign_user_groups(self, patient):
+        """✅ NEW: Auto-assign users to correct groups based on assignments"""
+        doctors_group, _ = Group.objects.get_or_create(name='Doctors')
+        caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
+        patients_group, _ = Group.objects.get_or_create(name='Patients')
+        
+        # If a doctor is assigned, add them to Doctors group
+        if patient.assigned_doctor:
+            patient.assigned_doctor.groups.add(doctors_group)
+        
+        # If a caregiver is assigned, add them to Caregivers group
+        if patient.assigned_caregiver:
+            patient.assigned_caregiver.groups.add(caregivers_group)
+        
+        # If this patient is also a caregiver, add to Caregivers group
+        if patient.is_caregiver and patient.user:
+            patient.user.groups.add(caregivers_group)
     
     def _generate_username(self, full_name):
         import re
@@ -384,6 +470,27 @@ class PatientAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+        
+        # ✅ NEW: Ensure group assignments after saving
+        doctors_group, _ = Group.objects.get_or_create(name='Doctors')
+        caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
+        patients_group, _ = Group.objects.get_or_create(name='Patients')
+        
+        # If a doctor is assigned, add them to Doctors group
+        if obj.assigned_doctor:
+            obj.assigned_doctor.groups.add(doctors_group)
+        
+        # If a caregiver is assigned, add them to Caregivers group
+        if obj.assigned_caregiver:
+            obj.assigned_caregiver.groups.add(caregivers_group)
+        
+        # If this patient is a caregiver, add to Caregivers group
+        if obj.is_caregiver and obj.user:
+            obj.user.groups.add(caregivers_group)
+        
+        # If this patient is a patient, add to Patients group
+        if obj.is_patient and obj.user:
+            obj.user.groups.add(patients_group)
         
         if hasattr(form, '_user_created') and form._user_created:
             self.message_user(
