@@ -749,3 +749,61 @@ def live_telemetry(request):
     }
     
     return render(request, 'live_telemetry.html', context)
+
+@login_required
+def patient_detail(request, patient_id):
+    """
+    Display detailed information for a single patient
+    """
+    user = request.user
+    
+    # Get the Doctor instance for this user
+    try:
+        doctor = Doctor.objects.get(user=user)
+    except Doctor.DoesNotExist:
+        messages.error(request, 'You are not registered as a doctor.')
+        return redirect('home')
+    
+    # Get the patient
+    patient = get_object_or_404(Patient, id=patient_id)
+    
+    # Check if this doctor is assigned to this patient
+    if patient.assigned_doctor != doctor:
+        messages.error(request, 'You are not authorized to view this patient.')
+        return redirect('doctor_patients_list')
+    
+    # Get all readings for this patient
+    readings = VitalReading.objects.filter(patient=patient).order_by('-created_at')
+    total_readings = readings.count()
+    
+    # Get latest reading
+    latest_reading = readings.first()
+    
+    # Get alerts for this patient
+    active_alerts = Alert.objects.filter(patient=patient, status='unreviewed')
+    resolved_alerts = Alert.objects.filter(patient=patient, status='reviewed')
+    
+    # Get chart data (last 30 days)
+    chart_data, stats = get_patient_chart_data(patient, days=30)
+    
+    # Get readings for the table (last 20)
+    recent_readings = readings[:20]
+    
+    # Check if patient has a user account
+    has_account = patient.user is not None
+    
+    context = {
+        'patient': patient,
+        'doctor': doctor,
+        'readings': recent_readings,
+        'total_readings': total_readings,
+        'latest_reading': latest_reading,
+        'active_alerts': active_alerts,
+        'resolved_alerts': resolved_alerts,
+        'chart_data': chart_data,
+        'stats': stats,
+        'has_account': has_account,
+        'alert_count': active_alerts.count(),
+    }
+    
+    return render(request, 'patient_detail.html', context)

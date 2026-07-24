@@ -28,6 +28,9 @@ urlpatterns = [
 
     # Alerts
     path('alerts/<int:alert_id>/review/', views.mark_alert_reviewed, name='mark_alert_reviewed'),
+    
+     # Patient detail view
+    path('patient/<int:patient_id>/', views.patient_detail, name='patient_detail'),
 ]
 
 if settings.DEBUG:
