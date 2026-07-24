@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Triage Desk · RGMS</title>
     
     <!-- Add favicon -->
@@ -15,8 +15,8 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Google Fonts - Montserrat + Lato -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Updated: Lora + Inter + DM Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <!-- Custom Dashboard CSS -->
     <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
@@ -34,31 +34,45 @@
             --red-glow: rgba(220, 53, 69, 0.25);
             --red-pale: #fde8ea;
             --red-gradient: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
+            --gold: #D4A843;
+            --gold-glow: rgba(212, 168, 67, 0.2);
             --white: #FFFFFF;
             --bg: #f8fafc;
             --text: #1a1a2e;
             --muted: #6c757d;
             --border: #e9ecef;
-            --montserrat: 'Montserrat', sans-serif;
-            --lato: 'Lato', sans-serif;
+            --lora: 'Lora', serif;
             --inter: 'Inter', sans-serif;
+            --mono: 'DM Mono', monospace;
             --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
             --shadow-lg: 0 20px 60px rgba(26, 10, 62, 0.12);
             --shadow-xl: 0 30px 80px rgba(26, 10, 62, 0.16);
             --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
             --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         body {
-            font-family: var(--lato);
+            font-family: var(--inter);
             background-color: var(--bg);
             letter-spacing: -0.011em;
             color: var(--text);
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
         }
         
-        .font-display {
-            font-family: var(--montserrat);
+        .font-heading {
+            font-family: var(--lora);
+        }
+        
+        .font-mono {
+            font-family: var(--mono);
+        }
+        
+        .font-body {
+            font-family: var(--inter);
         }
 
         /* ============================================ */
@@ -71,9 +85,12 @@
             overflow: hidden;
             width: 280px;
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
         }
 
         .gradient-sidebar::before {
@@ -85,6 +102,44 @@
             height: 200%;
             background: radial-gradient(circle at 70% 30%, rgba(220, 53, 69, 0.06), transparent 70%);
             pointer-events: none;
+        }
+
+        /* ---- ECG Trace ---- */
+        .gradient-sidebar .ecg-trace {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 28px;
+            opacity: 0.15;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .gradient-sidebar .ecg-trace svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .gradient-sidebar .ecg-trace .ecg-line {
+            stroke: var(--red);
+            stroke-width: 1.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: ecgPulse 3.5s ease-in-out infinite;
+        }
+
+        @keyframes ecgPulse {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .gradient-sidebar .ecg-trace .ecg-line {
+                animation: none;
+            }
         }
 
         /* Brand Section */
@@ -111,7 +166,7 @@
             font-weight: 800;
             box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
             position: relative;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
 
         .gradient-sidebar .sidebar-brand .brand-icon::after {
@@ -126,7 +181,7 @@
             font-size: 18px;
             font-weight: 800;
             color: white;
-            font-family: var(--montserrat);
+            font-family: var(--lora);
             letter-spacing: -0.3px;
             line-height: 1.2;
         }
@@ -143,6 +198,7 @@
             font-weight: 600;
             display: block;
             margin-top: 2px;
+            font-family: var(--inter);
         }
 
         /* Navigation */
@@ -151,6 +207,7 @@
             flex: 1;
             position: relative;
             z-index: 1;
+            overflow-y: auto;
         }
 
         .gradient-sidebar .nav-item {
@@ -168,6 +225,7 @@
             font-size: 14px;
             font-weight: 500;
             font-family: var(--inter);
+            min-height: 48px;
         }
 
         .gradient-sidebar .nav-item .icon-wrapper {
@@ -186,6 +244,7 @@
             width: 20px;
             height: 20px;
             transition: var(--transition);
+            stroke: currentColor;
         }
 
         .gradient-sidebar .nav-item .nav-label {
@@ -202,6 +261,8 @@
             color: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.04);
             transition: var(--transition);
+            font-family: var(--mono);
+            min-height: 24px;
         }
 
         .gradient-sidebar .nav-item .badge-red {
@@ -274,6 +335,11 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        .gradient-sidebar .nav-item:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
         /* User Section */
         .gradient-sidebar .sidebar-user {
             padding: 16px 20px 20px;
@@ -313,7 +379,7 @@
             font-size: 14px;
             flex-shrink: 0;
             box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
 
         .gradient-sidebar .sidebar-user .user-info {
@@ -325,7 +391,7 @@
             font-size: 13px;
             font-weight: 600;
             color: white;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -337,6 +403,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 600;
+            font-family: var(--inter);
         }
 
         .gradient-sidebar .sidebar-user .user-status {
@@ -350,14 +417,8 @@
         }
 
         @keyframes pulse-dot {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.3);
-                opacity: 0.7;
-            }
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
         }
 
         .gradient-sidebar .logout-btn {
@@ -378,8 +439,9 @@
             letter-spacing: 0.05em;
             transition: var(--transition);
             cursor: pointer;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             text-decoration: none;
+            min-height: 44px;
         }
 
         .gradient-sidebar .logout-btn:hover {
@@ -397,6 +459,461 @@
 
         .gradient-sidebar .logout-btn:hover svg {
             transform: translateX(2px) rotate(2deg);
+        }
+
+        .gradient-sidebar .logout-btn:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* ============================================ */
+        /* RESPONSIVE: Hide gradient sidebar on mobile */
+        /* ============================================ */
+        @media (max-width: 768px) {
+            .gradient-sidebar {
+                display: none !important;
+            }
+        }
+
+        /* ============================================ */
+        /* MOBILE HEADER */
+        /* ============================================ */
+        .mobile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--navy);
+            border-bottom: 2px solid var(--red);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            min-height: 64px;
+        }
+
+        @media (min-width: 769px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+
+        .hamburger-btn {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            min-height: 44px;
+            min-width: 44px;
+            position: relative;
+            z-index: 45;
+        }
+
+        .hamburger-btn .hamburger-line {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--white);
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center;
+        }
+
+        .hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        .hamburger-btn:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+            border-radius: 8px;
+        }
+
+        .mobile-header .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-header .mobile-brand .brand-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--red-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+            font-family: var(--inter);
+        }
+
+        .mobile-header .mobile-brand .brand-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            font-family: var(--lora);
+        }
+
+        .mobile-header .mobile-brand .brand-text span {
+            color: var(--red);
+        }
+
+        .mobile-header .mobile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--red-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--inter);
+        }
+
+        /* ============================================ */
+        /* MOBILE SIDEBAR OVERLAY */
+        /* ============================================ */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 35;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ============================================ */
+        /* MOBILE SIDEBAR */
+        /* ============================================ */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100vh;
+            height: 100dvh;
+            background: var(--navy);
+            z-index: 50;
+            padding: 24px 16px;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+        .mobile-sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 24px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .mobile-sidebar-brand .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--red-gradient);
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 800;
+            box-shadow: 0 4px 20px var(--red-glow);
+            flex-shrink: 0;
+            font-family: var(--inter);
+        }
+
+        .mobile-sidebar-brand .brand-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            font-family: var(--lora);
+        }
+
+        .mobile-sidebar-brand .brand-text span {
+            color: var(--red);
+        }
+
+        .mobile-sidebar-brand .brand-sub {
+            font-size: 10px;
+            color: #ffffff;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            font-family: var(--inter);
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            opacity: 0.7;
+            cursor: pointer;
+            font-family: var(--inter);
+            min-height: 44px;
+        }
+
+        .mobile-nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 1;
+        }
+
+        .mobile-nav-item.active {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(220, 53, 69, 0.15);
+            opacity: 1;
+        }
+
+        .mobile-nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            stroke-width: 1.8;
+            stroke: currentColor;
+        }
+
+        .mobile-nav-item .badge {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #ffffff;
+            opacity: 0.6;
+            font-family: var(--mono);
+        }
+
+        .mobile-nav-item .badge-count {
+            margin-left: auto;
+            background: var(--red);
+            color: var(--white);
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: var(--mono);
+        }
+
+        .mobile-logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            opacity: 0.7;
+            cursor: pointer;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 16px;
+            font-family: var(--inter);
+            min-height: 44px;
+        }
+
+        .mobile-logout-btn:hover {
+            background: rgba(220, 53, 69, 0.08);
+            color: var(--red);
+            opacity: 1;
+        }
+
+        .mobile-logout-btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            stroke-width: 1.8;
+        }
+
+        .mobile-logout-btn:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+            border-radius: 8px;
+        }
+
+        .mobile-user-section {
+            padding: 12px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mobile-user-section .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--red-gradient);
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+            font-family: var(--inter);
+        }
+
+        .mobile-user-section .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            font-family: var(--inter);
+        }
+
+        .mobile-user-section .user-role {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: var(--inter);
+        }
+
+        /* ============================================ */
+        /* MOBILE DOCK */
+        /* ============================================ */
+        .mobile-dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 68px;
+            background: var(--navy);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0 8px;
+            padding-bottom: var(--safe-bottom);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 50;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (min-width: 769px) {
+            .mobile-dock {
+                display: none;
+            }
+        }
+
+        .mobile-dock-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 56px;
+            padding: 4px 0;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            cursor: pointer;
+            min-height: 48px;
+        }
+
+        .mobile-dock-item .icon-wrapper {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .mobile-dock-item .icon-wrapper svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .mobile-dock-item .label {
+            font-size: 9px;
+            font-weight: 600;
+            margin-top: 2px;
+            font-family: var(--inter);
+            transition: var(--transition);
+        }
+
+        .mobile-dock-item.active {
+            color: var(--white);
+        }
+
+        .mobile-dock-item.active .icon-wrapper {
+            transform: translateY(-2px);
+        }
+
+        .mobile-dock-item.active .label {
+            color: var(--red);
+        }
+
+        .mobile-dock-item .badge {
+            position: absolute;
+            top: 2px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 0 8px var(--red-glow);
+        }
+
+        .mobile-dock-item .badge-count {
+            position: absolute;
+            top: -4px;
+            right: 4px;
+            background: var(--red);
+            color: var(--white);
+            font-size: 8px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+            font-family: var(--mono);
+        }
+
+        .mobile-dock-item:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+            border-radius: 8px;
         }
 
         /* ============================================ */
@@ -427,13 +944,41 @@
             box-shadow: var(--shadow);
         }
 
+        /* ============================================ */
+        /* STATS GRID - Snap scroll under 380px */
+        /* ============================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 380px) {
+            .stats-grid {
+                display: flex;
+                gap: 12px;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding: 4px 0 8px 0;
+                scrollbar-width: none;
+            }
+            .stats-grid::-webkit-scrollbar { display: none; }
+            .stats-grid .stat-card {
+                flex: 0 0 160px;
+                scroll-snap-align: start;
+            }
+        }
+
         .stat-card {
             background: var(--white);
-            padding: 20px 24px;
+            padding: 18px 20px;
             border-radius: 16px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             transition: var(--transition);
+            min-height: 88px;
         }
 
         .stat-card:hover {
@@ -448,7 +993,7 @@
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             display: block;
             margin-bottom: 4px;
         }
@@ -457,14 +1002,16 @@
             font-size: 28px;
             font-weight: 800;
             color: var(--navy);
-            font-family: var(--montserrat);
+            font-family: var(--mono);
             line-height: 1.2;
+            letter-spacing: 0.5px;
         }
 
         .stat-card .stat-sub {
             font-size: 10px;
             color: var(--muted);
             margin-top: 2px;
+            font-family: var(--inter);
         }
 
         .stat-card.red { 
@@ -505,7 +1052,7 @@
             font-weight: 600;
             color: var(--navy);
             margin-bottom: 6px;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
         .chart-container .chart-wrapper {
             height: 150px;
@@ -521,6 +1068,7 @@
             padding-top: 4px;
             border-top: 1px solid rgba(226, 232, 240, 0.4);
             font-weight: 600;
+            font-family: var(--mono);
         }
         .chart-container .chart-stats .stat-value {
             font-weight: 700;
@@ -532,15 +1080,16 @@
         .chart-container .chart-stats .stat-label {
             color: var(--muted);
             font-weight: 400;
+            font-family: var(--inter);
         }
 
-        /* Responsive */
+        /* ============================================ */
+        /* RESPONSIVE */
+        /* ============================================ */
         @media (max-width: 768px) {
-            .gradient-sidebar {
-                display: none !important;
-            }
             .main-content {
                 padding: 16px !important;
+                padding-bottom: calc(16px + 80px) !important;
             }
             .stats-grid {
                 grid-template-columns: 1fr 1fr !important;
@@ -555,6 +1104,7 @@
             }
             .stat-card {
                 padding: 12px !important;
+                min-height: 72px;
             }
             .stat-value {
                 font-size: 18px !important;
@@ -562,21 +1112,151 @@
             .stat-label {
                 font-size: 8px !important;
             }
+            .chart-container .chart-wrapper {
+                height: 120px !important;
+            }
+        }
+
+        /* ============================================ */
+        /* REDUCED MOTION */
+        /* ============================================ */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .animated-card:hover,
+            .stat-card:hover {
+                transform: none !important;
+            }
+            .gradient-sidebar .nav-item:hover {
+                transform: none !important;
+            }
+            .gradient-sidebar .ecg-trace .ecg-line {
+                animation: none !important;
+            }
+            .pulse-dot {
+                animation: none !important;
+            }
+        }
+
+        /* ============================================ */
+        /* FOCUS VISIBLE */
+        /* ============================================ */
+        :focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* ============================================ */
+        /* SAFE AREA SUPPORT */
+        /* ============================================ */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+                padding-top: max(0px, env(safe-area-inset-top));
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+            .mobile-dock {
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+            .mobile-sidebar {
+                padding-top: max(16px, env(safe-area-inset-top));
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+            }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row antialiased select-none">
 
     <!-- ============================================ -->
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <!-- ============================================ -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ============================================ -->
+    <!-- MOBILE SIDEBAR -->
+    <!-- ============================================ -->
+    <div class="mobile-sidebar" id="mobileSidebar">
+        <div class="mobile-sidebar-brand">
+            <div class="brand-icon">RG</div>
+            <div>
+                <div class="brand-text">RGMS <span>Portal</span></div>
+                <div class="brand-sub">Clinical Care</div>
+            </div>
+        </div>
+
+        <div class="mobile-user-section">
+            <div class="avatar">{{ user.first_name|first|default:user.username|first|upper }}</div>
+            <div>
+                <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                <div class="user-role">Geriatrics Unit</div>
+            </div>
+        </div>
+
+        <nav style="flex:1;display:flex;flex-direction:column;gap:4px;">
+            <a href="{% url 'doctor_dashboard' %}" class="mobile-nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Dashboard
+            </a>
+
+            <a href="{% url 'doctor_patients_list' %}" class="mobile-nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Patients List
+                <span class="badge">{{ total_patients }}</span>
+            </a>
+
+            <a href="{% url 'live_telemetry' %}" class="mobile-nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Live Telemetry
+                <span class="badge" style="background:rgba(56,189,248,0.15);color:#38bdf8;">Active</span>
+            </a>
+
+            <a href="{% url 'triage_desk' %}" class="mobile-nav-item active">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Triage Desk
+                {% if critical_count > 0 %}
+                <span class="badge" style="background:rgba(220,53,69,0.15);color:#DC3545;">{{ critical_count }} Critical</span>
+                {% else %}
+                <span class="badge">0</span>
+                {% endif %}
+            </a>
+        </nav>
+
+        <a href="{% url 'logout' %}" class="mobile-logout-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Logout
+        </a>
+    </div>
+
+    <!-- ============================================ -->
     <!-- 1. LEFT SIDEBAR NAVIGATION (DESKTOP) - Modern Gradient Sidebar -->
     <!-- ============================================ -->
     <aside class="gradient-sidebar hidden md:flex">
-        <!-- Brand Section -->
+        <!-- Brand Section with ECG Trace -->
         <div class="sidebar-brand">
             <div class="brand-icon">RG</div>
             <div>
                 <div class="brand-text">RGMS <span>Portal</span></div>
-                <span class="brand-sub">Clinical Care Suite</span>
+                <span class="brand-sub">Clinical Care <span class="caregiver-label">Suite</span></span>
+            </div>
+            <!-- ECG Trace -->
+            <div class="ecg-trace" aria-hidden="true">
+                <svg viewBox="0 0 280 28" preserveAspectRatio="none">
+                    <polyline class="ecg-line" points="0,14 20,14 30,6 40,22 50,14 70,14 80,6 90,22 100,14 120,14 130,6 140,22 150,14 170,14 180,6 190,22 200,14 220,14 230,6 240,22 250,14 280,14"/>
+                </svg>
             </div>
         </div>
 
@@ -650,19 +1330,37 @@
     </aside>
 
     <!-- ============================================ -->
-    <!-- 2. MAIN CONTENT -->
+    <!-- 2. MOBILE HEADER -->
+    <!-- ============================================ -->
+    <header class="mobile-header">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-expanded="false" aria-controls="mobileSidebar" aria-label="Toggle navigation">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="mobile-brand">
+            <div class="brand-icon">RG</div>
+            <div class="brand-text">RGMS<span>.</span></div>
+        </div>
+        <div class="mobile-avatar">{{ user.first_name|first|default:user.username|first|upper }}</div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- 3. MAIN CONTENT -->
     <!-- ============================================ -->
     <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
 
         <!-- Header -->
         <header class="bg-white border-b-2 border-[#DC3545] px-6 md:px-8 py-4 flex items-center justify-between shadow-sm shrink-0 z-40">
             <div>
-                <h1 class="text-xl font-extrabold tracking-tight text-[#1a0a3e] font-display">🚨 Triage Desk</h1>
-                <p class="text-xs text-slate-500 mt-0.5">Prioritize patients based on urgency</p>
+                <h1 class="text-xl font-extrabold tracking-tight text-[#1a0a3e] font-heading">🚨 Triage Desk</h1>
+                <p class="text-xs text-slate-500 mt-0.5 font-body">Prioritize patients based on urgency</p>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-sm text-slate-600 hidden sm:block">Dr. {{ request.user.get_full_name|default:request.user.username }}</span>
-                <a href="{% url 'doctor_dashboard' %}" class="text-sm font-bold text-[#1a0a3e] bg-slate-100 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-200 transition">Back to Dashboard</a>
+                <span class="text-sm text-slate-600 hidden sm:block font-body">Dr. {{ request.user.get_full_name|default:request.user.username }}</span>
+                <a href="{% url 'doctor_dashboard' %}" class="text-sm font-bold text-[#1a0a3e] bg-slate-100 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-200 transition font-body min-h-[44px]">
+                    Back to Dashboard
+                </a>
             </div>
         </header>
 
@@ -670,122 +1368,122 @@
         <div class="main-content flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
 
             <!-- Quick Stats -->
-            <div class="stats-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="stats-grid">
                 <div class="stat-card red animated-card">
-                    <span class="stat-label">🚨 Critical</span>
-                    <p class="stat-value">{{ critical_count }}</p>
-                    <p class="stat-sub">Requires immediate attention</p>
+                    <span class="stat-label font-body">🚨 Critical</span>
+                    <p class="stat-value font-mono">{{ critical_count }}</p>
+                    <p class="stat-sub font-body">Requires immediate attention</p>
                 </div>
                 <div class="stat-card amber animated-card">
-                    <span class="stat-label">⚠️ Warning</span>
-                    <p class="stat-value">{{ warning_count }}</p>
-                    <p class="stat-sub">Needs clinical review</p>
+                    <span class="stat-label font-body">⚠️ Warning</span>
+                    <p class="stat-value font-mono">{{ warning_count }}</p>
+                    <p class="stat-sub font-body">Needs clinical review</p>
                 </div>
                 <div class="stat-card emerald animated-card">
-                    <span class="stat-label">✅ Stable</span>
-                    <p class="stat-value">{{ stable_count }}</p>
-                    <p class="stat-sub">No immediate concerns</p>
+                    <span class="stat-label font-body">✅ Stable</span>
+                    <p class="stat-value font-mono">{{ stable_count }}</p>
+                    <p class="stat-sub font-body">No immediate concerns</p>
                 </div>
                 <div class="stat-card animated-card">
-                    <span class="stat-label">📊 Total</span>
-                    <p class="stat-value">{{ total_patients }}</p>
-                    <p class="stat-sub">Patients under care</p>
+                    <span class="stat-label font-body">📊 Total</span>
+                    <p class="stat-value font-mono">{{ total_patients }}</p>
+                    <p class="stat-sub font-body">Patients under care</p>
                 </div>
             </div>
 
             <!-- Critical Patients (Top Priority) -->
             {% if critical_patients %}
             <div>
-                <h2 class="text-xl font-extrabold text-[#DC3545] mb-4 flex items-center gap-2">
+                <h2 class="text-xl font-extrabold text-[#DC3545] mb-4 flex items-center gap-2 font-heading">
                     <span>🚨</span> Critical - Immediate Action Required
-                    <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{{ critical_patients|length }}</span>
+                    <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-mono">{{ critical_patients|length }}</span>
                 </h2>
                 <div class="space-y-4">
                     {% for item in critical_patients %}
                     <div class="priority-critical p-4 rounded-xl border border-red-200 shadow-sm animated-card">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
-                                <p class="font-bold text-lg text-[#1a0a3e]">{{ item.patient.full_name }}</p>
-                                <p class="text-sm text-slate-600">{{ item.patient.care_type|title }}</p>
+                                <p class="font-bold text-lg text-[#1a0a3e] font-body">{{ item.patient.full_name }}</p>
+                                <p class="text-sm text-slate-600 font-body">{{ item.patient.care_type|title }}</p>
                                 {% if item.latest_reading %}
-                                <p class="text-xs text-slate-400 mt-1">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
+                                <p class="text-xs text-slate-400 mt-1 font-mono">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
                                 {% endif %}
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 {% for alert in item.alerts|slice:":3" %}
-                                <span class="bg-[#fde8ea] text-[#DC3545] border border-[#DC3545] px-3 py-1 rounded-full text-xs font-bold">⚠️ {{ alert.title }}</span>
+                                <span class="bg-[#fde8ea] text-[#DC3545] border border-[#DC3545] px-3 py-1 rounded-full text-xs font-bold font-mono">⚠️ {{ alert.title }}</span>
                                 {% endfor %}
-                                <a href="#" class="bg-[#DC3545] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#b02a37] transition">View Details</a>
+                                <a href="#" class="bg-[#DC3545] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#b02a37] transition font-body min-h-[44px]">
+                                    View Details
+                                </a>
                             </div>
                         </div>
 
-                        <!-- ============================================ -->
-                        <!-- DETAILED CHARTS FOR CRITICAL PATIENTS        -->
-                        <!-- ============================================ -->
+                        <!-- Detailed Charts for Critical Patients -->
                         {% if item.chart_data.labels %}
                         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Blood Pressure Chart -->
                             <div class="chart-container">
-                                <div class="chart-title">💉 Blood Pressure (mmHg)</div>
+                                <div class="chart-title font-body">💉 Blood Pressure (mmHg)</div>
                                 <div class="chart-wrapper">
                                     <canvas id="triageChartBP_{{ item.patient.id }}"></canvas>
                                 </div>
-                                <div class="chart-stats">
-                                    <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
-                                    <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <div class="chart-stats font-mono">
+                                    <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
+                                    <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
                                     <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                        <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                        <span class="stat-label font-body">Trend:</span> {{ item.stats.trend|title }}
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Heart Rate Chart -->
                             <div class="chart-container">
-                                <div class="chart-title">❤️ Heart Rate (bpm)</div>
+                                <div class="chart-title font-body">❤️ Heart Rate (bpm)</div>
                                 <div class="chart-wrapper">
                                     <canvas id="triageChartHR_{{ item.patient.id }}"></canvas>
                                 </div>
-                                <div class="chart-stats">
-                                    <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
-                                    <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <div class="chart-stats font-mono">
+                                    <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
+                                    <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
                                     <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                        <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                        <span class="stat-label font-body">Trend:</span> {{ item.stats.trend|title }}
                                     </span>
                                 </div>
                             </div>
 
                             <!-- SpO2 Chart -->
                             <div class="chart-container">
-                                <div class="chart-title">🫁 Oxygen Saturation (%)</div>
+                                <div class="chart-title font-body">🫁 Oxygen Saturation (%)</div>
                                 <div class="chart-wrapper">
                                     <canvas id="triageChartSpO2_{{ item.patient.id }}"></canvas>
                                 </div>
-                                <div class="chart-stats">
-                                    <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_spo2|floatformat:0 }}%</span></span>
-                                    <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <div class="chart-stats font-mono">
+                                    <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_spo2|floatformat:0 }}%</span></span>
+                                    <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
                                     <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                        <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                        <span class="stat-label font-body">Trend:</span> {{ item.stats.trend|title }}
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Blood Sugar Chart -->
                             <div class="chart-container">
-                                <div class="chart-title">🍬 Blood Sugar (mg/dL)</div>
+                                <div class="chart-title font-body">🍬 Blood Sugar (mg/dL)</div>
                                 <div class="chart-wrapper">
                                     <canvas id="triageChartSugar_{{ item.patient.id }}"></canvas>
                                 </div>
-                                <div class="chart-stats">
-                                    <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_sugar|floatformat:0 }} mg/dL</span></span>
-                                    <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <div class="chart-stats font-mono">
+                                    <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_sugar|floatformat:0 }} mg/dL</span></span>
+                                    <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
                                     <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                        <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                        <span class="stat-label font-body">Trend:</span> {{ item.stats.trend|title }}
                                     </span>
                                 </div>
                             </div>
                         </div>
                         {% else %}
-                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200 font-body">
                             No chart data available for this patient
                         </div>
                         {% endif %}
@@ -798,26 +1496,28 @@
             <!-- Warning Patients -->
             {% if warning_patients %}
             <div>
-                <h2 class="text-xl font-extrabold text-amber-600 mb-4 flex items-center gap-2">
+                <h2 class="text-xl font-extrabold text-amber-600 mb-4 flex items-center gap-2 font-heading">
                     <span>⚠️</span> Warning - Needs Clinical Review
-                    <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{{ warning_patients|length }}</span>
+                    <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-mono">{{ warning_patients|length }}</span>
                 </h2>
                 <div class="space-y-4">
                     {% for item in warning_patients %}
                     <div class="priority-warning p-4 rounded-xl border border-amber-200 shadow-sm animated-card">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
-                                <p class="font-bold text-lg text-[#1a0a3e]">{{ item.patient.full_name }}</p>
-                                <p class="text-sm text-slate-600">{{ item.patient.care_type|title }}</p>
+                                <p class="font-bold text-lg text-[#1a0a3e] font-body">{{ item.patient.full_name }}</p>
+                                <p class="text-sm text-slate-600 font-body">{{ item.patient.care_type|title }}</p>
                                 {% if item.latest_reading %}
-                                <p class="text-xs text-slate-400 mt-1">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
+                                <p class="text-xs text-slate-400 mt-1 font-mono">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
                                 {% endif %}
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 {% for alert in item.alerts|slice:":3" %}
-                                <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">⚠️ {{ alert.title }}</span>
+                                <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold font-mono">⚠️ {{ alert.title }}</span>
                                 {% endfor %}
-                                <a href="#" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition">Review</a>
+                                <a href="#" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition font-body min-h-[44px]">
+                                    Review
+                                </a>
                             </div>
                         </div>
 
@@ -826,36 +1526,36 @@
                         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Blood Pressure Chart -->
                             <div class="chart-container">
-                                <div class="chart-title">💉 Blood Pressure (mmHg)</div>
+                                <div class="chart-title font-body">💉 Blood Pressure (mmHg)</div>
                                 <div class="chart-wrapper">
                                     <canvas id="triageChartBP_{{ item.patient.id }}"></canvas>
                                 </div>
-                                <div class="chart-stats">
-                                    <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
-                                    <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <div class="chart-stats font-mono">
+                                    <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
+                                    <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
                                     <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                        <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                        <span class="stat-label font-body">Trend:</span> {{ item.stats.trend|title }}
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Heart Rate Chart -->
                             <div class="chart-container">
-                                <div class="chart-title">❤️ Heart Rate (bpm)</div>
+                                <div class="chart-title font-body">❤️ Heart Rate (bpm)</div>
                                 <div class="chart-wrapper">
                                     <canvas id="triageChartHR_{{ item.patient.id }}"></canvas>
                                 </div>
-                                <div class="chart-stats">
-                                    <span><span class="stat-label">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
-                                    <span><span class="stat-label">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
+                                <div class="chart-stats font-mono">
+                                    <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
+                                    <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
                                     <span class="{% if item.stats.trend == 'up' %}trend-up{% elif item.stats.trend == 'down' %}trend-down{% else %}trend-stable{% endif %}">
-                                        <span class="stat-label">Trend:</span> {{ item.stats.trend|title }}
+                                        <span class="stat-label font-body">Trend:</span> {{ item.stats.trend|title }}
                                     </span>
                                 </div>
                             </div>
                         </div>
                         {% else %}
-                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200 font-body">
                             No chart data available for this patient
                         </div>
                         {% endif %}
@@ -868,19 +1568,21 @@
             <!-- Stable Patients -->
             {% if stable_patients %}
             <div>
-                <h2 class="text-xl font-extrabold text-emerald-600 mb-4 flex items-center gap-2">
+                <h2 class="text-xl font-extrabold text-emerald-600 mb-4 flex items-center gap-2 font-heading">
                     <span>✅</span> Stable - Continue Monitoring
-                    <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{{ stable_patients|length }}</span>
+                    <span class="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full font-mono">{{ stable_patients|length }}</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {% for item in stable_patients %}
                     <div class="priority-stable p-4 rounded-xl border border-emerald-200 shadow-sm animated-card">
-                        <p class="font-bold text-[#1a0a3e]">{{ item.patient.full_name }}</p>
-                        <p class="text-sm text-slate-500">{{ item.patient.care_type|title }}</p>
+                        <p class="font-bold text-[#1a0a3e] font-body">{{ item.patient.full_name }}</p>
+                        <p class="text-sm text-slate-500 font-body">{{ item.patient.care_type|title }}</p>
                         {% if item.latest_reading %}
-                        <p class="text-xs text-slate-400 mt-1">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
+                        <p class="text-xs text-slate-400 mt-1 font-mono">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
                         {% endif %}
-                        <a href="#" class="text-emerald-600 text-xs font-bold hover:text-emerald-800 transition mt-2 inline-block">View Details →</a>
+                        <a href="#" class="text-emerald-600 text-xs font-bold hover:text-emerald-800 transition mt-2 inline-block font-body">
+                            View Details →
+                        </a>
                     </div>
                     {% endfor %}
                 </div>
@@ -893,13 +1595,52 @@
                 <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <h2 class="text-2xl font-bold text-slate-400">No Patients Assigned</h2>
-                <p class="text-slate-400 mt-2">Patients will appear here once they are assigned to you</p>
+                <h2 class="text-2xl font-bold text-slate-400 font-heading">No Patients Assigned</h2>
+                <p class="text-slate-400 mt-2 font-body">Patients will appear here once they are assigned to you</p>
             </div>
             {% endif %}
 
         </div>
     </main>
+
+    <!-- ============================================ -->
+    <!-- 4. BOTTOM MOBILE DOCK -->
+    <!-- ============================================ -->
+    <nav class="mobile-dock" aria-label="Mobile Navigation">
+        <a href="{% url 'doctor_dashboard' %}" class="mobile-dock-item">
+            <span class="icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </span>
+            <span class="label">Dashboard</span>
+        </a>
+        <a href="{% url 'doctor_patients_list' %}" class="mobile-dock-item">
+            <span class="icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </span>
+            <span class="label">Patients</span>
+        </a>
+        <a href="{% url 'live_telemetry' %}" class="mobile-dock-item">
+            <span class="icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </span>
+            <span class="label">Live</span>
+        </a>
+        <a href="{% url 'triage_desk' %}" class="mobile-dock-item active">
+            <span class="icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </span>
+            <span class="label">Triage</span>
+            {% if critical_count > 0 %}
+            <span class="badge"></span>
+            {% endif %}
+        </a>
+        <button class="mobile-dock-item" id="mobileMenuBtn" aria-label="Toggle menu">
+            <span class="icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </span>
+            <span class="label">Menu</span>
+        </button>
+    </nav>
 
     <!-- ============================================ -->
     <!-- CHART.JS SCRIPTS FOR TRIAGE CHARTS           -->
@@ -950,7 +1691,7 @@
                                 display: true,
                                 position: 'top',
                                 labels: {
-                                    font: { size: 9, weight: '600' },
+                                    font: { size: 9, weight: '600', family: "'Inter', sans-serif" },
                                     boxWidth: 10,
                                     boxHeight: 10,
                                     usePointStyle: true,
@@ -969,7 +1710,7 @@
                             x: {
                                 grid: { display: false },
                                 ticks: {
-                                    font: { size: 8 },
+                                    font: { size: 8, family: "'DM Mono', monospace" },
                                     maxRotation: 30,
                                     autoSkip: true,
                                     maxTicksLimit: 10
@@ -977,7 +1718,7 @@
                             },
                             y: {
                                 grid: { color: 'rgba(0,0,0,0.05)' },
-                                ticks: { font: { size: 8 } }
+                                ticks: { font: { size: 8, family: "'DM Mono', monospace" } }
                             }
                         }
                     }
@@ -1053,6 +1794,58 @@
                     );
                 {% endif %}
             {% endfor %}
+        });
+    </script>
+
+    <!-- Mobile Menu JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtns = document.querySelectorAll('#mobileMenuBtn, #hamburgerBtn');
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function toggleMenu(open) {
+                const isOpen = typeof open === 'boolean' ? open : !sidebar.classList.contains('open');
+                
+                sidebar.classList.toggle('open', isOpen);
+                overlay.classList.toggle('open', isOpen);
+                document.body.style.overflow = isOpen ? 'hidden' : '';
+                
+                menuBtns.forEach(function(btn) {
+                    btn.setAttribute('aria-expanded', isOpen);
+                });
+            }
+
+            menuBtns.forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+            });
+
+            overlay.addEventListener('click', function() {
+                toggleMenu(false);
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    toggleMenu(false);
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768 && sidebar.classList.contains('open')) {
+                    toggleMenu(false);
+                }
+            });
+
+            document.querySelectorAll('.mobile-nav-item, .mobile-logout-btn, .mobile-dock-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+                        toggleMenu(false);
+                    }
+                });
+            });
         });
     </script>
 
