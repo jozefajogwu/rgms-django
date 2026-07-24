@@ -3,12 +3,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Client Vital Entry · RGMS</title>
-     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
-    <!-- Google Fonts: Montserrat + Lato -->
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+    
+    <!-- Google Fonts: Lora (headings) + Inter (body) + DM Mono (numbers) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
         /* ----- GLOBAL DESIGN SYSTEM (Genesis Medevac) ----- */
@@ -18,6 +19,8 @@
             --red: #DC3545;
             --red-glow: rgba(220, 53, 69, 0.25);
             --red-pale: #fde8ea;
+            --gold: #D4A843;
+            --gold-glow: rgba(212, 168, 67, 0.2);
             --sky-blue: #AED9F6;
             --cyan: #00A3E0;
             --cyan-glow: rgba(0, 163, 224, 0.2);
@@ -26,10 +29,13 @@
             --text: #1a1a2e;
             --muted: #6c757d;
             --border: #e9ecef;
-            --montserrat: 'Montserrat', sans-serif;
-            --lato: 'Lato', sans-serif;
+            --lora: 'Lora', serif;
+            --inter: 'Inter', sans-serif;
+            --mono: 'DM Mono', monospace;
             --shadow: 0 4px 20px rgba(33, 21, 104, 0.06);
             --shadow-lg: 0 20px 60px rgba(33, 21, 104, 0.08);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * {
@@ -39,11 +45,14 @@
         }
 
         body {
-            font-family: var(--lato);
+            font-family: var(--inter);
             background: var(--navy);
             color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh;
             padding: 32px 24px;
+            padding-top: calc(32px + var(--safe-top));
+            padding-bottom: calc(32px + var(--safe-bottom));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -75,19 +84,15 @@
         .bg-orb:nth-child(2) {
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(0, 163, 224, 0.15), transparent 70%);
+            background: radial-gradient(circle, rgba(212, 168, 67, 0.12), transparent 70%);
             bottom: -150px;
             left: -100px;
             animation-duration: 26s;
             animation-delay: -8s;
         }
         @keyframes orbDrift {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-            100% {
-                transform: translate(40px, -20px) scale(1.1);
-            }
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, -20px) scale(1.1); }
         }
 
         /* ----- MAIN CONTAINER ----- */
@@ -105,18 +110,24 @@
             align-items: center;
             gap: 10px;
             color: rgba(255, 255, 255, 0.7);
-            font-weight: 700;
+            font-weight: 600;
             font-size: 14px;
             text-decoration: none;
             padding: 8px 4px 20px 4px;
             transition: all 0.2s ease;
-            font-family: var(--montserrat);
-            letter-spacing: 0.5px;
+            font-family: var(--inter);
+            letter-spacing: 0.3px;
             text-transform: uppercase;
+            min-height: 48px;
         }
         .back-link:hover {
             color: var(--white);
             transform: translateX(-4px);
+        }
+        .back-link:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 4px;
+            border-radius: 4px;
         }
         .back-link svg {
             width: 20px;
@@ -168,6 +179,8 @@
             justify-content: center;
             margin-bottom: 8px;
             box-shadow: 0 4px 16px var(--red-glow);
+            min-height: 48px;
+            min-width: 48px;
         }
 
         .form-header-left .icon-wrapper svg {
@@ -181,10 +194,9 @@
             font-size: 28px;
             font-weight: 700;
             color: var(--navy);
-            font-family: var(--montserrat);
+            font-family: var(--lora);
             letter-spacing: 0.5px;
             line-height: 1.2;
-            text-transform: uppercase;
         }
 
         .form-header h1 span {
@@ -194,7 +206,7 @@
         .form-header .subtitle {
             font-size: 14px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
             margin-top: 2px;
         }
 
@@ -214,12 +226,13 @@
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: 0.3px;
             border: 1px solid var(--red);
             white-space: nowrap;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             text-transform: uppercase;
+            min-height: 36px;
         }
 
         .badge-self svg {
@@ -238,7 +251,8 @@
             font-weight: 600;
             letter-spacing: 0.3px;
             border: 1px solid var(--red);
-            font-family: var(--montserrat);
+            font-family: var(--inter);
+            min-height: 28px;
         }
 
         /* ----- MESSAGES ----- */
@@ -249,11 +263,12 @@
             padding: 14px 20px;
             color: #16a34a;
             font-weight: 500;
-            font-family: var(--lato);
+            font-family: var(--inter);
             margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 10px;
+            min-height: 52px;
         }
 
         .msg-success svg {
@@ -294,7 +309,7 @@
             font-weight: 700;
             color: var(--red);
             font-size: 14px;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -312,7 +327,7 @@
             display: flex;
             align-items: flex-start;
             gap: 6px;
-            font-family: var(--lato);
+            font-family: var(--inter);
         }
 
         .error-summary .error-list li::before {
@@ -331,6 +346,7 @@
             gap: 16px;
             flex-wrap: wrap;
             margin-bottom: 4px;
+            min-height: 76px;
         }
 
         .client-info-card .avatar {
@@ -344,8 +360,10 @@
             color: var(--white);
             font-weight: 700;
             font-size: 16px;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             flex-shrink: 0;
+            min-height: 44px;
+            min-width: 44px;
         }
 
         .client-info-card .info {
@@ -358,20 +376,20 @@
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
 
         .client-info-card .info .name {
             font-size: 16px;
             font-weight: 700;
             color: var(--navy);
-            font-family: var(--montserrat);
+            font-family: var(--lora);
         }
 
         .client-info-card .info .email {
             font-size: 13px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
         }
 
         .client-info-card .status-badge {
@@ -383,9 +401,10 @@
             border-radius: 20px;
             border: 1px solid var(--red);
             white-space: nowrap;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            min-height: 32px;
         }
 
         /* ----- FORM ELEMENTS ----- */
@@ -404,10 +423,10 @@
 
         .field-group label {
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--navy);
-            font-family: var(--montserrat);
-            letter-spacing: 0.5px;
+            font-family: var(--inter);
+            letter-spacing: 0.3px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -423,10 +442,13 @@
             font-weight: 400;
             color: var(--muted);
             font-size: 12px;
-            font-family: var(--lato);
+            font-family: var(--inter);
             text-transform: none;
         }
 
+        /* 🔥 MONO DIGITS FOR ALL NUMBER INPUTS */
+        .field-group input[type="number"],
+        .field-group input[type="text"],
         .field-group input,
         .field-group select,
         .field-group textarea {
@@ -435,11 +457,18 @@
             background: #fafbfc;
             border: 2px solid var(--border);
             border-radius: 12px;
-            font-family: var(--lato);
+            font-family: var(--inter);
             font-size: 14px;
             color: var(--text);
             transition: all 0.2s ease;
             outline: none;
+            min-height: 48px;
+        }
+
+        .field-group input[type="number"] {
+            font-family: var(--mono);
+            font-size: 15px;
+            letter-spacing: 0.5px;
         }
 
         .field-group input:focus,
@@ -448,6 +477,13 @@
             border-color: var(--red);
             background: var(--white);
             box-shadow: 0 0 0 4px var(--red-glow);
+        }
+
+        .field-group input:focus-visible,
+        .field-group select:focus-visible,
+        .field-group textarea:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
         }
 
         /* Error state for form fields */
@@ -468,7 +504,7 @@
         .field-group input::placeholder,
         .field-group textarea::placeholder {
             color: #a0aec0;
-            font-family: var(--lato);
+            font-family: var(--inter);
         }
 
         .field-group textarea {
@@ -483,12 +519,13 @@
             background-position: right 16px center;
             padding-right: 40px;
             cursor: pointer;
+            min-height: 48px;
         }
 
         .field-group .error-text {
             font-size: 12px;
             color: var(--red);
-            font-family: var(--lato);
+            font-family: var(--inter);
             margin-top: 2px;
             display: flex;
             align-items: center;
@@ -499,7 +536,7 @@
         .field-group .help-text {
             font-size: 12px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
             margin-top: 2px;
             font-style: italic;
         }
@@ -538,12 +575,11 @@
             font-size: 18px;
             font-weight: 700;
             color: var(--navy);
-            font-family: var(--montserrat);
+            font-family: var(--lora);
             display: flex;
             align-items: center;
             gap: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         .section-header h2 .section-icon {
@@ -553,7 +589,7 @@
         .section-header p {
             font-size: 13px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
             margin-top: 2px;
             margin-left: 32px;
         }
@@ -566,7 +602,7 @@
             color: var(--white);
             border: none;
             border-radius: 14px;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             font-size: 17px;
             font-weight: 700;
             cursor: pointer;
@@ -579,6 +615,7 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
+            min-height: 60px;
         }
 
         .submit-btn:hover {
@@ -588,6 +625,11 @@
 
         .submit-btn:active {
             transform: translateY(-1px);
+        }
+
+        .submit-btn:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 4px;
         }
 
         .submit-btn svg {
@@ -626,7 +668,7 @@
             .grid-2,
             .grid-3,
             .grid-4 {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
                 gap: 16px;
             }
 
@@ -655,6 +697,7 @@
             .submit-btn {
                 padding: 16px;
                 font-size: 15px;
+                min-height: 56px;
             }
         }
 
@@ -677,15 +720,50 @@
             .field-group textarea {
                 padding: 10px 14px;
                 font-size: 13px;
+                min-height: 44px;
             }
 
             .badge-self {
                 font-size: 10px;
                 padding: 4px 12px;
+                min-height: 32px;
             }
 
             .client-info-card .info .name {
                 font-size: 15px;
+            }
+
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .submit-btn {
+                min-height: 52px;
+                font-size: 14px;
+                padding: 14px;
+            }
+        }
+
+        /* 🔥 Snap-scroll for stat row under 380px */
+        @media (max-width: 380px) {
+            .grid-4 {
+                display: flex;
+                gap: 12px;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                padding: 4px 0 8px 0;
+                scrollbar-width: none;
+            }
+            .grid-4::-webkit-scrollbar {
+                display: none;
+            }
+            .grid-4 .field-group {
+                flex: 0 0 140px;
+                scroll-snap-align: start;
             }
         }
 
@@ -704,6 +782,41 @@
         .field-group textarea:hover {
             border-color: var(--red);
         }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .bg-orb {
+                animation: none;
+            }
+            .form-card:hover {
+                box-shadow: 0 30px 80px rgba(0, 0, 0, 0.40);
+            }
+            .form-card:hover {
+                transform: none;
+            }
+            .submit-btn:hover {
+                transform: none;
+            }
+            .back-link:hover {
+                transform: none;
+            }
+        }
+
+        /* Focus-visible for keyboard nav */
+        :focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* Safe area insets for notch/home indicator */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(24px, env(safe-area-inset-left));
+                padding-right: max(24px, env(safe-area-inset-right));
+                padding-top: max(32px, env(safe-area-inset-top));
+                padding-bottom: max(32px, env(safe-area-inset-bottom));
+            }
+        }
     </style>
 </head>
 
@@ -718,8 +831,8 @@
     <div class="container">
 
         <!-- Back Link -->
-        <a href="{% url 'caregiver_dashboard' %}" class="back-link">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <a href="{% url 'caregiver_dashboard' %}" class="back-link" aria-label="Return to dashboard">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
             Back to Dashboard
@@ -731,7 +844,7 @@
             <!-- Header -->
             <div class="form-header">
                 <div class="form-header-left">
-                    <div class="icon-wrapper">
+                    <div class="icon-wrapper" aria-hidden="true">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                         </svg>
@@ -741,7 +854,7 @@
                 </div>
                 <div class="badge-group">
                     <span class="badge-self">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                         Self-Reporting
@@ -754,9 +867,9 @@
             <!-- ERROR SUMMARY -->
             <!-- ============================================ -->
             {% if form.errors %}
-            <div class="error-summary">
+            <div class="error-summary" role="alert">
                 <div class="error-header">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                     <div>
@@ -776,8 +889,8 @@
             <!-- Success Messages -->
             {% if messages %}
                 {% for message in messages %}
-                    <div class="msg-success">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="msg-success" role="alert">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         {{ message }}
@@ -787,7 +900,7 @@
 
             <!-- Client Info Card -->
             <div class="client-info-card">
-                <div class="avatar">{{ client.full_name|slice:":2"|upper }}</div>
+                <div class="avatar" aria-hidden="true">{{ client.full_name|slice:":2"|upper }}</div>
                 <div class="info">
                     <div class="label">Recording Vitals For</div>
                     <div class="name">{{ client.full_name }}</div>
@@ -798,7 +911,7 @@
                 <input type="hidden" name="patient" value="{{ client.id }}">
             </div>
 
-            <form method="POST">
+            <form method="POST" novalidate>
                 {% csrf_token %}
 
                 <!-- Blood Sugar -->
@@ -887,7 +1000,7 @@
 
                 <div class="section-header">
                     <h2>
-                        <span class="section-icon">🧪</span>
+                        <span class="section-icon" aria-hidden="true">🧪</span>
                         Urinalysis Result
                     </h2>
                     <p>Select the result shown on the urine dipstick test strip</p>
@@ -965,7 +1078,7 @@
 
                 <!-- Submit -->
                 <button type="submit" class="submit-btn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                     </svg>
                     Submit Vital Reading

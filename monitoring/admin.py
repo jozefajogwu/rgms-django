@@ -34,7 +34,7 @@ class CustomUserAdmin(BaseUserAdmin):
 
 
 # ============================================
-# DOCTOR ADMIN - UPDATED FOR REGULAR MODEL
+# DOCTOR ADMIN
 # ============================================
 class DoctorForm(forms.ModelForm):
     """Form for creating/editing doctors with user account"""
@@ -75,7 +75,6 @@ class DoctorForm(forms.ModelForm):
         if password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match.")
         
-        # If this is a new doctor and no password provided, set a default
         if not self.instance.pk and not password:
             cleaned_data['password'] = 'changeme123'
         
@@ -85,7 +84,6 @@ class DoctorForm(forms.ModelForm):
         instance = super().save(commit=False)
         
         if self.instance.pk:
-            # Update existing doctor
             user = self.instance.user
             user.username = self.cleaned_data['username']
             user.first_name = self.cleaned_data['first_name']
@@ -96,7 +94,6 @@ class DoctorForm(forms.ModelForm):
             user.is_staff = True
             user.save()
         else:
-            # Create new user
             user = User.objects.create_user(
                 username=self.cleaned_data['username'],
                 first_name=self.cleaned_data['first_name'],
@@ -154,13 +151,12 @@ class DoctorAdmin(admin.ModelAdmin):
     get_patient_count.short_description = "Patients"
     
     def save_model(self, request, obj, form, change):
-        """Save the doctor and handle user creation"""
         super().save_model(request, obj, form, change)
         messages.success(request, f'✅ Doctor "{obj.get_full_name()}" saved successfully!')
 
 
 # ============================================
-# CAREGIVER ADMIN - UPDATED FOR REGULAR MODEL
+# CAREGIVER ADMIN
 # ============================================
 class CaregiverForm(forms.ModelForm):
     """Form for creating/editing caregivers with user account"""
@@ -279,7 +275,7 @@ class CaregiverAdmin(admin.ModelAdmin):
 
 
 # ============================================
-# PATIENT ADMIN FORM (Creates user account automatically)
+# PATIENT ADMIN FORM
 # ============================================
 class PatientAdminForm(forms.ModelForm):
     create_account = forms.BooleanField(
@@ -345,7 +341,6 @@ class PatientAdminForm(forms.ModelForm):
             user.save()
             patient.user = user
             
-            # ✅ Add patient to Patients group
             patients_group, _ = Group.objects.get_or_create(name='Patients')
             user.groups.add(patients_group)
             
@@ -356,33 +351,23 @@ class PatientAdminForm(forms.ModelForm):
         if commit:
             patient.save()
             self.save_m2m()
-            
-            # ✅ After saving, ensure proper group assignments
             self._assign_user_groups(patient)
         
         return patient
     
     def _assign_user_groups(self, patient):
-        """✅ FIXED: Auto-assign users to correct groups based on assignments"""
         doctors_group, _ = Group.objects.get_or_create(name='Doctors')
         caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
         patients_group, _ = Group.objects.get_or_create(name='Patients')
         
-        # ✅ FIXED: Doctor is now a regular model with a user attribute
-        # If a doctor is assigned, add their User to Doctors group
         if patient.assigned_doctor:
-            # Access the user through the doctor object
             doctor_user = patient.assigned_doctor.user
             doctor_user.groups.add(doctors_group)
         
-        # ✅ FIXED: Caregiver is now a regular model with a user attribute
-        # If a caregiver is assigned, add their User to Caregivers group
         if patient.assigned_caregiver:
-            # Access the user through the caregiver object
             caregiver_user = patient.assigned_caregiver.user
             caregiver_user.groups.add(caregivers_group)
         
-        # If this patient is also a caregiver, add to Caregivers group
         if patient.is_caregiver and patient.user:
             patient.user.groups.add(caregivers_group)
     
@@ -397,7 +382,6 @@ class PatientAdminForm(forms.ModelForm):
         return username
     
     def _generate_password(self):
-        """Generate a secure random password"""
         import random
         import string
         characters = string.ascii_letters + string.digits + '!@#$%^&*()_+-='
@@ -406,25 +390,31 @@ class PatientAdminForm(forms.ModelForm):
 
 
 # ============================================
-# PATIENT ADMIN
+# ✅ UPDATED: PATIENT ADMIN (Option A - Single Source of Truth)
 # ============================================
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
     form = PatientAdminForm
     
+    # ✅ FIXED: Added 'assigned_doctor' and 'assigned_caregiver' to list_display
     list_display = (
         'full_name',
         'email',
         'get_username',
         'phone_number',
         'get_roles',
-        'get_doctor',
-        'get_caregiver',
+        'assigned_doctor',          # ← ADDED (was assigned_doctor_display)
+        'assigned_caregiver',       # ← ADDED (was assigned_caregiver_display)
         'created_at',
     )
     search_fields = ('full_name', 'phone_number', 'email', 'user__username')
     list_filter = ('gender', 'care_type', 'assigned_doctor', 'assigned_caregiver')
     readonly_fields = ('created_at', 'updated_at')
+    
+    # ✅ Now these work because they're in list_display
+    list_editable = ['assigned_doctor', 'assigned_caregiver']
+    
+    autocomplete_fields = ['assigned_doctor', 'assigned_caregiver']
     
     fieldsets = (
         ('Personal Information', {
@@ -472,40 +462,22 @@ class PatientAdmin(admin.ModelAdmin):
         return ", ".join(roles) if roles else "None"
     get_roles.short_description = "Roles"
     
-    def get_doctor(self, obj):
-        if obj.assigned_doctor:
-            return obj.assigned_doctor.get_full_name() or str(obj.assigned_doctor)
-        return "—"
-    get_doctor.short_description = "Doctor"
-    
-    def get_caregiver(self, obj):
-        if obj.assigned_caregiver:
-            return obj.assigned_caregiver.get_full_name() or str(obj.assigned_caregiver)
-        return "—"
-    get_caregiver.short_description = "Caregiver"
-    
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         
-        # ✅ FIXED: Doctor/Caregiver are regular models with user attribute
-        # Get groups (for User objects)
         doctors_group, _ = Group.objects.get_or_create(name='Doctors')
         caregivers_group, _ = Group.objects.get_or_create(name='Caregivers')
         patients_group, _ = Group.objects.get_or_create(name='Patients')
         
-        # ✅ FIXED: If a doctor is assigned, add their User to Doctors group
         if obj.assigned_doctor:
             obj.assigned_doctor.user.groups.add(doctors_group)
         
-        # ✅ FIXED: If a caregiver is assigned, add their User to Caregivers group
         if obj.assigned_caregiver:
             obj.assigned_caregiver.user.groups.add(caregivers_group)
         
-        # If this patient is a caregiver, add their User to Caregivers group
         if obj.is_caregiver and obj.user:
             obj.user.groups.add(caregivers_group)
         
-        # If this patient is a patient, add their User to Patients group
         if obj.is_patient and obj.user:
             obj.user.groups.add(patients_group)
         
@@ -518,33 +490,35 @@ class PatientAdmin(admin.ModelAdmin):
 
 
 # ============================================
-# DOCTOR ASSIGNMENT ADMIN
+# ✅ OPTION 1: DOCTORASSIGNMENT - HIDDEN FROM ADMIN
 # ============================================
-@admin.register(DoctorAssignment)
-class DoctorAssignmentAdmin(admin.ModelAdmin):
-    list_display = ('get_doctor', 'get_patient', 'assignment_type', 'is_active', 'started_at')
-    list_filter = ('assignment_type', 'is_active')
-    search_fields = ('doctor__user__username', 'patient__full_name')
-    
-    fieldsets = (
-        ('Assignment', {
-            'fields': ('doctor', 'patient', 'assignment_type')
-        }),
-        ('Status', {
-            'fields': ('is_active', 'ended_at')
-        }),
-        ('Notes', {
-            'fields': ('notes',)
-        }),
-    )
-    
-    def get_doctor(self, obj):
-        return obj.doctor.get_full_name() or str(obj.doctor)
-    get_doctor.short_description = "Doctor"
-    
-    def get_patient(self, obj):
-        return obj.patient.full_name
-    get_patient.short_description = "Patient"
+# We're NOT registering DoctorAssignment here
+# because Patient.assigned_doctor is the single source of truth
+# 
+# If you still want to see it but not edit, uncomment this:
+# 
+# @admin.register(DoctorAssignment)
+# class DoctorAssignmentAdmin(admin.ModelAdmin):
+#     list_display = ('get_doctor', 'get_patient', 'assignment_type', 'is_active', 'started_at')
+#     list_filter = ('assignment_type', 'is_active')
+#     search_fields = ('doctor__user__username', 'patient__full_name')
+#     
+#     def has_add_permission(self, request):
+#         return False
+#     
+#     def has_change_permission(self, request, obj=None):
+#         return False
+#     
+#     def has_delete_permission(self, request, obj=None):
+#         return False
+#     
+#     def get_doctor(self, obj):
+#         return obj.doctor.get_full_name() or str(obj.doctor)
+#     get_doctor.short_description = "Doctor"
+#     
+#     def get_patient(self, obj):
+#         return obj.patient.full_name
+#     get_patient.short_description = "Patient"
 
 
 # ============================================

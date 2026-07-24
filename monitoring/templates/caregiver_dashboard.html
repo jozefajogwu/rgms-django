@@ -3,22 +3,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Portal · RGMS</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %} · RGMS</title>
+
     <!-- Add favicon -->
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
-    
-    <!-- Google Fonts: Montserrat + Lato -->
+
+    <!-- Google Fonts: Lora (clinical serif display) + Inter (body/nav) + DM Mono (vitals/data) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Custom Dashboard CSS -->
     <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
 
     <style>
         /* ============================================ */
-        /* OVERRIDE STYLES - Genesis Medevac Darker Purple */
+        /* OVERRIDE STYLES - Genesis Medevac, clinical pass */
+        /* Palette unchanged — same navy / red / gold system. */
+        /* Typography moved to a serif display + mono data   */
+        /* read-out, closer to a bedside monitor.             */
         /* ============================================ */
         :root {
             --navy: #1a0a3e;
@@ -36,15 +40,20 @@
             --text: #1a1a2e;
             --muted: #6c757d;
             --border: #e9ecef;
-            --montserrat: 'Montserrat', sans-serif;
-            --lato: 'Lato', sans-serif;
-            --inter: 'Inter', sans-serif;
+            /* --montserrat / --lato / --inter kept as names so every existing */
+            /* var() reference below repoints automatically to the new faces. */
+            --montserrat: 'Lora', Georgia, serif;
+            --lato: 'Inter', -apple-system, sans-serif;
+            --inter: 'Inter', -apple-system, sans-serif;
+            --mono: 'DM Mono', 'SFMono-Regular', Consolas, monospace;
             --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
             --shadow-lg: 0 20px 60px rgba(26, 10, 62, 0.12);
             --shadow-xl: 0 30px 80px rgba(26, 10, 62, 0.16);
             --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
             --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * {
@@ -52,7 +61,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         html {
             height: 100%;
             -webkit-font-smoothing: antialiased;
@@ -69,6 +78,22 @@
 
         .font-display {
             font-family: var(--montserrat);
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        .nav-item:focus-visible {
+            outline: 2px solid var(--yellow);
+            outline-offset: 2px;
+            border-radius: 8px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
         }
 
         /* ============================================ */
@@ -103,7 +128,7 @@
 
         /* Brand Section */
         .gradient-sidebar .sidebar-brand {
-            padding: 24px 24px 20px;
+            padding: calc(24px + var(--safe-top)) 24px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
@@ -121,8 +146,8 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
-            font-weight: 800;
+            font-size: 19px;
+            font-weight: 700;
             box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
             position: relative;
             font-family: var(--montserrat);
@@ -138,10 +163,10 @@
 
         .gradient-sidebar .sidebar-brand .brand-text {
             font-size: 18px;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--white);
             font-family: var(--montserrat);
-            letter-spacing: -0.3px;
+            letter-spacing: -0.2px;
             line-height: 1.2;
         }
 
@@ -157,6 +182,40 @@
             font-weight: 600;
             display: block;
             margin-top: 2px;
+            font-family: var(--inter);
+        }
+
+        /* Signature element: quiet vitals trace under the brand mark — */
+        /* reads as a monitor strip, ties the whole UI back to "bedside". */
+        .vitals-trace {
+            padding: 0 24px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+        .vitals-trace svg {
+            width: 100%;
+            height: 22px;
+            display: block;
+            overflow: visible;
+        }
+        .vitals-trace path {
+            fill: none;
+            stroke: var(--yellow);
+            stroke-width: 1.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.55;
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300;
+            animation: trace-draw 3.2s ease-in-out infinite;
+        }
+        @keyframes trace-draw {
+            0% { stroke-dashoffset: 300; opacity: 0; }
+            15% { opacity: 0.6; }
+            55% { stroke-dashoffset: 0; opacity: 0.6; }
+            75% { opacity: 0; }
+            100% { stroke-dashoffset: 0; opacity: 0; }
         }
 
         /* Role Badges in Sidebar */
@@ -177,21 +236,22 @@
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.03em;
+            font-family: var(--inter);
         }
-        .gradient-sidebar .role-badge-side.patient { 
-            background: rgba(220, 53, 69, 0.15); 
-            color: var(--red); 
-            border: 1px solid rgba(220, 53, 69, 0.2); 
+        .gradient-sidebar .role-badge-side.patient {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(220, 53, 69, 0.2);
         }
-        .gradient-sidebar .role-badge-side.caregiver { 
-            background: rgba(255, 215, 0, 0.12); 
-            color: var(--yellow); 
-            border: 1px solid rgba(255, 215, 0, 0.2); 
+        .gradient-sidebar .role-badge-side.caregiver {
+            background: rgba(255, 215, 0, 0.12);
+            color: var(--yellow);
+            border: 1px solid rgba(255, 215, 0, 0.2);
         }
-        .gradient-sidebar .role-badge-side.client { 
-            background: rgba(255, 255, 255, 0.06); 
-            color: rgba(255, 255, 255, 0.7); 
-            border: 1px solid rgba(255, 255, 255, 0.06); 
+        .gradient-sidebar .role-badge-side.client {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         /* Navigation */
@@ -201,6 +261,7 @@
             position: relative;
             z-index: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .gradient-sidebar .nav-label {
@@ -210,7 +271,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             padding: 12px 12px 6px 12px;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
 
         .gradient-sidebar .nav-item {
@@ -232,6 +293,7 @@
             background: transparent;
             width: 100%;
             text-align: left;
+            min-height: 48px;
         }
 
         .gradient-sidebar .nav-item .icon-wrapper {
@@ -269,6 +331,7 @@
             color: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.04);
             transition: var(--transition);
+            font-family: var(--mono);
         }
 
         .gradient-sidebar .nav-item .badge-red {
@@ -360,7 +423,7 @@
 
         /* User Section */
         .gradient-sidebar .sidebar-user {
-            padding: 16px 20px 20px;
+            padding: 16px 20px calc(20px + var(--safe-bottom));
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
             position: relative;
@@ -394,7 +457,7 @@
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             flex-shrink: 0;
             box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
             font-family: var(--montserrat);
@@ -409,7 +472,7 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--white);
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -421,6 +484,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 600;
+            font-family: var(--inter);
         }
 
         .gradient-sidebar .sidebar-user .user-status {
@@ -462,8 +526,9 @@
             letter-spacing: 0.05em;
             transition: var(--transition);
             cursor: pointer;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             text-decoration: none;
+            min-height: 44px;
         }
 
         .gradient-sidebar .logout-btn:hover {
@@ -493,7 +558,7 @@
             z-index: 5;
             min-height: 100vh;
             background: var(--bg);
-            padding: 24px 32px 32px 32px;
+            padding: calc(24px + var(--safe-top)) 32px 32px 32px;
         }
 
         /* TOP BAR */
@@ -504,26 +569,27 @@
             padding-bottom: 20px;
             border-bottom: 2px solid var(--red);
             margin-bottom: 28px;
+            gap: 16px;
         }
 
         .topbar-left h1 {
             font-size: 22px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--navy);
             font-family: var(--montserrat);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            letter-spacing: 0.2px;
         }
         .topbar-left p {
             font-size: 13px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
             margin-top: 2px;
         }
         .topbar-left .role-tags {
             display: flex;
             gap: 6px;
             margin-top: 4px;
+            flex-wrap: wrap;
         }
         .topbar-left .role-tag {
             font-size: 10px;
@@ -532,6 +598,7 @@
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.03em;
+            font-family: var(--inter);
         }
         .role-tag.patient { background: var(--red-pale); color: var(--red); border: 1px solid var(--red); }
         .role-tag.caregiver { background: rgba(255, 215, 0, 0.15); color: #b8960f; border: 1px solid rgba(255, 215, 0, 0.3); }
@@ -541,6 +608,7 @@
             display: flex;
             align-items: center;
             gap: 14px;
+            flex-shrink: 0;
         }
         .topbar-right .avatar {
             width: 38px;
@@ -558,14 +626,17 @@
         .topbar-right .welcome {
             font-size: 13px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
         }
 
-        /* Mobile Hamburger */
+        /* Mobile Hamburger — animates into an X when the sidebar is open */
         .hamburger {
             display: none;
             flex-direction: column;
+            justify-content: center;
             gap: 5px;
+            width: 40px;
+            height: 40px;
             background: none;
             border: none;
             cursor: pointer;
@@ -578,11 +649,20 @@
         }
         .hamburger span {
             display: block;
-            width: 24px;
+            width: 22px;
             height: 2px;
             background: var(--navy);
             border-radius: 2px;
-            transition: all 0.3s ease;
+            transition: transform 0.25s ease, opacity 0.2s ease;
+        }
+        .hamburger.is-open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .hamburger.is-open span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.is-open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
         }
 
         /* Sidebar Overlay (Mobile) */
@@ -638,15 +718,16 @@
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
         .stat-card .value {
             font-size: 30px;
-            font-weight: 800;
+            font-weight: 500;
             color: var(--navy);
-            margin-top: 2px;
-            font-family: var(--montserrat);
+            margin-top: 4px;
+            font-family: var(--mono);
             letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
         }
         .stat-card .value.red {
             color: var(--red);
@@ -654,8 +735,8 @@
         .stat-card .sub {
             font-size: 11px;
             color: var(--muted);
-            font-family: var(--lato);
-            margin-top: 2px;
+            font-family: var(--inter);
+            margin-top: 4px;
         }
         .stat-card .sub.has-alerts {
             color: var(--red);
@@ -674,6 +755,7 @@
             cursor: pointer;
             text-decoration: none;
             box-shadow: 0 4px 20px rgba(26, 10, 62, 0.15);
+            min-height: 48px;
         }
         .quick-action-card:hover {
             transform: translateY(-4px);
@@ -685,11 +767,11 @@
             color: rgba(255, 255, 255, 0.5);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
         .quick-action-card .value {
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--white);
             font-family: var(--montserrat);
         }
@@ -731,12 +813,11 @@
         }
 
         .card-title {
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 17px;
+            font-weight: 600;
             color: var(--navy);
             font-family: var(--montserrat);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.1px;
         }
 
         .card-badge {
@@ -746,7 +827,7 @@
             font-size: 11px;
             font-weight: 600;
             color: var(--muted);
-            font-family: var(--montserrat);
+            font-family: var(--mono);
         }
         .card-badge.alert-badge {
             background: var(--red-pale);
@@ -759,6 +840,7 @@
             max-height: 340px;
             overflow-y: auto;
             padding-right: 4px;
+            -webkit-overflow-scrolling: touch;
         }
         .scroll-area::-webkit-scrollbar {
             width: 4px;
@@ -790,6 +872,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            min-height: 48px;
         }
         .patient-item:last-child {
             margin-bottom: 0;
@@ -802,13 +885,13 @@
             font-weight: 600;
             font-size: 14px;
             color: var(--text);
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
         .patient-item .status {
             font-size: 11px;
             font-weight: 500;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
         }
         .patient-item .status.active {
             color: var(--cyan);
@@ -837,13 +920,13 @@
             font-weight: 600;
             font-size: 14px;
             color: var(--text);
-            font-family: var(--montserrat);
+            font-family: var(--inter);
             margin-bottom: 4px;
         }
         .reading-item .meta {
-            font-size: 12px;
+            font-size: 12.5px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--mono);
         }
         .reading-item .meta .self-tag {
             background: var(--red-pale);
@@ -853,6 +936,7 @@
             font-size: 10px;
             font-weight: 600;
             border: 1px solid var(--red);
+            font-family: var(--inter);
         }
 
         /* Alert Items */
@@ -865,6 +949,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 10px;
         }
         .alert-item:last-child {
             margin-bottom: 0;
@@ -873,22 +958,23 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            min-width: 0;
         }
         .alert-item .alert-title {
             font-weight: 600;
             font-size: 13px;
             color: var(--red);
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
         .alert-item .alert-patient {
             font-size: 12px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
         }
         .alert-item .alert-time {
             font-size: 10px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--mono);
         }
         .alert-item .alert-severity {
             font-size: 10px;
@@ -896,7 +982,8 @@
             padding: 2px 10px;
             border-radius: 12px;
             text-transform: uppercase;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
+            flex-shrink: 0;
         }
         .alert-item .alert-severity.critical {
             background: var(--red);
@@ -926,7 +1013,7 @@
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
         .care-team-section .team-item {
             display: flex;
@@ -946,16 +1033,24 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--navy);
-            font-family: var(--montserrat);
+            font-family: var(--inter);
         }
         .care-team-section .team-item .item .value {
             font-size: 13px;
             color: var(--muted);
-            font-family: var(--lato);
+            font-family: var(--inter);
         }
         .care-team-section .team-item .item .value.not-assigned {
             color: #94a3b8;
             font-style: italic;
+        }
+
+        /* ============================================ */
+        /* MOBILE QUICK-ACTION DOCK                     */
+        /* Thumb-reach bar, hidden above tablet width.   */
+        /* ============================================ */
+        .mobile-dock {
+            display: none;
         }
 
         /* ============================================ */
@@ -970,7 +1065,7 @@
         @media (max-width: 768px) {
             .gradient-sidebar {
                 transform: translateX(-100%);
-                width: 280px;
+                width: min(280px, 84vw);
             }
             .gradient-sidebar.open {
                 transform: translateX(0);
@@ -982,7 +1077,7 @@
 
             .main-content {
                 margin-left: 0;
-                padding: 16px 16px 24px;
+                padding: calc(16px + var(--safe-top)) 16px calc(96px + var(--safe-bottom));
             }
 
             .topbar {
@@ -1031,6 +1126,52 @@
                 flex-direction: column;
                 gap: 8px;
             }
+
+            /* Fixed thumb-reach dock replaces the in-grid quick action card */
+            .mobile-dock {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 80;
+                padding: 10px 14px calc(10px + var(--safe-bottom));
+                background: rgba(255, 255, 255, 0.92);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid var(--border);
+                box-shadow: 0 -8px 24px rgba(26, 10, 62, 0.08);
+            }
+            .mobile-dock a {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                padding: 8px 4px;
+                min-height: 52px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-family: var(--inter);
+                font-size: 10.5px;
+                font-weight: 600;
+                color: var(--muted);
+                transition: var(--transition);
+            }
+            .mobile-dock a svg {
+                width: 20px;
+                height: 20px;
+            }
+            .mobile-dock a.primary {
+                background: var(--red-gradient);
+                color: var(--white);
+                box-shadow: var(--shadow-red);
+            }
+            .mobile-dock a:active {
+                transform: scale(0.96);
+            }
         }
 
         @media (max-width: 480px) {
@@ -1054,7 +1195,24 @@
                 font-size: 16px;
             }
             .card-title {
-                font-size: 14px;
+                font-size: 15px;
+            }
+        }
+
+        /* Very small phones: let the stat strip scroll horizontally      */
+        /* instead of squeezing four numbers into a cramped 2x2 grid.     */
+        @media (max-width: 380px) {
+            .stats-row {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x proximity;
+                gap: 10px;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .stats-row > * {
+                flex: 0 0 78%;
+                scroll-snap-align: start;
             }
         }
     </style>
@@ -1076,8 +1234,15 @@
             <div class="brand-icon">RG</div>
             <div>
                 <div class="brand-text">RGMS <span>Portal</span></div>
-                <span class="brand-sub">Client Portal</span>
+                <span class="brand-sub">{% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %}</span>
             </div>
+        </div>
+
+        <!-- Signature vitals trace -->
+        <div class="vitals-trace" aria-hidden="true">
+            <svg viewBox="0 0 240 22" preserveAspectRatio="none">
+                <path d="M0,11 L60,11 L70,3 L80,19 L90,11 L104,11 L112,7 L120,15 L128,11 L240,11" />
+            </svg>
         </div>
 
         <!-- Role Badges -->
@@ -1153,7 +1318,7 @@
                 <span class="badge">{{ total_my_readings }}</span>
             </a>
 
-            <a href="#" class="nav-item">
+            <a href="#" id="alertsNavLink" class="nav-item">
                 <div class="icon-wrapper">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -1170,7 +1335,7 @@
                 <div class="user-avatar">{{ client.full_name|slice:":2"|upper }}</div>
                 <div class="user-info">
                     <div class="user-name">{{ client.full_name }}</div>
-                    <div class="user-role">Client Portal</div>
+                    <div class="user-role">{% if client.is_caregiver %}Caregiver Portal{% else %}Client Portal{% endif %}</div>
                 </div>
                 <div class="user-status"></div>
             </div>
@@ -1192,11 +1357,11 @@
         <header class="topbar">
             <div class="topbar-left">
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle sidebar">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle sidebar" aria-expanded="false">
                         <span></span><span></span><span></span>
                     </button>
                     <div>
-                        <h1>RGMS Client Portal</h1>
+                        <h1>{% if client.is_caregiver %}Caregiver Dashboard{% else %}RGMS Client Portal{% endif %}</h1>
                         <p>Welcome, {{ client.full_name }}</p>
                         <div class="role-tags">
                             {% if client.is_patient %}
@@ -1228,7 +1393,7 @@
         <!-- STATS ROW -->
         <div class="stats-row">
             <div class="stat-card">
-                <div class="label">My Health Records</div>
+                <div class="label">{% if client.is_caregiver %}Patient Records{% else %}My Health Records{% endif %}</div>
                 <div class="value">{{ total_my_readings }}</div>
                 <div class="sub">Total readings</div>
             </div>
@@ -1287,7 +1452,7 @@
             <!-- MY HEALTH RECORDS -->
             <section class="card">
                 <div class="card-header">
-                    <h2 class="card-title">📊 My Health Records</h2>
+                    <h2 class="card-title">📊 {% if client.is_caregiver %}Patient Records{% else %}My Health Records{% endif %}</h2>
                     <span class="card-badge">{{ total_my_readings }}</span>
                 </div>
 
@@ -1304,7 +1469,7 @@
                             Pulse {{ reading.pulse_rate }} bpm ·
                             SpO2 {{ reading.oxygen_saturation|default:"—" }}%
                         </div>
-                        <div class="meta" style="font-size:11px;margin-top:4px;color:#94a3b8;">
+                        <div class="meta" style="font-size:11px;margin-top:4px;color:#94a3b8;font-family:var(--inter);">
                             {{ reading.created_at }}
                             {% if reading.is_abnormal %}
                             <span style="color:var(--red);font-weight:600;margin-left:8px;">⚠️ Review</span>
@@ -1324,7 +1489,7 @@
             </section>
 
             <!-- PATIENTS I CARE FOR & ALERTS -->
-            <section class="card">
+            <section class="card" id="alertsCard">
                 <div class="card-header">
                     <h2 class="card-title">
                         {% if client.is_caregiver %}
@@ -1415,6 +1580,27 @@
     </main>
 
     <!-- ============================================ -->
+    <!-- MOBILE QUICK-ACTION DOCK -->
+    <!-- Thumb-reach bar so the primary caregiver tasks -->
+    <!-- (log a reading, jump to alerts) never sit under -->
+    <!-- a fold on a phone.                               -->
+    <!-- ============================================ -->
+    <nav class="mobile-dock" aria-label="Quick actions">
+        <a href="#alertsCard">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Alerts</span>
+        </a>
+        <a href="{% url 'add_vital_reading' %}" class="primary">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>
+            <span>Add Reading</span>
+        </a>
+        <a href="#" id="mobileDockMenuBtn">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Menu</span>
+        </a>
+    </nav>
+
+    <!-- ============================================ -->
     <!-- MOBILE MENU JAVASCRIPT -->
     <!-- ============================================ -->
     <script>
@@ -1422,15 +1608,25 @@
         const hamburger = document.getElementById('hamburgerBtn');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
+        const mobileDockMenuBtn = document.getElementById('mobileDockMenuBtn');
 
         function toggleSidebar(open) {
             sidebar.classList.toggle('open', open);
             overlay.classList.toggle('open', open);
+            hamburger.classList.toggle('is-open', open);
+            hamburger.setAttribute('aria-expanded', open);
             document.body.style.overflow = open ? 'hidden' : '';
         }
 
         hamburger.addEventListener('click', () => toggleSidebar(!sidebar.classList.contains('open')));
         overlay.addEventListener('click', () => toggleSidebar(false));
+
+        if (mobileDockMenuBtn) {
+            mobileDockMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleSidebar(!sidebar.classList.contains('open'));
+            });
+        }
 
         // Close sidebar on escape key
         document.addEventListener('keydown', (e) => {
