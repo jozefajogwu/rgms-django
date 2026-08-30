@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to RHMS</title>
+</head>
+<body style="font-family: 'Inter', Arial, sans-serif; background: #f8fafc; padding: 20px; margin: 0;">
+    <table style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+        <tr>
+            <td>
+                <!-- ========================================== -->
+                <!-- HEADER WITH TEXT LOGO (ALWAYS WORKS) -->
+                <!-- ========================================== -->
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; border-bottom: 2px solid #DC3545; padding-bottom: 16px;">
+                    
+                    <!-- Text-based logo - Always displays in all email clients -->
+                    <div style="background: #DC3545; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 20px; flex-shrink: 0;">RH</div>
+                    
+                    <div>
+                        <h1 style="margin: 0; font-size: 20px; color: #1a0a3e; font-weight: 700;">
+                            Welcome to <span style="color: #DC3545;">RHMS</span>
+                        </h1>
+                        <p style="margin: 0; font-size: 12px; color: #6c757d;">
+                            Remote Health Monitoring System
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- GREETING -->
+                <!-- ========================================== -->
+                <h2 style="font-size: 18px; color: #1a0a3e; margin-bottom: 8px;">
+                    Hello {{ user_name }},
+                </h2>
+                <p style="color: #6c757d; margin: 0; line-height: 1.6;">
+                    Your RHMS doctor account has been successfully created!
+                </p>
+
+                <!-- ========================================== -->
+                <!-- ACCOUNT DETAILS -->
+                <!-- ========================================== -->
+                <div style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <p style="font-weight: 700; color: #1a0a3e; margin: 0 0 12px 0;">
+                        📋 Account Details
+                    </p>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 6px 0; border-bottom: 1px solid #e9ecef;">
+                                <span style="color: #6c757d;">👤 Username</span>
+                                <span style="float: right; font-weight: 700; color: #1a0a3e;">{{ username }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px 0; border-bottom: 1px solid #e9ecef;">
+                                <span style="color: #6c757d;">📧 Email</span>
+                                <span style="float: right; font-weight: 700; color: #1a0a3e;">{{ email }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px 0;">
+                                <span style="color: #6c757d;">🔑 Password</span>
+                                <span style="float: right; font-weight: 700; color: #DC3545;">{{ password }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- SECURITY TIP -->
+                <!-- ========================================== -->
+                <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 12px; padding: 16px; margin: 16px 0;">
+                    <p style="margin: 0; color: #92400e; font-weight: 600;">🔒 Security Tip</p>
+                    <p style="margin: 4px 0 0 0; color: #92400e; font-size: 13px;">
+                        For security, please change your password after your first login.
+                    </p>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- ACTION BUTTON -->
+                <!-- ========================================== -->
+                <div style="text-align: center; margin: 24px 0;">
+                    <a href="{{ login_url }}" 
+                       style="background: #DC3545; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                        Login to Dashboard →
+                    </a>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- FOOTER -->
+                <!-- ========================================== -->
+                <hr style="border: none; border-top: 1px solid #e9ecef; margin: 24px 0;">
+                <p style="font-size: 12px; color: #6c757d; text-align: center; margin: 0;">
+                    This is an automated notification from RHMS.<br>
+                    © 2026 RHMS - Remote Health Monitoring System
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

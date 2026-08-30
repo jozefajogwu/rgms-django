@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.utils.html import format_html, mark_safe
 from django import forms
 from .models import Patient, VitalReading, Alert, CaregiverAssignment, Doctor, Caregiver, DoctorAssignment
+from .email_utils import send_registration_email
 
 
 # ============================================
@@ -34,23 +35,29 @@ class CustomUserAdmin(BaseUserAdmin):
 
 
 # ============================================
-# DOCTOR ADMIN
+# DOCTOR ADMIN - UPDATED WITH EMAIL
 # ============================================
 class DoctorForm(forms.ModelForm):
     """Form for creating/editing doctors with user account"""
     username = forms.CharField(max_length=150, required=True)
     first_name = forms.CharField(max_length=150, required=False)
     last_name = forms.CharField(max_length=150, required=False)
-    email = forms.EmailField(required=False)
+    email = forms.EmailField(required=True)  # ✅ Changed to required
     password = forms.CharField(
         widget=forms.PasswordInput,
         required=False,
-        help_text="Leave blank to keep current password"
+        help_text="Leave blank to auto-generate a secure password"
     )
     confirm_password = forms.CharField(
         widget=forms.PasswordInput,
         required=False,
         help_text="Confirm password"
+    )
+    send_email = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="📧 Send welcome email to doctor",
+        help_text="Uncheck to skip email notification"
     )
     
     class Meta:
@@ -75,38 +82,62 @@ class DoctorForm(forms.ModelForm):
         if password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match.")
         
+        # Auto-generate password if not provided
         if not self.instance.pk and not password:
-            cleaned_data['password'] = 'changeme123'
+            import random
+            import string
+            characters = string.ascii_letters + string.digits + '!@#$%^&*'
+            cleaned_data['password'] = ''.join(random.choice(characters) for _ in range(12))
         
         return cleaned_data
     
     def save(self, commit=True):
         instance = super().save(commit=False)
         
+        # Get the password before saving
+        password = self.cleaned_data.get('password')
+        send_email = self.cleaned_data.get('send_email', True)
+        
         if self.instance.pk:
+            # Update existing doctor
             user = self.instance.user
             user.username = self.cleaned_data['username']
             user.first_name = self.cleaned_data['first_name']
             user.last_name = self.cleaned_data['last_name']
             user.email = self.cleaned_data['email']
-            if self.cleaned_data.get('password'):
-                user.set_password(self.cleaned_data['password'])
+            if password:
+                user.set_password(password)
             user.is_staff = True
             user.save()
         else:
+            # Create new user
             user = User.objects.create_user(
                 username=self.cleaned_data['username'],
                 first_name=self.cleaned_data['first_name'],
                 last_name=self.cleaned_data['last_name'],
                 email=self.cleaned_data['email'],
-                password=self.cleaned_data['password'],
+                password=password,
             )
             user.is_staff = True
             user.save()
             instance.user = user
+            
+            # Add to Doctors group
+            doctors_group, _ = Group.objects.get_or_create(name='Doctors')
+            user.groups.add(doctors_group)
+            
+            # ✅ Send welcome email
+            if send_email and user.email:
+                try:
+                    send_registration_email(user, password, 'doctor')
+                    self._email_sent = True
+                except Exception as e:
+                    self._email_error = str(e)
+            self._password = password
         
         if commit:
             instance.save()
+        
         return instance
 
 
@@ -120,7 +151,7 @@ class DoctorAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('User Information', {
-            'fields': ('username', 'first_name', 'last_name', 'email', 'password', 'confirm_password')
+            'fields': ('username', 'first_name', 'last_name', 'email', 'password', 'confirm_password', 'send_email')
         }),
         ('Professional Information', {
             'fields': ('specialty', 'license_number')
@@ -152,7 +183,20 @@ class DoctorAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        messages.success(request, f'✅ Doctor "{obj.get_full_name()}" saved successfully!')
+        
+        # Show success message with email status
+        if hasattr(form, '_email_sent') and form._email_sent:
+            messages.success(
+                request,
+                f'✅ Doctor "{obj.get_full_name()}" created! Welcome email sent to {obj.user.email}.'
+            )
+        elif hasattr(form, '_email_error'):
+            messages.warning(
+                request,
+                f'✅ Doctor "{obj.get_full_name()}" created! But email failed: {form._email_error}'
+            )
+        else:
+            messages.success(request, f'✅ Doctor "{obj.get_full_name()}" saved successfully!')
 
 
 # ============================================
@@ -275,7 +319,7 @@ class CaregiverAdmin(admin.ModelAdmin):
 
 
 # ============================================
-# PATIENT ADMIN FORM
+# PATIENT ADMIN FORM - UPDATED WITH EMAIL
 # ============================================
 class PatientAdminForm(forms.ModelForm):
     create_account = forms.BooleanField(
@@ -294,6 +338,12 @@ class PatientAdminForm(forms.ModelForm):
         required=False,
         help_text="Leave blank to auto-generate"
     )
+    send_email = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="📧 Send welcome email to patient",
+        help_text="Uncheck to skip email notification"
+    )
     
     class Meta:
         model = Patient
@@ -306,6 +356,7 @@ class PatientAdminForm(forms.ModelForm):
             self.initial['create_account'] = False
             self.fields['username'].disabled = True
             self.fields['create_account'].help_text = "This person already has a login account"
+            self.fields['send_email'].initial = False
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
@@ -323,6 +374,7 @@ class PatientAdminForm(forms.ModelForm):
         create_account = self.cleaned_data.get('create_account', False)
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
+        send_email = self.cleaned_data.get('send_email', True)
         
         if create_account and not patient.user:
             if not username:
@@ -341,8 +393,21 @@ class PatientAdminForm(forms.ModelForm):
             user.save()
             patient.user = user
             
+            # Add to Patients group
             patients_group, _ = Group.objects.get_or_create(name='Patients')
             user.groups.add(patients_group)
+            
+            # ✅ Send welcome email
+            if send_email and user.email:
+                try:
+                    # Get assigned doctor name if exists
+                    assigned_doctor = None
+                    if self.cleaned_data.get('assigned_doctor'):
+                        assigned_doctor = self.cleaned_data['assigned_doctor'].get_full_name()
+                    send_registration_email(user, password, 'patient', assigned_doctor)
+                    self._email_sent = True
+                except Exception as e:
+                    self._email_error = str(e)
             
             self._user_created = True
             self._username = username
@@ -390,30 +455,26 @@ class PatientAdminForm(forms.ModelForm):
 
 
 # ============================================
-# ✅ UPDATED: PATIENT ADMIN (Option A - Single Source of Truth)
+# ✅ UPDATED: PATIENT ADMIN (With Email)
 # ============================================
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
     form = PatientAdminForm
     
-    # ✅ FIXED: Added 'assigned_doctor' and 'assigned_caregiver' to list_display
     list_display = (
         'full_name',
         'email',
         'get_username',
         'phone_number',
         'get_roles',
-        'assigned_doctor',          # ← ADDED (was assigned_doctor_display)
-        'assigned_caregiver',       # ← ADDED (was assigned_caregiver_display)
+        'assigned_doctor',
+        'assigned_caregiver',
         'created_at',
     )
     search_fields = ('full_name', 'phone_number', 'email', 'user__username')
     list_filter = ('gender', 'care_type', 'assigned_doctor', 'assigned_caregiver')
     readonly_fields = ('created_at', 'updated_at')
-    
-    # ✅ Now these work because they're in list_display
     list_editable = ['assigned_doctor', 'assigned_caregiver']
-    
     autocomplete_fields = ['assigned_doctor', 'assigned_caregiver']
     
     fieldsets = (
@@ -421,7 +482,7 @@ class PatientAdmin(admin.ModelAdmin):
             'fields': ('full_name', 'email', 'date_of_birth', 'gender', 'phone_number', 'address')
         }),
         ('Login Account', {
-            'fields': ('create_account', 'username', 'password'),
+            'fields': ('create_account', 'username', 'password', 'send_email'),
             'description': 'Check "Create login account" to auto-generate login credentials'
         }),
         ('Roles', {
@@ -481,44 +542,34 @@ class PatientAdmin(admin.ModelAdmin):
         if obj.is_patient and obj.user:
             obj.user.groups.add(patients_group)
         
+        # Show account creation message
         if hasattr(form, '_user_created') and form._user_created:
             self.message_user(
                 request,
                 f"✅ Account created! Username: {form._username}, Password: {form._password}",
                 messages.SUCCESS
             )
+        
+        # Show email status
+        if hasattr(form, '_email_sent') and form._email_sent:
+            self.message_user(
+                request,
+                f"✅ Welcome email sent to {obj.email}",
+                messages.SUCCESS
+            )
+        elif hasattr(form, '_email_error'):
+            self.message_user(
+                request,
+                f"⚠️ Account created but email failed: {form._email_error}",
+                messages.WARNING
+            )
 
 
 # ============================================
-# ✅ OPTION 1: DOCTORASSIGNMENT - HIDDEN FROM ADMIN
+# DOCTORASSIGNMENT - HIDDEN FROM ADMIN
 # ============================================
 # We're NOT registering DoctorAssignment here
 # because Patient.assigned_doctor is the single source of truth
-# 
-# If you still want to see it but not edit, uncomment this:
-# 
-# @admin.register(DoctorAssignment)
-# class DoctorAssignmentAdmin(admin.ModelAdmin):
-#     list_display = ('get_doctor', 'get_patient', 'assignment_type', 'is_active', 'started_at')
-#     list_filter = ('assignment_type', 'is_active')
-#     search_fields = ('doctor__user__username', 'patient__full_name')
-#     
-#     def has_add_permission(self, request):
-#         return False
-#     
-#     def has_change_permission(self, request, obj=None):
-#         return False
-#     
-#     def has_delete_permission(self, request, obj=None):
-#         return False
-#     
-#     def get_doctor(self, obj):
-#         return obj.doctor.get_full_name() or str(obj.doctor)
-#     get_doctor.short_description = "Doctor"
-#     
-#     def get_patient(self, obj):
-#         return obj.patient.full_name
-#     get_patient.short_description = "Patient"
 
 
 # ============================================

@@ -64,9 +64,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'rgms_core.wsgi.application'
 
 # ============================================
-# DATABASE CONFIGURATION - FIXED
+# DATABASE CONFIGURATION - SQLITE FOR DEVELOPMENT
 # ============================================
-# First, define DATABASES with SQLite as default
+
+# ✅ SQLite Database (Default for local development)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -74,20 +75,24 @@ DATABASES = {
     }
 }
 
-# Then, optionally override with PostgreSQL from environment
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# ❌ POSTGRESQL CONFIGURATION - COMMENTED OUT
+# ============================================
+# # PostgreSQL from environment (for Render.com deployment)
+# DATABASE_URL = os.environ.get('DATABASE_URL')
+# 
+# if DATABASE_URL:
+#     # Use PostgreSQL from DATABASE_URL
+#     DATABASES['default'] = dj_database_url.config(
+#         default=DATABASE_URL,
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+#     print(f"✅ Using PostgreSQL database")
+# else:
+#     # If no DATABASE_URL, use SQLite (for local development)
+#     print("ℹ️ Using SQLite database (set DATABASE_URL for PostgreSQL)")
 
-if DATABASE_URL:
-    # Use PostgreSQL from DATABASE_URL
-    DATABASES['default'] = dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-    print(f"✅ Using PostgreSQL database")
-else:
-    # If no DATABASE_URL, use SQLite (for local development)
-    print("ℹ️ Using SQLite database (set DATABASE_URL for PostgreSQL)")
+print("✅ Using SQLite database for development")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -126,21 +131,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # JAZZMIN CONFIGURATION
 # ============================================
 JAZZMIN_SETTINGS = {
-    "site_title": "Genesis Portal Admin",
-    "site_header": "Genesis Portal",
-    "site_brand": "Genesis Portal",
-    "welcome_sign": "Welcome to Genesis Portal Admin",
-    "copyright": "Genesis Portal © 2026",
+    "site_title": "RHMS Admin",
+    "site_header": "Remote Health Monitoring System",
+    "site_brand": "RHMS",
+    "welcome_sign": "Welcome to RHMS Admin",
+    "copyright": "RHMS © 2026",
     
     # ============================================
     # LOGO SETTINGS - TRY THESE OPTIONS
     # ============================================
     
     # Option 1: Try with leading slash (RECOMMENDED)
-    "site_logo": "/static/admin/img/logo.png",
+    "site_logo": "images/logo.png",
     "site_logo_classes": "img-fluid",  # Changed from img-circle
     "site_icon": "/static/admin/img/favicon.ico",
-    "login_logo": "/static/admin/img/logo.png",
+    "login_logo": "images/logo.png",
     "login_logo_classes": "img-fluid",
     
     # Option 2: If Option 1 doesn't work, try using images folder
@@ -231,9 +236,14 @@ JAZZMIN_UI_TWEAKS = {
 }
 
 # Email Configuration
-# For testing (prints email to console)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'RGMS System <noreply@rgms.com>'
+# ============================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('GMAIL_EMAIL')
+EMAIL_HOST_PASSWORD = os.getenv('GMAIL_APP_PASSWORD')
+DEFAULT_FROM_EMAIL = f'RGMS System <{os.getenv("GMAIL_EMAIL")}>'
 
 # Logout redirect URL
 LOGOUT_REDIRECT_URL = 'home'  # Redirect to homepage after logout

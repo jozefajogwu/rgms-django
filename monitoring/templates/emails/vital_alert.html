@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RGMS Vital Alert</title>
+</head>
+<body style="font-family: 'Inter', Arial, sans-serif; background: #f8fafc; padding: 20px; margin: 0;">
+    <table style="max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+        <tr>
+            <td>
+                <!-- ============================================ -->
+                <!-- HEADER -->
+                <!-- ============================================ -->
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #DC3545; padding-bottom: 16px;">
+                    <div style="background: #DC3545; width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 20px;">RG</div>
+                    <div>
+                        <h1 style="margin: 0; font-size: 20px; color: #1a0a3e; font-weight: 700;">RGMS <span style="color: #DC3545;">Alert</span></h1>
+                        <p style="margin: 0; font-size: 12px; color: #6c757d;">Remote Geriatric Monitoring System</p>
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- GREETING -->
+                <!-- ============================================ -->
+                <h2 style="font-size: 16px; color: #1a0a3e; margin-bottom: 8px;">Hello Dr. {{ doctor_name }},</h2>
+                <p style="color: #6c757d; margin: 0; line-height: 1.6;">
+                    A new vital reading has been submitted for <strong style="color: #1a0a3e;">{{ patient_name }}</strong>.
+                </p>
+
+                <!-- ============================================ -->
+                <!-- SUCCESS BANNER -->
+                <!-- ============================================ -->
+                <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 16px; margin: 20px 0;">
+                    <p style="margin: 0; color: #16a34a; font-weight: 600; font-size: 14px;">🟢 Vital reading submitted successfully!</p>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- VITALS CARD -->
+                <!-- ============================================ -->
+                <div style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <p style="font-weight: 700; color: #1a0a3e; margin: 0 0 12px 0;">📊 Vital Signs</p>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 6px 0; border-bottom: 1px solid #e9ecef;">
+                                <span style="color: #6c757d;">💉 Blood Pressure</span>
+                                <span style="float: right; font-weight: 700; color: #1a0a3e;">
+                                    {% if reading.is_abnormal %}<span style="color: #DC3545;">⚠️</span>{% endif %}
+                                    {{ reading.systolic }}/{{ reading.diastolic }} mmHg
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px 0; border-bottom: 1px solid #e9ecef;">
+                                <span style="color: #6c757d;">❤️ Heart Rate</span>
+                                <span style="float: right; font-weight: 700; color: #1a0a3e;">
+                                    {% if reading.pulse > 100 or reading.pulse < 60 %}<span style="color: #DC3545;">⚠️</span>{% endif %}
+                                    {{ reading.pulse }} bpm
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px 0; border-bottom: 1px solid #e9ecef;">
+                                <span style="color: #6c757d;">🫁 Oxygen Saturation</span>
+                                <span style="float: right; font-weight: 700; color: #1a0a3e;">
+                                    {% if reading.spo2 and reading.spo2 < 95 %}<span style="color: #DC3545;">⚠️</span>{% endif %}
+                                    {{ reading.spo2|default:"—" }}%
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px 0;">
+                                <span style="color: #6c757d;">🍬 Blood Sugar</span>
+                                <span style="float: right; font-weight: 700; color: #1a0a3e;">
+                                    {% if reading.glucose and reading.glucose > 126 %}<span style="color: #DC3545;">⚠️</span>{% endif %}
+                                    {{ reading.glucose|default:"—" }} mg/dL
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- STATUS (Abnormal / Normal) -->
+                <!-- ============================================ -->
+                {% if reading.is_abnormal %}
+                <div style="background: #fee2e2; border: 1px solid #fca5a5; border-radius: 12px; padding: 16px; margin: 16px 0;">
+                    <p style="margin: 0; color: #DC3545; font-weight: 700;">⚠️ Some values are outside normal range. Please review.</p>
+                </div>
+                {% else %}
+                <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 16px; margin: 16px 0;">
+                    <p style="margin: 0; color: #16a34a; font-weight: 600;">✅ All vitals are within normal range.</p>
+                </div>
+                {% endif %}
+
+                <!-- ============================================ -->
+                <!-- ACTION BUTTON -->
+                <!-- ============================================ -->
+                <div style="text-align: center; margin: 24px 0;">
+                    <a href="{{ dashboard_url }}" style="background: #DC3545; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; min-height: 44px;">
+                        View on Dashboard →
+                    </a>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- FOOTER -->
+                <!-- ============================================ -->
+                <hr style="border: none; border-top: 1px solid #e9ecef; margin: 24px 0;">
+                <p style="font-size: 12px; color: #6c757d; text-align: center; margin: 0;">
+                    This is an automated notification from RGMS.<br>
+                    © 2026 RGMS - Remote Geriatric Monitoring System
+                </p>
+                <p style="font-size: 10px; color: #adb5bd; text-align: center; margin: 8px 0 0 0;">
+                    Sent at: {{ reading.created_at }}
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

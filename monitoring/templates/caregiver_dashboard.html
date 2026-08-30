@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %} · RGMS</title>
+    <title>{% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %} · RHMS</title>
 
     <!-- Add favicon -->
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
@@ -40,8 +40,6 @@
             --text: #1a1a2e;
             --muted: #6c757d;
             --border: #e9ecef;
-            /* --montserrat / --lato / --inter kept as names so every existing */
-            /* var() reference below repoints automatically to the new faces. */
             --montserrat: 'Lora', Georgia, serif;
             --lato: 'Inter', -apple-system, sans-serif;
             --inter: 'Inter', -apple-system, sans-serif;
@@ -185,8 +183,7 @@
             font-family: var(--inter);
         }
 
-        /* Signature element: quiet vitals trace under the brand mark — */
-        /* reads as a monitor strip, ties the whole UI back to "bedside". */
+        /* Signature element: quiet vitals trace under the brand mark */
         .vitals-trace {
             padding: 0 24px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -629,7 +626,7 @@
             font-family: var(--inter);
         }
 
-        /* Mobile Hamburger — animates into an X when the sidebar is open */
+        /* Mobile Hamburger */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -994,10 +991,12 @@
             color: var(--white);
         }
 
-        /* Care Team Section */
+        /* ============================================ */
+        /* CARE TEAM SECTION - IMPROVED */
+        /* ============================================ */
         .care-team-section {
             margin-top: 24px;
-            padding: 16px 20px;
+            padding: 20px 24px;
             background: var(--white);
             border-radius: 14px;
             border: 2px solid var(--red);
@@ -1008,46 +1007,139 @@
             box-shadow: var(--shadow-lg);
         }
         .care-team-section .team-label {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-family: var(--inter);
+            margin-bottom: 12px;
         }
-        .care-team-section .team-item {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 4px;
+
+        .care-team-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
-        .care-team-section .team-item .item {
+
+        .care-team-card {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 14px;
+            background: #fafbfc;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+            min-height: 68px;
         }
-        .care-team-section .team-item .item .icon {
-            font-size: 14px;
+        .care-team-card:hover {
+            border-color: var(--red);
+            background: #f8fafc;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
         }
-        .care-team-section .team-item .item .label {
-            font-size: 13px;
+
+        .care-team-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            flex-shrink: 0;
+            font-family: var(--inter);
+        }
+        .care-team-avatar.doctor {
+            background: linear-gradient(135deg, #DC3545, #b02a37);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+        }
+        .care-team-avatar.caregiver {
+            background: linear-gradient(135deg, #0d9488, #14b8a6);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+        }
+        .care-team-avatar.unassigned {
+            background: #e2e8f0;
+            color: #94a3b8;
+            box-shadow: none;
+        }
+
+        .care-team-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .care-team-name {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-weight: 700;
+            color: #1a0a3e;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+        }
+        .care-team-name .dr-title {
+            color: #DC3545;
             font-weight: 600;
-            color: var(--navy);
-            font-family: var(--inter);
         }
-        .care-team-section .team-item .item .value {
-            font-size: 13px;
-            color: var(--muted);
-            font-family: var(--inter);
-        }
-        .care-team-section .team-item .item .value.not-assigned {
+        .care-team-name .not-assigned {
             color: #94a3b8;
             font-style: italic;
+            font-family: var(--inter);
+            font-weight: 400;
+            font-size: 14px;
+        }
+
+        .care-team-role {
+            font-family: var(--inter);
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .care-team-status-badge {
+            font-family: var(--mono);
+            font-size: 9px;
+            background: #dcfce7;
+            color: #16a34a;
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid #86efac;
+        }
+        .care-team-status-badge.inactive {
+            background: #f1f5f9;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+        }
+
+        .care-team-type {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #fafbfc;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-family: var(--inter);
+            font-size: 13px;
+            color: var(--text);
+            grid-column: span 2;
+        }
+        .care-team-type .care-team-type-label {
+            font-weight: 600;
+            color: var(--navy);
+        }
+        .care-team-type .care-team-type-value {
+            color: #475569;
         }
 
         /* ============================================ */
-        /* MOBILE QUICK-ACTION DOCK                     */
-        /* Thumb-reach bar, hidden above tablet width.   */
+        /* MOBILE QUICK-ACTION DOCK */
         /* ============================================ */
         .mobile-dock {
             display: none;
@@ -1059,6 +1151,12 @@
         @media (max-width: 1024px) {
             .stats-row {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .care-team-grid {
+                grid-template-columns: 1fr;
+            }
+            .care-team-type {
+                grid-column: span 1;
             }
         }
 
@@ -1122,12 +1220,31 @@
                 font-size: 15px;
             }
 
-            .care-team-section .team-item {
-                flex-direction: column;
-                gap: 8px;
+            .care-team-section {
+                padding: 16px;
+            }
+            .care-team-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .care-team-card {
+                padding: 10px 14px;
+                min-height: 60px;
+            }
+            .care-team-avatar {
+                width: 38px;
+                height: 38px;
+                font-size: 13px;
+            }
+            .care-team-name {
+                font-size: 14px;
+            }
+            .care-team-type {
+                grid-column: span 1;
+                flex-wrap: wrap;
             }
 
-            /* Fixed thumb-reach dock replaces the in-grid quick action card */
+            /* Mobile Dock */
             .mobile-dock {
                 display: flex;
                 align-items: center;
@@ -1199,8 +1316,7 @@
             }
         }
 
-        /* Very small phones: let the stat strip scroll horizontally      */
-        /* instead of squeezing four numbers into a cramped 2x2 grid.     */
+        /* Very small phones: stat strip scroll horizontally */
         @media (max-width: 380px) {
             .stats-row {
                 display: flex;
@@ -1390,7 +1506,9 @@
         {% endfor %}
         {% endif %}
 
-        <!-- STATS ROW -->
+        <!-- ============================================ -->
+        <!-- STATS ROW - UPDATED WITH PROFESSIONAL DOCTOR NAME -->
+        <!-- ============================================ -->
         <div class="stats-row">
             <div class="stat-card">
                 <div class="label">{% if client.is_caregiver %}Patient Records{% else %}My Health Records{% endif %}</div>
@@ -1408,31 +1526,33 @@
                     {% endif %}
                 </div>
             </div>
+            <!-- ✅ UPDATED: My Care Team with Professional Doctor Name -->
             <div class="stat-card">
                 <div class="label">My Care Team</div>
-                <div class="value">
+                <div class="value" style="font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #1a0a3e; font-size: 17px; letter-spacing: 0.2px; line-height: 1.3;">
                     {% if client.is_caregiver %}
                         {{ patients_caring_for.count }}
                     {% else %}
                         {% if client.assigned_doctor %}
-                            Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username|truncatechars:12 }}
+                            <span style="color: #DC3545; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 14px;">Dr.</span> 
+                            {{ client.assigned_doctor.user.get_full_name|default:client.assigned_doctor.user.username|truncatechars:15 }}
                         {% elif client.assigned_caregiver %}
-                            {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username|truncatechars:12 }}
+                            {{ client.assigned_caregiver.user.get_full_name|default:client.assigned_caregiver.user.username|truncatechars:15 }}
                         {% else %}
-                            —
+                            <span style="color: #94a3b8; font-family: 'Inter', sans-serif; font-size: 22px;">—</span>
                         {% endif %}
                     {% endif %}
                 </div>
-                <div class="sub">
+                <div class="sub" style="margin-top: 6px;">
                     {% if client.is_caregiver %}
                         Patients under your care
                     {% else %}
                         {% if client.assigned_doctor %}
-                            👨‍⚕️ Doctor assigned
+                            <span style="display: inline-block; font-family: 'DM Mono', monospace; font-size: 9px; background: #dcfce7; color: #16a34a; padding: 2px 12px; border-radius: 12px; border: 1px solid #86efac;">● Active</span>
                         {% elif client.assigned_caregiver %}
                             👩‍⚕️ Caregiver assigned
                         {% else %}
-                            No care team assigned
+                            <span style="color: #94a3b8;">No care team assigned</span>
                         {% endif %}
                     {% endif %}
                 </div>
@@ -1543,37 +1663,77 @@
 
         </div>
 
-        <!-- CARE TEAM SECTION -->
+        <!-- ============================================ -->
+        <!-- CARE TEAM SECTION - IMPROVED                  -->
+        <!-- ============================================ -->
         <div class="care-team-section">
-            <div class="team-label">My Care Team</div>
-            <div class="team-item">
-                <div class="item">
-                    <span class="icon">👨‍⚕️</span>
-                    <span class="label">Doctor:</span>
-                    <span class="value {% if not client.assigned_doctor %}not-assigned{% endif %}">
+            <div class="team-label">👨‍⚕️ My Care Team</div>
+
+            <div class="care-team-grid">
+
+                <!-- Doctor -->
+                <div class="care-team-card">
+                    <div class="care-team-avatar doctor">
                         {% if client.assigned_doctor %}
-                            Dr. {{ client.assigned_doctor.get_full_name|default:client.assigned_doctor.username }}
+                            {{ client.assigned_doctor.user.first_name|first|upper }}{{ client.assigned_doctor.user.last_name|first|upper }}
                         {% else %}
-                            <span style="color:#94a3b8;font-style:italic;">Not assigned</span>
+                            ?
                         {% endif %}
-                    </span>
+                    </div>
+                    <div class="care-team-info">
+                        <div class="care-team-name">
+                            {% if client.assigned_doctor %}
+                                <span class="dr-title">Dr.</span> 
+                                {{ client.assigned_doctor.user.get_full_name|default:client.assigned_doctor.user.username }}
+                            {% else %}
+                                <span class="not-assigned">No doctor assigned</span>
+                            {% endif %}
+                        </div>
+                        <div class="care-team-role">
+                            {% if client.assigned_doctor %}
+                                {{ client.assigned_doctor.specialty|default:"Primary Care Physician" }}
+                                <span class="care-team-status-badge">● Active</span>
+                            {% else %}
+                                <span style="color:#94a3b8;">Not assigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="item">
-                    <span class="icon">👩‍⚕️</span>
-                    <span class="label">Caregiver:</span>
-                    <span class="value {% if not client.assigned_caregiver %}not-assigned{% endif %}">
+
+                <!-- Caregiver -->
+                <div class="care-team-card">
+                    <div class="care-team-avatar caregiver">
                         {% if client.assigned_caregiver %}
-                            {{ client.assigned_caregiver.get_full_name|default:client.assigned_caregiver.username }}
+                            {{ client.assigned_caregiver.user.first_name|first|upper }}{{ client.assigned_caregiver.user.last_name|first|upper }}
                         {% else %}
-                            <span style="color:#94a3b8;font-style:italic;">Not assigned</span>
+                            ?
                         {% endif %}
-                    </span>
+                    </div>
+                    <div class="care-team-info">
+                        <div class="care-team-name">
+                            {% if client.assigned_caregiver %}
+                                {{ client.assigned_caregiver.user.get_full_name|default:client.assigned_caregiver.user.username }}
+                            {% else %}
+                                <span class="not-assigned">No caregiver assigned</span>
+                            {% endif %}
+                        </div>
+                        <div class="care-team-role">
+                            {% if client.assigned_caregiver %}
+                                Caregiver
+                                <span class="care-team-status-badge">● Active</span>
+                            {% else %}
+                                <span style="color:#94a3b8;">Not assigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="item">
-                    <span class="icon">📋</span>
-                    <span class="label">Care Type:</span>
-                    <span class="value">{{ client.get_care_type_display|default:"Not specified" }}</span>
+
+                <!-- Care Type -->
+                <div class="care-team-type">
+                    <span class="care-team-type-label">📋 Care Type:</span>
+                    <span class="care-team-type-value">{{ client.get_care_type_display|default:"Not specified" }}</span>
                 </div>
+
             </div>
         </div>
 
@@ -1581,9 +1741,6 @@
 
     <!-- ============================================ -->
     <!-- MOBILE QUICK-ACTION DOCK -->
-    <!-- Thumb-reach bar so the primary caregiver tasks -->
-    <!-- (log a reading, jump to alerts) never sit under -->
-    <!-- a fold on a phone.                               -->
     <!-- ============================================ -->
     <nav class="mobile-dock" aria-label="Quick actions">
         <a href="#alertsCard">
