@@ -24,6 +24,7 @@ ALLOWED_HOSTS = config(
 # Application definition
 INSTALLED_APPS = [
     'jazzmin',  # MUST BE FIRST
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -247,3 +248,12 @@ DEFAULT_FROM_EMAIL = f'RGMS System <{os.getenv("GMAIL_EMAIL")}>'
 
 # Logout redirect URL
 LOGOUT_REDIRECT_URL = 'home'  # Redirect to homepage after logout
+
+# Site URL for email links and other absolute URLs
+SITE_URL = 'http://127.0.0.1:8000'  # Development URL
+
+
+# Also add this for consistency
+BASE_URL = SITE_URL
+
+

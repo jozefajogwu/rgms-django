@@ -1,0 +1,64 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h1>📊 New Vitals Recorded</h1>
+
+<p><strong>Patient:</strong> {{ patient.full_name }}</p>
+<p><strong>Recorded:</strong> {{ reading.created_at|date:"F j, Y, g:i A" }}</p>
+
+{% if alerts %}
+<div class="alert-box">
+    <div class="alert-title">⚠️ Attention Required</div>
+    <p>The following vitals are outside normal range:</p>
+    <ul>
+        {% for alert in alerts %}
+        <li><strong>{{ alert.title }}</strong></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<h2>📋 Vitals Summary</h2>
+
+<div class="vitals-grid">
+    {% if reading.systolic_bp %}
+    <div class="vital-item">
+        <div class="label">Blood Pressure</div>
+        <div class="value">{{ reading.systolic_bp }}/{{ reading.diastolic_bp }} mmHg</div>
+    </div>
+    {% endif %}
+    
+    {% if reading.pulse_rate %}
+    <div class="vital-item">
+        <div class="label">Heart Rate</div>
+        <div class="value">{{ reading.pulse_rate }} bpm</div>
+    </div>
+    {% endif %}
+    
+    {% if reading.oxygen_saturation %}
+    <div class="vital-item">
+        <div class="label">Oxygen Saturation</div>
+        <div class="value {% if reading.oxygen_saturation < 95 %}alert{% else %}normal{% endif %}">
+            {{ reading.oxygen_saturation }}%
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if reading.fasting_blood_sugar %}
+    <div class="vital-item">
+        <div class="label">Fasting Blood Sugar</div>
+        <div class="value {% if reading.fasting_blood_sugar > 126 %}alert{% else %}normal{% endif %}">
+            {{ reading.fasting_blood_sugar }} mg/dL
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin: 28px 0;">
+    <a href="{{ patient_url }}" class="btn">View Patient Details →</a>
+    <br>
+    <a href="#" class="btn btn-secondary" style="margin-top: 8px;">Acknowledge Alert</a>
+</div>
+
+<p class="text-muted">Please review and take appropriate action if needed.</p>
+{% endblock %}

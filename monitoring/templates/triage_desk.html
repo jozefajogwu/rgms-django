@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Triage Desk · RGMS</title>
+    <title>Triage Desk · RHMS</title>
     
     <!-- Add favicon -->
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
@@ -1084,6 +1084,92 @@
         }
 
         /* ============================================ */
+        /* QUICK ACTION BUTTONS */
+        /* ============================================ */
+        .quick-action-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--inter);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .quick-action-btn:hover {
+            transform: translateY(-1px);
+        }
+        .quick-action-btn:active {
+            transform: scale(0.97);
+        }
+        .quick-action-btn .icon {
+            font-size: 14px;
+        }
+
+        .quick-action-btn.resolve {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+        .quick-action-btn.resolve:hover {
+            background: #bbf7d0;
+        }
+
+        .quick-action-btn.acknowledge {
+            background: #dbeafe;
+            color: #2563eb;
+            border: 1px solid #93c5fd;
+        }
+        .quick-action-btn.acknowledge:hover {
+            background: #bfdbfe;
+        }
+
+        .quick-action-btn.escalate {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+        .quick-action-btn.escalate:hover {
+            background: #fecaca;
+        }
+
+        .quick-action-btn.monitor {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+        .quick-action-btn.monitor:hover {
+            background: #fde68a;
+        }
+
+        .quick-action-btn.document {
+            background: #f3e8ff;
+            color: #7c3aed;
+            border: 1px solid #c4b5fd;
+        }
+        .quick-action-btn.document:hover {
+            background: #e9d5ff;
+        }
+
+        .quick-action-success {
+            font-size: 11px;
+            color: #16a34a;
+            font-family: var(--mono);
+            animation: fadeInOut 2s ease forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* ============================================ */
         /* RESPONSIVE */
         /* ============================================ */
         @media (max-width: 768px) {
@@ -1094,6 +1180,11 @@
             .stats-grid {
                 grid-template-columns: 1fr 1fr !important;
                 gap: 10px !important;
+            }
+            .quick-action-btn {
+                font-size: 10px;
+                padding: 4px 10px;
+                min-height: 32px;
             }
         }
 
@@ -1114,6 +1205,11 @@
             }
             .chart-container .chart-wrapper {
                 height: 120px !important;
+            }
+            .quick-action-btn {
+                font-size: 9px;
+                padding: 3px 8px;
+                min-height: 28px;
             }
         }
 
@@ -1166,6 +1262,60 @@
                 padding-top: max(16px, env(safe-area-inset-top));
                 padding-bottom: max(16px, env(safe-area-inset-bottom));
             }
+        }
+
+        /* ============================================ */
+        /* ALERT DETAIL LINK STYLES */
+        /* ============================================ */
+        .alert-detail-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--inter);
+            transition: var(--transition);
+            text-decoration: none;
+            min-height: 32px;
+        }
+        .alert-detail-link:hover {
+            transform: translateX(2px);
+        }
+        .alert-detail-link.red {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+        .alert-detail-link.red:hover {
+            background: #fee2e2;
+        }
+        .alert-detail-link.amber {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+        .alert-detail-link.amber:hover {
+            background: #fef3c7;
+        }
+        .alert-detail-link.emerald {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+        .alert-detail-link.emerald:hover {
+            background: #dcfce7;
+        }
+        .alert-detail-link.disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 1px solid #e2e8f0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .alert-detail-link.disabled:hover {
+            transform: none;
         }
     </style>
 </head>
@@ -1242,17 +1392,15 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- 1. LEFT SIDEBAR NAVIGATION (DESKTOP) - Modern Gradient Sidebar -->
+    <!-- 1. LEFT SIDEBAR NAVIGATION (DESKTOP) -->
     <!-- ============================================ -->
     <aside class="gradient-sidebar hidden md:flex">
-        <!-- Brand Section with ECG Trace -->
         <div class="sidebar-brand">
             <div class="brand-icon">RG</div>
             <div>
                 <div class="brand-text">RGMS <span>Portal</span></div>
                 <span class="brand-sub">Clinical Care <span class="caregiver-label">Suite</span></span>
             </div>
-            <!-- ECG Trace -->
             <div class="ecg-trace" aria-hidden="true">
                 <svg viewBox="0 0 280 28" preserveAspectRatio="none">
                     <polyline class="ecg-line" points="0,14 20,14 30,6 40,22 50,14 70,14 80,6 90,22 100,14 120,14 130,6 140,22 150,14 170,14 180,6 190,22 200,14 220,14 230,6 240,22 250,14 280,14"/>
@@ -1260,9 +1408,7 @@
             </div>
         </div>
 
-        <!-- Navigation -->
         <nav class="sidebar-nav">
-            <!-- Dashboard -->
             <a href="{% url 'doctor_dashboard' %}" class="nav-item">
                 <div class="icon-wrapper">
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -1272,7 +1418,6 @@
                 <span class="nav-label">Dashboard</span>
             </a>
 
-            <!-- Patients List -->
             <a href="{% url 'doctor_patients_list' %}" class="nav-item">
                 <div class="icon-wrapper">
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -1283,7 +1428,6 @@
                 <span class="badge">{{ total_patients }}</span>
             </a>
 
-            <!-- Live Telemetry -->
             <a href="{% url 'live_telemetry' %}" class="nav-item">
                 <div class="icon-wrapper">
                     <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -1294,7 +1438,6 @@
                 <span class="badge badge-sky">Active</span>
             </a>
 
-            <!-- Triage Desk (Active) -->
             <a href="{% url 'triage_desk' %}" class="nav-item active">
                 <div class="icon-wrapper">
                     <svg class="w-5 h-5 text-[#DC3545]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -1310,7 +1453,6 @@
             </a>
         </nav>
 
-        <!-- User Section -->
         <div class="sidebar-user">
             <div class="user-card">
                 <div class="user-avatar">{{ user.first_name|first|default:user.username|first|upper }}</div>
@@ -1391,7 +1533,9 @@
                 </div>
             </div>
 
-            <!-- Critical Patients (Top Priority) -->
+            <!-- ============================================ -->
+            <!-- CRITICAL PATIENTS -->
+            <!-- ============================================ -->
             {% if critical_patients %}
             <div>
                 <h2 class="text-xl font-extrabold text-[#DC3545] mb-4 flex items-center gap-2 font-heading">
@@ -1413,21 +1557,47 @@
                                 {% for alert in item.alerts|slice:":3" %}
                                 <span class="bg-[#fde8ea] text-[#DC3545] border border-[#DC3545] px-3 py-1 rounded-full text-xs font-bold font-mono">⚠️ {{ alert.title }}</span>
                                 {% endfor %}
-                                <a href="#" class="bg-[#DC3545] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#b02a37] transition font-body min-h-[44px]">
-                                    View Details
-                                </a>
+                                {% with alert=item.alerts|first %}
+                                    {% if alert and alert.id %}
+                                        <a href="{% url 'alert_detail' alert.id %}" class="bg-[#DC3545] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#b02a37] transition font-body min-h-[44px]">
+                                            View Details
+                                        </a>
+                                    {% else %}
+                                        <span class="bg-slate-300 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold font-body min-h-[44px] inline-flex items-center">
+                                            No details
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
                             </div>
                         </div>
 
-                        <!-- Detailed Charts for Critical Patients -->
+                        <!-- Quick Action Buttons -->
+                        <div class="mt-3 flex flex-wrap gap-2 pt-3 border-t border-red-200">
+                            {% for alert in item.alerts|slice:":3" %}
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs text-slate-500 font-body">Alert #{{ alert.id }}:</span>
+                                <button onclick="quickAction('{{ alert.id }}', 'resolved', '{{ item.patient.full_name }}')" class="quick-action-btn resolve"><span class="icon">✅</span> Resolve</button>
+                                <button onclick="quickAction('{{ alert.id }}', 'acknowledged', '{{ item.patient.full_name }}')" class="quick-action-btn acknowledge"><span class="icon">👀</span> Acknowledge</button>
+                                <button onclick="quickAction('{{ alert.id }}', 'escalated', '{{ item.patient.full_name }}')" class="quick-action-btn escalate"><span class="icon">🚨</span> Escalate</button>
+                                {% if alert.id %}
+                                    <a href="{% url 'add_alert_action' alert.id %}" class="quick-action-btn document"><span class="icon">📋</span> Document</a>
+                                    <a href="{% url 'alert_detail' alert.id %}" class="quick-action-btn document" style="background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd;">
+                                        <span class="icon">👁️</span> View
+                                    </a>
+                                {% else %}
+                                    <span class="text-xs text-slate-400 font-body">(No detail view)</span>
+                                {% endif %}
+                                <span id="quickActionSuccess_{{ alert.id }}" class="quick-action-success" style="display:none;"></span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Charts -->
                         {% if item.chart_data.labels %}
                         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Blood Pressure Chart -->
                             <div class="chart-container">
                                 <div class="chart-title font-body">💉 Blood Pressure (mmHg)</div>
-                                <div class="chart-wrapper">
-                                    <canvas id="triageChartBP_{{ item.patient.id }}"></canvas>
-                                </div>
+                                <div class="chart-wrapper"><canvas id="triageChartBP_{{ item.patient.id }}"></canvas></div>
                                 <div class="chart-stats font-mono">
                                     <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
                                     <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
@@ -1436,13 +1606,9 @@
                                     </span>
                                 </div>
                             </div>
-
-                            <!-- Heart Rate Chart -->
                             <div class="chart-container">
                                 <div class="chart-title font-body">❤️ Heart Rate (bpm)</div>
-                                <div class="chart-wrapper">
-                                    <canvas id="triageChartHR_{{ item.patient.id }}"></canvas>
-                                </div>
+                                <div class="chart-wrapper"><canvas id="triageChartHR_{{ item.patient.id }}"></canvas></div>
                                 <div class="chart-stats font-mono">
                                     <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
                                     <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
@@ -1451,13 +1617,9 @@
                                     </span>
                                 </div>
                             </div>
-
-                            <!-- SpO2 Chart -->
                             <div class="chart-container">
                                 <div class="chart-title font-body">🫁 Oxygen Saturation (%)</div>
-                                <div class="chart-wrapper">
-                                    <canvas id="triageChartSpO2_{{ item.patient.id }}"></canvas>
-                                </div>
+                                <div class="chart-wrapper"><canvas id="triageChartSpO2_{{ item.patient.id }}"></canvas></div>
                                 <div class="chart-stats font-mono">
                                     <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_spo2|floatformat:0 }}%</span></span>
                                     <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
@@ -1466,13 +1628,9 @@
                                     </span>
                                 </div>
                             </div>
-
-                            <!-- Blood Sugar Chart -->
                             <div class="chart-container">
                                 <div class="chart-title font-body">🍬 Blood Sugar (mg/dL)</div>
-                                <div class="chart-wrapper">
-                                    <canvas id="triageChartSugar_{{ item.patient.id }}"></canvas>
-                                </div>
+                                <div class="chart-wrapper"><canvas id="triageChartSugar_{{ item.patient.id }}"></canvas></div>
                                 <div class="chart-stats font-mono">
                                     <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_sugar|floatformat:0 }} mg/dL</span></span>
                                     <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
@@ -1483,9 +1641,7 @@
                             </div>
                         </div>
                         {% else %}
-                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200 font-body">
-                            No chart data available for this patient
-                        </div>
+                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200 font-body">No chart data available for this patient</div>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -1493,7 +1649,9 @@
             </div>
             {% endif %}
 
-            <!-- Warning Patients -->
+            <!-- ============================================ -->
+            <!-- WARNING PATIENTS -->
+            <!-- ============================================ -->
             {% if warning_patients %}
             <div>
                 <h2 class="text-xl font-extrabold text-amber-600 mb-4 flex items-center gap-2 font-heading">
@@ -1515,21 +1673,47 @@
                                 {% for alert in item.alerts|slice:":3" %}
                                 <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold font-mono">⚠️ {{ alert.title }}</span>
                                 {% endfor %}
-                                <a href="#" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition font-body min-h-[44px]">
-                                    Review
-                                </a>
+                                {% with alert=item.alerts|first %}
+                                    {% if alert and alert.id %}
+                                        <a href="{% url 'alert_detail' alert.id %}" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition font-body min-h-[44px]">
+                                            Review
+                                        </a>
+                                    {% else %}
+                                        <span class="bg-slate-300 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold font-body min-h-[44px] inline-flex items-center">
+                                            No details
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
                             </div>
                         </div>
 
-                        <!-- Charts for Warning Patients -->
+                        <!-- Quick Action Buttons -->
+                        <div class="mt-3 flex flex-wrap gap-2 pt-3 border-t border-amber-200">
+                            {% for alert in item.alerts|slice:":3" %}
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs text-slate-500 font-body">Alert #{{ alert.id }}:</span>
+                                <button onclick="quickAction('{{ alert.id }}', 'resolved', '{{ item.patient.full_name }}')" class="quick-action-btn resolve"><span class="icon">✅</span> Resolve</button>
+                                <button onclick="quickAction('{{ alert.id }}', 'acknowledged', '{{ item.patient.full_name }}')" class="quick-action-btn acknowledge"><span class="icon">👀</span> Acknowledge</button>
+                                <button onclick="quickAction('{{ alert.id }}', 'monitored', '{{ item.patient.full_name }}')" class="quick-action-btn monitor"><span class="icon">📊</span> Monitor</button>
+                                {% if alert.id %}
+                                    <a href="{% url 'add_alert_action' alert.id %}" class="quick-action-btn document"><span class="icon">📋</span> Document</a>
+                                    <a href="{% url 'alert_detail' alert.id %}" class="quick-action-btn document" style="background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd;">
+                                        <span class="icon">👁️</span> View
+                                    </a>
+                                {% else %}
+                                    <span class="text-xs text-slate-400 font-body">(No detail view)</span>
+                                {% endif %}
+                                <span id="quickActionSuccess_{{ alert.id }}" class="quick-action-success" style="display:none;"></span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Charts -->
                         {% if item.chart_data.labels %}
                         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Blood Pressure Chart -->
                             <div class="chart-container">
                                 <div class="chart-title font-body">💉 Blood Pressure (mmHg)</div>
-                                <div class="chart-wrapper">
-                                    <canvas id="triageChartBP_{{ item.patient.id }}"></canvas>
-                                </div>
+                                <div class="chart-wrapper"><canvas id="triageChartBP_{{ item.patient.id }}"></canvas></div>
                                 <div class="chart-stats font-mono">
                                     <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_systolic|floatformat:0 }}/{{ item.stats.avg_diastolic|floatformat:0 }}</span></span>
                                     <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
@@ -1538,13 +1722,9 @@
                                     </span>
                                 </div>
                             </div>
-
-                            <!-- Heart Rate Chart -->
                             <div class="chart-container">
                                 <div class="chart-title font-body">❤️ Heart Rate (bpm)</div>
-                                <div class="chart-wrapper">
-                                    <canvas id="triageChartHR_{{ item.patient.id }}"></canvas>
-                                </div>
+                                <div class="chart-wrapper"><canvas id="triageChartHR_{{ item.patient.id }}"></canvas></div>
                                 <div class="chart-stats font-mono">
                                     <span><span class="stat-label font-body">Avg:</span> <span class="stat-value">{{ item.stats.avg_pulse|floatformat:0 }} bpm</span></span>
                                     <span><span class="stat-label font-body">Readings:</span> <span class="stat-value">{{ item.stats.readings_count }}</span></span>
@@ -1555,9 +1735,7 @@
                             </div>
                         </div>
                         {% else %}
-                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200 font-body">
-                            No chart data available for this patient
-                        </div>
+                        <div class="mt-4 text-center text-sm text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-200 font-body">No chart data available for this patient</div>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -1565,7 +1743,9 @@
             </div>
             {% endif %}
 
-            <!-- Stable Patients -->
+            <!-- ============================================ -->
+            <!-- STABLE PATIENTS - WITH QUICK ACTIONS -->
+            <!-- ============================================ -->
             {% if stable_patients %}
             <div>
                 <h2 class="text-xl font-extrabold text-emerald-600 mb-4 flex items-center gap-2 font-heading">
@@ -1580,7 +1760,30 @@
                         {% if item.latest_reading %}
                         <p class="text-xs text-slate-400 mt-1 font-mono">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
                         {% endif %}
-                        <a href="#" class="text-emerald-600 text-xs font-bold hover:text-emerald-800 transition mt-2 inline-block font-body">
+
+                        <!-- Quick Action Buttons for Stable Patients -->
+                        <div class="mt-3 flex flex-wrap gap-2 pt-3 border-t border-emerald-200">
+                            {% if item.alerts %}
+                                {% for alert in item.alerts|slice:":2" %}
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs text-slate-500 font-body">Alert #{{ alert.id }}:</span>
+                                    <button onclick="quickAction('{{ alert.id }}', 'resolved', '{{ item.patient.full_name }}')" class="quick-action-btn resolve"><span class="icon">✅</span> Resolve</button>
+                                    <button onclick="quickAction('{{ alert.id }}', 'acknowledged', '{{ item.patient.full_name }}')" class="quick-action-btn acknowledge"><span class="icon">👀</span> Acknowledge</button>
+                                    <button onclick="quickAction('{{ alert.id }}', 'monitored', '{{ item.patient.full_name }}')" class="quick-action-btn monitor"><span class="icon">📊</span> Monitor</button>
+                                    {% if alert.id %}
+                                        <a href="{% url 'add_alert_action' alert.id %}" class="quick-action-btn document"><span class="icon">📋</span> Document</a>
+                                    {% else %}
+                                        <span class="text-xs text-slate-400 font-body">(No detail view)</span>
+                                    {% endif %}
+                                    <span id="quickActionSuccess_{{ alert.id }}" class="quick-action-success" style="display:none;"></span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-xs text-slate-400 font-body">No active alerts</span>
+                            {% endif %}
+                        </div>
+
+                        <a href="{% url 'patient_detail' item.patient.id %}" class="text-emerald-600 text-xs font-bold hover:text-emerald-800 transition mt-2 inline-block font-body">
                             View Details →
                         </a>
                     </div>
@@ -1643,22 +1846,17 @@
     </nav>
 
     <!-- ============================================ -->
-    <!-- CHART.JS SCRIPTS FOR TRIAGE CHARTS           -->
+    <!-- CHART.JS SCRIPTS -->
     <!-- ============================================ -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Full chart creation function for triage
             function createTriageChart(canvasId, labels, data, color, label, unit) {
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return;
-                
                 const ctx = canvas.getContext('2d');
                 if (!ctx) return;
-                
-                // Filter out null/undefined values
                 const validData = data.filter(d => d !== null && d !== undefined);
                 const validLabels = labels.filter((_, i) => data[i] !== null && data[i] !== undefined);
-                
                 if (validData.length < 2) {
                     ctx.fillStyle = '#94a3b8';
                     ctx.font = '12px Inter, sans-serif';
@@ -1666,7 +1864,6 @@
                     ctx.fillText('No data available', canvas.width / 2, canvas.height / 2 + 4);
                     return;
                 }
-                
                 new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -1725,76 +1922,93 @@
                 });
             }
 
-            // Create charts for Critical Patients
             {% for item in critical_patients %}
                 {% if item.chart_data.labels %}
-                    // Blood Pressure (Systolic)
-                    createTriageChart(
-                        'triageChartBP_{{ item.patient.id }}',
-                        {{ item.chart_data.labels|safe }},
-                        {{ item.chart_data.systolic|safe }},
-                        '#ef4444',
-                        'Systolic',
-                        ' mmHg'
-                    );
-                    
-                    // Heart Rate
-                    createTriageChart(
-                        'triageChartHR_{{ item.patient.id }}',
-                        {{ item.chart_data.labels|safe }},
-                        {{ item.chart_data.pulse|safe }},
-                        '#0d9488',
-                        'Heart Rate',
-                        ' bpm'
-                    );
-                    
-                    // SpO2
-                    createTriageChart(
-                        'triageChartSpO2_{{ item.patient.id }}',
-                        {{ item.chart_data.labels|safe }},
-                        {{ item.chart_data.spo2|safe }},
-                        '#f59e0b',
-                        'SpO2',
-                        '%'
-                    );
-                    
-                    // Blood Sugar
-                    createTriageChart(
-                        'triageChartSugar_{{ item.patient.id }}',
-                        {{ item.chart_data.labels|safe }},
-                        {{ item.chart_data.sugar|safe }},
-                        '#8b5cf6',
-                        'Blood Sugar',
-                        ' mg/dL'
-                    );
+                    createTriageChart('triageChartBP_{{ item.patient.id }}', {{ item.chart_data.labels|safe }}, {{ item.chart_data.systolic|safe }}, '#ef4444', 'Systolic', ' mmHg');
+                    createTriageChart('triageChartHR_{{ item.patient.id }}', {{ item.chart_data.labels|safe }}, {{ item.chart_data.pulse|safe }}, '#0d9488', 'Heart Rate', ' bpm');
+                    createTriageChart('triageChartSpO2_{{ item.patient.id }}', {{ item.chart_data.labels|safe }}, {{ item.chart_data.spo2|safe }}, '#f59e0b', 'SpO2', '%');
+                    createTriageChart('triageChartSugar_{{ item.patient.id }}', {{ item.chart_data.labels|safe }}, {{ item.chart_data.sugar|safe }}, '#8b5cf6', 'Blood Sugar', ' mg/dL');
                 {% endif %}
             {% endfor %}
 
-            // Create charts for Warning Patients
             {% for item in warning_patients %}
                 {% if item.chart_data.labels %}
-                    // Blood Pressure (Systolic)
-                    createTriageChart(
-                        'triageChartBP_{{ item.patient.id }}',
-                        {{ item.chart_data.labels|safe }},
-                        {{ item.chart_data.systolic|safe }},
-                        '#ef4444',
-                        'Systolic',
-                        ' mmHg'
-                    );
-                    
-                    // Heart Rate
-                    createTriageChart(
-                        'triageChartHR_{{ item.patient.id }}',
-                        {{ item.chart_data.labels|safe }},
-                        {{ item.chart_data.pulse|safe }},
-                        '#0d9488',
-                        'Heart Rate',
-                        ' bpm'
-                    );
+                    createTriageChart('triageChartBP_{{ item.patient.id }}', {{ item.chart_data.labels|safe }}, {{ item.chart_data.systolic|safe }}, '#ef4444', 'Systolic', ' mmHg');
+                    createTriageChart('triageChartHR_{{ item.patient.id }}', {{ item.chart_data.labels|safe }}, {{ item.chart_data.pulse|safe }}, '#0d9488', 'Heart Rate', ' bpm');
                 {% endif %}
             {% endfor %}
         });
+    </script>
+
+    <!-- ============================================ -->
+    <!-- QUICK ACTION JAVASCRIPT -->
+    <!-- ============================================ -->
+    <script>
+        function quickAction(alertId, actionType, patientName) {
+            // Skip if alertId is empty or null
+            if (!alertId || alertId === 'None' || alertId === '') {
+                showToast('❌ Cannot perform action: Alert ID is missing', 'error');
+                return;
+            }
+
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]');
+            const formData = new FormData();
+            formData.append('action_type', actionType);
+            formData.append('description', actionType.charAt(0).toUpperCase() + actionType.slice(1) + ' by doctor');
+            formData.append('notes', 'Quick ' + actionType + ' action taken via Triage Desk');
+            
+            const successSpan = document.getElementById('quickActionSuccess_' + alertId);
+            if (successSpan) {
+                successSpan.style.display = 'inline-block';
+                successSpan.textContent = '⏳ Processing...';
+                successSpan.style.color = '#6c757d';
+            }
+            
+            fetch('/alert/' + alertId + '/quick-action/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken ? csrftoken.value : '' },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (successSpan) {
+                        successSpan.textContent = '✅ ' + actionType.charAt(0).toUpperCase() + actionType.slice(1) + '!';
+                        successSpan.style.color = '#16a34a';
+                        setTimeout(() => { successSpan.style.display = 'none'; }, 3000);
+                    }
+                    showToast('✅ Action documented: ' + actionType + ' for ' + patientName, 'success');
+                    setTimeout(() => { location.reload(); }, 1500);
+                } else {
+                    if (successSpan) {
+                        successSpan.textContent = '❌ Failed';
+                        successSpan.style.color = '#dc2626';
+                        setTimeout(() => { successSpan.style.display = 'none'; }, 3000);
+                    }
+                    showToast('❌ Action failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                if (successSpan) {
+                    successSpan.textContent = '❌ Error';
+                    successSpan.style.color = '#dc2626';
+                    setTimeout(() => { successSpan.style.display = 'none'; }, 3000);
+                }
+                showToast('❌ Network error. Please try again.', 'error');
+            });
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;padding:14px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:500;box-shadow:0 10px 40px rgba(0,0,0,0.15);animation:slideIn 0.5s ease;max-width:400px;' + 
+                (type === 'success' ? 'background:#dcfce7;color:#16a34a;border:1px solid #86efac;' : 'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     </script>
 
     <!-- Mobile Menu JavaScript -->
@@ -1806,11 +2020,9 @@
 
             function toggleMenu(open) {
                 const isOpen = typeof open === 'boolean' ? open : !sidebar.classList.contains('open');
-                
                 sidebar.classList.toggle('open', isOpen);
                 overlay.classList.toggle('open', isOpen);
                 document.body.style.overflow = isOpen ? 'hidden' : '';
-                
                 menuBtns.forEach(function(btn) {
                     btn.setAttribute('aria-expanded', isOpen);
                 });

@@ -2,7 +2,7 @@
 
 from django import forms
 from django.core.validators import MinValueValidator, MaxValueValidator
-from .models import VitalReading
+from .models import VitalReading, AlertAction
 
 
 class VitalReadingForm(forms.ModelForm):
@@ -25,7 +25,7 @@ class VitalReadingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Add custom help texts and placeholders
-        self.fields['systolic_bp'].help_text = "Normal: 90-120 mmHg"
+        self.fields['systolic_bp'].help_text = "Normal: 100-140 mmHg"
         self.fields['diastolic_bp'].help_text = "Normal: 60-80 mmHg"
         self.fields['pulse_rate'].help_text = "Normal: 60-100 bpm"
         self.fields['oxygen_saturation'].help_text = "Normal: 95-100%"
@@ -33,7 +33,7 @@ class VitalReadingForm(forms.ModelForm):
         self.fields['random_blood_sugar'].help_text = "Normal: 70-140 mg/dL"
         
         # Add placeholders
-        self.fields['systolic_bp'].widget.attrs['placeholder'] = 'e.g., 120'
+        self.fields['systolic_bp'].widget.attrs['placeholder'] = 'e.g., 120 (100-140 normal)'
         self.fields['diastolic_bp'].widget.attrs['placeholder'] = 'e.g., 80'
         self.fields['pulse_rate'].widget.attrs['placeholder'] = 'e.g., 72'
         self.fields['oxygen_saturation'].widget.attrs['placeholder'] = 'e.g., 98'
@@ -88,3 +88,169 @@ class VitalReadingForm(forms.ModelForm):
             if value < 50:
                 raise forms.ValidationError('SpO2 cannot be below 50%. Please check your reading.')
         return value
+
+
+# ============================================
+# ALERT ACTION FORMS - Clinical Documentation
+# ============================================
+
+class AlertActionForm(forms.ModelForm):
+    """
+    Full form for documenting clinical actions on patient alerts
+    Used for detailed clinical documentation
+    """
+    
+    class Meta:
+        model = AlertAction
+        fields = [
+            'action_type',
+            'description',
+            'notes',
+            'clinical_findings',
+            'assessment',
+            'plan',
+            'follow_up_needed',
+            'follow_up_date',
+            'follow_up_notes',
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Describe the action taken in detail...',
+                'class': 'form-input'
+            }),
+            'notes': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Additional notes or observations...',
+                'class': 'form-input'
+            }),
+            'clinical_findings': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Document clinical findings...',
+                'class': 'form-input'
+            }),
+            'assessment': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Clinical assessment...',
+                'class': 'form-input'
+            }),
+            'plan': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Recommended next steps or treatment plan...',
+                'class': 'form-input'
+            }),
+            'follow_up_notes': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Follow-up notes...',
+                'class': 'form-input'
+            }),
+            'follow_up_date': forms.DateTimeInput(attrs={
+                'type': 'datetime-local',
+                'class': 'form-input'
+            }),
+        }
+        labels = {
+            'action_type': 'Action Type',
+            'description': 'Description of Action',
+            'notes': 'Additional Notes',
+            'clinical_findings': 'Clinical Findings',
+            'assessment': 'Assessment',
+            'plan': 'Plan / Recommendations',
+            'follow_up_needed': 'Follow-up Needed',
+            'follow_up_date': 'Follow-up Date & Time',
+            'follow_up_notes': 'Follow-up Notes',
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Make description and action_type required
+        self.fields['action_type'].required = True
+        self.fields['description'].required = True
+        
+        # Add help texts
+        self.fields['action_type'].help_text = "Select the type of action taken"
+        self.fields['description'].help_text = "Provide a clear description of what was done"
+        self.fields['clinical_findings'].help_text = "Document any clinical findings or observations"
+        self.fields['assessment'].help_text = "Clinical assessment based on the findings"
+        self.fields['plan'].help_text = "Recommended next steps or treatment plan"
+        self.fields['follow_up_notes'].help_text = "Any additional notes for follow-up"
+        
+        # Add CSS classes for styling
+        for field in self.fields:
+            if hasattr(self.fields[field].widget, 'attrs'):
+                if 'class' not in self.fields[field].widget.attrs:
+                    self.fields[field].widget.attrs['class'] = 'form-input'
+        
+        # Special handling for checkbox
+        self.fields['follow_up_needed'].widget.attrs['class'] = 'form-checkbox'
+        self.fields['follow_up_needed'].widget.attrs['style'] = 'width: 20px; height: 20px; margin-right: 8px;'
+
+
+class AlertActionSimpleForm(forms.ModelForm):
+    """
+    Simplified form for quick action documentation
+    Used for quick actions from triage desk or live telemetry
+    """
+    
+    class Meta:
+        model = AlertAction
+        fields = ['action_type', 'description', 'notes']
+        widgets = {
+            'description': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Describe action taken...',
+                'class': 'form-input'
+            }),
+            'notes': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Additional notes...',
+                'class': 'form-input'
+            }),
+        }
+        labels = {
+            'action_type': 'Action Type',
+            'description': 'Description',
+            'notes': 'Additional Notes',
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Make required fields
+        self.fields['action_type'].required = True
+        self.fields['description'].required = True
+        
+        # Add CSS classes
+        for field in self.fields:
+            if hasattr(self.fields[field].widget, 'attrs'):
+                if 'class' not in self.fields[field].widget.attrs:
+                    self.fields[field].widget.attrs['class'] = 'form-input'
+
+
+class AlertQuickActionForm(forms.Form):
+    """
+    Quick action form for one-click actions from triage desk
+    Used for simple actions like 'mark resolved' or 'acknowledge'
+    """
+    
+    ACTION_CHOICES = [
+        ('resolved', '✅ Mark as Resolved'),
+        ('acknowledged', '👀 Acknowledge'),
+        ('escalated', '🚨 Escalate'),
+        ('monitored', '📊 Monitor'),
+        ('contacted', '📞 Contact Patient'),
+    ]
+    
+    action = forms.ChoiceField(choices=ACTION_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-input',
+        'style': 'min-width: 180px;'
+    }))
+    notes = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 2,
+            'placeholder': 'Quick notes (optional)...',
+            'class': 'form-input'
+        })
+    )

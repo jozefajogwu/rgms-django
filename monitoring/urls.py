@@ -26,4 +26,15 @@ urlpatterns = [
     # Triage & Telemetry
     path('triage-desk/', views.triage_desk, name='triage_desk'),
     path('live-telemetry/', views.live_telemetry, name='live_telemetry'),
+    
+     # Alert Documentation URLs
+    path('alert/<int:alert_id>/', views.alert_detail, name='alert_detail'),
+    path('alert/<int:alert_id>/action/', views.add_alert_action, name='add_alert_action'),
+    path('alert/<int:alert_id>/quick-action/', views.add_quick_action, name='add_quick_action'),
+    
+    
+    
+    
+    # Patient Clinical Note
+    path('patient/<int:patient_id>/note/', views.add_patient_note, name='add_patient_note'),
 ]

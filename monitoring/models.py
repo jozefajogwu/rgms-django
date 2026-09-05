@@ -1,3 +1,5 @@
+# monitoring/models.py - UPDATED with Normal Range Constants
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -73,10 +75,10 @@ class Patient(models.Model):
     )
 
     # ============================================
-    # CARE TEAM (Who cares for this person) - UPDATED to use new Doctor/Caregiver models
+    # CARE TEAM (Who cares for this person)
     # ============================================
     assigned_doctor = models.ForeignKey(
-        'Doctor',  # Changed from User to Doctor model
+        'Doctor',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -85,7 +87,7 @@ class Patient(models.Model):
     )
 
     assigned_caregiver = models.ForeignKey(
-        'Caregiver',  # Changed from User to Caregiver model
+        'Caregiver',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -94,7 +96,7 @@ class Patient(models.Model):
     )
     
     # ============================================
-    # CAREGIVER RESPONSIBILITIES (Who this person cares for)
+    # CAREGIVER RESPONSIBILITIES
     # ============================================
     patients_caring_for = models.ManyToManyField(
         'self',
@@ -140,13 +142,10 @@ class Patient(models.Model):
         if self.user:
             return self.user
         
-        # Create a user account if one doesn't exist
         import re
         from django.contrib.auth.models import User
         
-        # Generate username from full name
         username = re.sub(r'[^a-zA-Z0-9]', '_', self.full_name.lower())
-        # Ensure uniqueness
         base_username = username
         counter = 1
         while User.objects.filter(username=username).exists():
@@ -160,7 +159,6 @@ class Patient(models.Model):
             last_name=' '.join(self.full_name.split()[1:]) if len(self.full_name.split()) > 1 else '',
         )
         
-        # Set password to something secure - user can change it later
         user.set_password('changeme123')
         user.save()
         
@@ -175,13 +173,27 @@ class VitalReading(models.Model):
     Vital signs reading - can be entered by patient or caregiver
     """
     
+    # ============================================
+    # NORMAL RANGE CONSTANTS
+    # ============================================
+    NORMAL_SYSTOLIC_MIN = 100
+    NORMAL_SYSTOLIC_MAX = 140
+    NORMAL_DIASTOLIC_MIN = 60
+    NORMAL_DIASTOLIC_MAX = 90
+    NORMAL_PULSE_MIN = 60
+    NORMAL_PULSE_MAX = 100
+    NORMAL_SPO2_MIN = 95
+    NORMAL_SPO2_MAX = 100
+    NORMAL_FASTING_SUGAR_MIN = 70
+    NORMAL_FASTING_SUGAR_MAX = 126
+    NORMAL_RANDOM_SUGAR_MAX = 200
+    
     patient = models.ForeignKey(
         Patient,
         on_delete=models.CASCADE,
         related_name='vital_readings'
     )
     
-    # Who entered this reading?
     entered_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -191,7 +203,6 @@ class VitalReading(models.Model):
         help_text="Who entered this reading (patient or caregiver)"
     )
     
-    # Source of the reading
     SOURCE_CHOICES = [
         ('patient_self', 'Patient Self-Reported'),
         ('caregiver', 'Caregiver Entered'),
@@ -252,7 +263,7 @@ class VitalReading(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # ============================================
-    # URINALYSIS FIELDS - UPDATED: Empty by default
+    # URINALYSIS FIELDS
     # ============================================
     URINE_RESULT_CHOICES = [
         ('negative', 'Negative'),
@@ -276,7 +287,6 @@ class VitalReading(models.Model):
         ('plus_4', '++++'),
     ]
 
-    # Updated: Empty by default instead of 'negative'
     urine_glucose = models.CharField(
         max_length=20,
         choices=URINE_RESULT_CHOICES,
@@ -338,33 +348,69 @@ class VitalReading(models.Model):
         return f"{self.patient.full_name} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
     
     def is_abnormal(self):
-        """Check if any vital signs are abnormal"""
+        """
+        Check if any vital signs are abnormal using the defined normal ranges
+        """
         abnormalities = []
         
-        # Blood pressure check
-        if self.systolic_bp >= 141 or self.diastolic_bp >= 91:
-            abnormalities.append("High Blood Pressure")
+        # Blood Pressure Check (Systolic: 100-140, Diastolic: 60-90)
+        if self.systolic_bp < self.NORMAL_SYSTOLIC_MIN or self.systolic_bp > self.NORMAL_SYSTOLIC_MAX:
+            abnormalities.append(f"Systolic BP {self.systolic_bp} (Normal: {self.NORMAL_SYSTOLIC_MIN}-{self.NORMAL_SYSTOLIC_MAX} mmHg)")
         
-        # Heart rate check
-        if self.pulse_rate > 100 or self.pulse_rate < 60:
-            abnormalities.append("Abnormal Heart Rate")
+        if self.diastolic_bp < self.NORMAL_DIASTOLIC_MIN or self.diastolic_bp > self.NORMAL_DIASTOLIC_MAX:
+            abnormalities.append(f"Diastolic BP {self.diastolic_bp} (Normal: {self.NORMAL_DIASTOLIC_MIN}-{self.NORMAL_DIASTOLIC_MAX} mmHg)")
         
-        # Oxygen saturation check
-        if self.oxygen_saturation and self.oxygen_saturation < 95:
-            abnormalities.append("Low Oxygen Saturation")
+        # Heart Rate Check (60-100 bpm)
+        if self.pulse_rate < self.NORMAL_PULSE_MIN or self.pulse_rate > self.NORMAL_PULSE_MAX:
+            abnormalities.append(f"Heart Rate {self.pulse_rate} bpm (Normal: {self.NORMAL_PULSE_MIN}-{self.NORMAL_PULSE_MAX} bpm)")
         
-        # Blood sugar check
-        if self.fasting_blood_sugar and self.fasting_blood_sugar > 126:
-            abnormalities.append("High Fasting Blood Sugar")
-        elif self.fasting_blood_sugar and self.fasting_blood_sugar < 70:
-            abnormalities.append("Low Fasting Blood Sugar")
+        # Oxygen Saturation Check (95-100%)
+        if self.oxygen_saturation and (self.oxygen_saturation < self.NORMAL_SPO2_MIN or self.oxygen_saturation > self.NORMAL_SPO2_MAX):
+            abnormalities.append(f"SpO2 {self.oxygen_saturation}% (Normal: {self.NORMAL_SPO2_MIN}-{self.NORMAL_SPO2_MAX}%)")
+        
+        # Fasting Blood Sugar Check (70-126 mg/dL)
+        if self.fasting_blood_sugar:
+            if self.fasting_blood_sugar < self.NORMAL_FASTING_SUGAR_MIN or self.fasting_blood_sugar > self.NORMAL_FASTING_SUGAR_MAX:
+                abnormalities.append(f"Fasting Sugar {self.fasting_blood_sugar} mg/dL (Normal: {self.NORMAL_FASTING_SUGAR_MIN}-{self.NORMAL_FASTING_SUGAR_MAX} mg/dL)")
+        
+        # Random Blood Sugar Check (< 200 mg/dL)
+        if self.random_blood_sugar and self.random_blood_sugar > self.NORMAL_RANDOM_SUGAR_MAX:
+            abnormalities.append(f"Random Sugar {self.random_blood_sugar} mg/dL (Normal: < {self.NORMAL_RANDOM_SUGAR_MAX} mg/dL)")
         
         return abnormalities
+    
+    def get_abnormal_count(self):
+        """Return the number of abnormal vitals"""
+        return len(self.is_abnormal())
+    
+    def is_abnormal_systolic(self):
+        """Check if systolic BP is abnormal"""
+        return self.systolic_bp < self.NORMAL_SYSTOLIC_MIN or self.systolic_bp > self.NORMAL_SYSTOLIC_MAX
+    
+    def is_abnormal_diastolic(self):
+        """Check if diastolic BP is abnormal"""
+        return self.diastolic_bp < self.NORMAL_DIASTOLIC_MIN or self.diastolic_bp > self.NORMAL_DIASTOLIC_MAX
+    
+    def is_abnormal_pulse(self):
+        """Check if pulse rate is abnormal"""
+        return self.pulse_rate < self.NORMAL_PULSE_MIN or self.pulse_rate > self.NORMAL_PULSE_MAX
+    
+    def is_abnormal_spo2(self):
+        """Check if SpO2 is abnormal"""
+        return self.oxygen_saturation and (self.oxygen_saturation < self.NORMAL_SPO2_MIN or self.oxygen_saturation > self.NORMAL_SPO2_MAX)
+    
+    def is_abnormal_fasting_sugar(self):
+        """Check if fasting blood sugar is abnormal"""
+        return self.fasting_blood_sugar and (self.fasting_blood_sugar < self.NORMAL_FASTING_SUGAR_MIN or self.fasting_blood_sugar > self.NORMAL_FASTING_SUGAR_MAX)
 
 
+# ============================================
+# ✅ ALERT MODEL - SINGLE DEFINITION (with nullable reading)
+# ============================================
 class Alert(models.Model):
     """
     Alerts generated from vital readings
+    - reading can be NULL for clinical notes
     """
     
     SEVERITY_CHOICES = [
@@ -385,15 +431,18 @@ class Alert(models.Model):
         related_name='alerts'
     )
 
+    # ✅ NULLABLE - allows clinical notes without readings
     reading = models.ForeignKey(
         VitalReading,
         on_delete=models.CASCADE,
+        null=True,      # ← NULL allowed
+        blank=True,     # ← Form can leave blank
         related_name='alerts'
     )
 
-    title = models.CharField(max_length=150)
+    title = models.CharField(max_length=200)
     message = models.TextField()
-    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES)
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default='normal')
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -404,7 +453,8 @@ class Alert(models.Model):
         User,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
+        related_name='reviewed_alerts'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -469,7 +519,7 @@ class DoctorAssignment(models.Model):
     """
     
     doctor = models.ForeignKey(
-        'Doctor',  # Updated to use Doctor model
+        'Doctor',
         on_delete=models.CASCADE,
         related_name='doctor_assignments',
         help_text="The doctor providing care"
@@ -510,12 +560,11 @@ class DoctorAssignment(models.Model):
 
 
 # ============================================
-# NEW: Regular Doctor Model (NOT a proxy)
+# DOCTOR MODEL
 # ============================================
 class Doctor(models.Model):
     """
     Doctor model - Regular model with its own table
-    Works like Patient model
     """
     user = models.OneToOneField(
         User,
@@ -557,12 +606,11 @@ class Doctor(models.Model):
 
 
 # ============================================
-# NEW: Regular Caregiver Model (NOT a proxy)
+# CAREGIVER MODEL
 # ============================================
 class Caregiver(models.Model):
     """
     Caregiver model - Regular model with its own table
-    Works like Patient model
     """
     user = models.OneToOneField(
         User,
@@ -599,3 +647,60 @@ class Caregiver(models.Model):
         verbose_name = "Caregiver"
         verbose_name_plural = "Caregivers"
         ordering = ['-created_at']
+
+
+# ============================================
+# ALERT ACTION MODEL - Clinical Documentation
+# ============================================
+class AlertAction(models.Model):
+    """
+    Track clinical actions taken for patient alerts
+    """
+    
+    ACTION_CHOICES = [
+        ('assessed', 'Patient Assessed'),
+        ('monitored', 'Vitals Monitored'),
+        ('medication', 'Medication Adjusted'),
+        ('referred', 'Referred to Specialist'),
+        ('contacted', 'Patient Contacted'),
+        ('lab_test', 'Lab Test Ordered'),
+        ('imaging', 'Imaging Ordered'),
+        ('follow_up', 'Follow-up Scheduled'),
+        ('escalated', 'Escalated to Emergency'),
+        ('resolved', 'Resolved/Closed'),
+        ('other', 'Other Action'),
+    ]
+    
+    alert = models.ForeignKey(
+        Alert,
+        on_delete=models.CASCADE,
+        related_name='actions'
+    )
+    doctor = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='alert_actions'
+    )
+    action_type = models.CharField(
+        max_length=50,
+        choices=ACTION_CHOICES
+    )
+    description = models.TextField(help_text="Describe the action taken")
+    notes = models.TextField(blank=True, help_text="Additional notes or observations")
+    
+    clinical_findings = models.TextField(blank=True)
+    assessment = models.TextField(blank=True)
+    plan = models.TextField(blank=True)
+    
+    follow_up_needed = models.BooleanField(default=False)
+    follow_up_date = models.DateTimeField(null=True, blank=True)
+    follow_up_notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.doctor.username} - {self.get_action_type_display()} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block subject %}RHMS System{% endblock %}</title>
+    <style>
+        /* ============================================ */
+        /* EMAIL STYLES - Inline for email clients */
+        /* ============================================ */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
+        }
+        
+        /* ============================================ */
+        /* HEADER - Navy with Red accent */
+        /* ============================================ */
+        .email-header {
+            background: linear-gradient(135deg, #1a0a3e 0%, #2d1a5e 100%);
+            padding: 32px 40px 24px;
+            text-align: center;
+            border-bottom: 4px solid #DC3545;
+        }
+        .email-header .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+        .email-header .logo span {
+            color: #DC3545;
+        }
+        .email-header .tagline {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+        .email-header .divider {
+            width: 60px;
+            height: 2px;
+            background: #DC3545;
+            margin: 12px auto 0;
+            border-radius: 2px;
+        }
+
+        /* ============================================ */
+        /* CONTENT */
+        /* ============================================ */
+        .email-body {
+            padding: 40px;
+            color: #1a1a2e;
+            line-height: 1.7;
+        }
+        .email-body h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a0a3e;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+        .email-body h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a0a3e;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        .email-body p {
+            font-size: 16px;
+            color: #334155;
+            margin-bottom: 16px;
+        }
+        .email-body .text-muted {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* ============================================ */
+        /* INFO BOX */
+        /* ============================================ */
+        .info-box {
+            background: #f8fafc;
+            border-left: 4px solid #DC3545;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .info-box .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .info-box .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a0a3e;
+        }
+        .info-box .value code {
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        /* ============================================ */
+        /* ALERT BOX */
+        /* ============================================ */
+        .alert-box {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .alert-box .alert-title {
+            color: #991b1b;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .alert-box ul {
+            color: #991b1b;
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        /* ============================================ */
+        /* VITALS GRID */
+        /* ============================================ */
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .vital-item {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .vital-item .label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .vital-item .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a0a3e;
+            font-family: 'Courier New', monospace;
+        }
+        .vital-item .value.alert {
+            color: #DC3545;
+        }
+        .vital-item .value.normal {
+            color: #22c55e;
+        }
+
+        /* ============================================ */
+        /* BUTTON */
+        /* ============================================ */
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
+            color: #ffffff !important;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 15px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.35);
+        }
+        .btn-secondary {
+            background: #1a0a3e;
+            box-shadow: 0 4px 12px rgba(26, 10, 62, 0.25);
+        }
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(26, 10, 62, 0.35);
+        }
+
+        /* ============================================ */
+        /* FOOTER */
+        /* ============================================ */
+        .email-footer {
+            background: #f8fafc;
+            padding: 24px 40px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .email-footer p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin: 4px 0;
+        }
+        .email-footer .links {
+            margin: 12px 0 8px;
+        }
+        .email-footer .links a {
+            color: #1a0a3e;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            margin: 0 12px;
+        }
+        .email-footer .links a:hover {
+            color: #DC3545;
+        }
+
+        /* ============================================ */
+        /* RESPONSIVE */
+        /* ============================================ */
+        @media (max-width: 480px) {
+            .email-body {
+                padding: 24px;
+            }
+            .email-header {
+                padding: 24px 20px;
+            }
+            .email-footer {
+                padding: 16px 20px;
+            }
+            .vitals-grid {
+                grid-template-columns: 1fr;
+            }
+            .btn {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- ============================================ -->
+        <!-- HEADER -->
+        <!-- ============================================ -->
+        <div class="email-header">
+            <div class="logo">RHMS <span>Portal</span></div>
+            <div class="tagline">Remote Health Monitoring System</div>
+            <div class="divider"></div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- BODY -->
+        <!-- ============================================ -->
+        <div class="email-body">
+            {% block content %}
+            <!-- Content goes here -->
+            {% endblock %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- FOOTER -->
+        <!-- ============================================ -->
+        <div class="email-footer">
+            <div class="links">
+                <a href="#">Dashboard</a>
+                <a href="#">Support</a>
+                <a href="#">Privacy</a>
+            </div>
+            <p>© 2026 RHMS System. All rights reserved.</p>
+            <p style="font-size: 12px; color: #cbd5e1;">This is an automated message. Please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>

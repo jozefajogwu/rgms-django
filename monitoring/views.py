@@ -5,11 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Count, Avg, Q
+from django.http import JsonResponse
 from datetime import timedelta
 from collections import defaultdict
 
-from .forms import VitalReadingForm
-from .models import Patient, VitalReading, Alert, Doctor, Caregiver
+from .forms import VitalReadingForm, AlertActionForm, AlertActionSimpleForm
+from .models import Patient, VitalReading, Alert, Doctor, Caregiver, AlertAction
 
 
 def landing_page(request):
@@ -107,6 +108,15 @@ def get_patient_chart_data(patient, days=7):
     }
     
     return chart_data, stats
+
+
+def is_doctor_authorized(doctor_user, patient):
+    """Check if doctor is authorized to view this patient"""
+    try:
+        doctor = Doctor.objects.get(user=doctor_user)
+        return patient.assigned_doctor == doctor
+    except Doctor.DoesNotExist:
+        return False
 
 
 @login_required
@@ -208,15 +218,15 @@ def doctor_dashboard(request):
         level = 'Low'
         
         if latest_reading:
-            if latest_reading.systolic_bp > 140:
+            if latest_reading.systolic_bp > VitalReading.NORMAL_SYSTOLIC_MAX:
                 risk_score += 2
-            if latest_reading.diastolic_bp > 90:
+            if latest_reading.diastolic_bp > VitalReading.NORMAL_DIASTOLIC_MAX:
                 risk_score += 2
-            if latest_reading.pulse_rate > 100:
+            if latest_reading.pulse_rate > VitalReading.NORMAL_PULSE_MAX:
                 risk_score += 1
-            if latest_reading.oxygen_saturation and latest_reading.oxygen_saturation < 95:
+            if latest_reading.oxygen_saturation and latest_reading.oxygen_saturation < VitalReading.NORMAL_SPO2_MIN:
                 risk_score += 2
-            if latest_reading.fasting_blood_sugar and latest_reading.fasting_blood_sugar > 6.5:
+            if latest_reading.fasting_blood_sugar and latest_reading.fasting_blood_sugar > VitalReading.NORMAL_FASTING_SUGAR_MAX:
                 risk_score += 2
         
         risk_score += alert_count
@@ -255,9 +265,9 @@ def doctor_dashboard(request):
             is_recent = (timezone.now() - latest.created_at).total_seconds() < 3600
             
             analysis_level = 'Normal'
-            if latest.systolic_bp > 140:
+            if latest.systolic_bp > VitalReading.NORMAL_SYSTOLIC_MAX:
                 analysis_level = 'High'
-            elif latest.systolic_bp > 130:
+            elif latest.systolic_bp > VitalReading.NORMAL_SYSTOLIC_MIN + 30:
                 analysis_level = 'Medium'
             
             if is_recent:
@@ -291,9 +301,6 @@ def doctor_dashboard(request):
     return render(request, 'doctor_dashboard.html', context)
 
 
-# ============================================
-# NEW: DOCTOR PATIENTS LIST VIEW
-# ============================================
 @login_required
 def doctor_patients_list(request):
     """Show all patients assigned to the logged-in doctor"""
@@ -461,70 +468,141 @@ def caregiver_dashboard(request):
     return render(request, 'caregiver_dashboard.html', context)
 
 
+# ============================================
+# ✅ CREATE ALERT FOR READING - UPDATED with Normal Ranges
+# ============================================
 def create_alert_for_reading(reading):
+    """
+    Create alerts for abnormal vital readings using the normal ranges
+    from the VitalReading model
+    """
     alerts_to_create = []
-
-    if reading.systolic_bp >= 141 or reading.diastolic_bp >= 90:
+    
+    # ============================================
+    # BLOOD PRESSURE (Systolic: 100-140, Diastolic: 60-90)
+    # ============================================
+    if reading.systolic_bp < VitalReading.NORMAL_SYSTOLIC_MIN:
         alerts_to_create.append({
             'severity': 'warning',
-            'title': 'High Blood Pressure Alert',
-            'message': 'The patient blood pressure reading is above the accepted limit.'
+            'title': 'Low Systolic BP Alert',
+            'message': f'Systolic BP is {reading.systolic_bp} mmHg. Normal range is {VitalReading.NORMAL_SYSTOLIC_MIN}-{VitalReading.NORMAL_SYSTOLIC_MAX} mmHg.'
         })
-
-    if reading.fasting_blood_sugar and reading.fasting_blood_sugar >= 6.5:
+    elif reading.systolic_bp > VitalReading.NORMAL_SYSTOLIC_MAX:
         alerts_to_create.append({
             'severity': 'warning',
-            'title': 'Fasting Blood Sugar Alert',
-            'message': 'The patient fasting blood sugar is 6.5 mmol/L or above.'
+            'title': 'High Systolic BP Alert',
+            'message': f'Systolic BP is {reading.systolic_bp} mmHg. Normal range is {VitalReading.NORMAL_SYSTOLIC_MIN}-{VitalReading.NORMAL_SYSTOLIC_MAX} mmHg.'
         })
-
-    if reading.random_blood_sugar and reading.random_blood_sugar >= 8.3:
+    
+    if reading.diastolic_bp < VitalReading.NORMAL_DIASTOLIC_MIN:
         alerts_to_create.append({
             'severity': 'warning',
-            'title': 'Random Blood Sugar Alert',
-            'message': 'The patient random blood sugar is 8.3 mmol/L or above.'
+            'title': 'Low Diastolic BP Alert',
+            'message': f'Diastolic BP is {reading.diastolic_bp} mmHg. Normal range is {VitalReading.NORMAL_DIASTOLIC_MIN}-{VitalReading.NORMAL_DIASTOLIC_MAX} mmHg.'
         })
-
-    if reading.oxygen_saturation and reading.oxygen_saturation <= 94:
+    elif reading.diastolic_bp > VitalReading.NORMAL_DIASTOLIC_MAX:
         alerts_to_create.append({
             'severity': 'warning',
-            'title': 'Low Oxygen Saturation Alert',
-            'message': 'The patient SpO2 reading is 94% or below.'
+            'title': 'High Diastolic BP Alert',
+            'message': f'Diastolic BP is {reading.diastolic_bp} mmHg. Normal range is {VitalReading.NORMAL_DIASTOLIC_MIN}-{VitalReading.NORMAL_DIASTOLIC_MAX} mmHg.'
         })
-
+    
+    # ============================================
+    # HEART RATE (60-100 bpm)
+    # ============================================
+    if reading.pulse_rate < VitalReading.NORMAL_PULSE_MIN:
+        alerts_to_create.append({
+            'severity': 'warning',
+            'title': 'Low Heart Rate Alert',
+            'message': f'Heart rate is {reading.pulse_rate} bpm. Normal range is {VitalReading.NORMAL_PULSE_MIN}-{VitalReading.NORMAL_PULSE_MAX} bpm.'
+        })
+    elif reading.pulse_rate > VitalReading.NORMAL_PULSE_MAX:
+        alerts_to_create.append({
+            'severity': 'warning',
+            'title': 'High Heart Rate Alert',
+            'message': f'Heart rate is {reading.pulse_rate} bpm. Normal range is {VitalReading.NORMAL_PULSE_MIN}-{VitalReading.NORMAL_PULSE_MAX} bpm.'
+        })
+    
+    # ============================================
+    # OXYGEN SATURATION (95-100%)
+    # ============================================
+    if reading.oxygen_saturation:
+        if reading.oxygen_saturation < VitalReading.NORMAL_SPO2_MIN:
+            alerts_to_create.append({
+                'severity': 'warning',
+                'title': 'Low Oxygen Saturation Alert',
+                'message': f'SpO2 is {reading.oxygen_saturation}%. Normal range is {VitalReading.NORMAL_SPO2_MIN}-{VitalReading.NORMAL_SPO2_MAX}%.'
+            })
+        elif reading.oxygen_saturation > VitalReading.NORMAL_SPO2_MAX:
+            alerts_to_create.append({
+                'severity': 'warning',
+                'title': 'High Oxygen Saturation Alert',
+                'message': f'SpO2 is {reading.oxygen_saturation}%. Normal range is {VitalReading.NORMAL_SPO2_MIN}-{VitalReading.NORMAL_SPO2_MAX}%.'
+            })
+    
+    # ============================================
+    # FASTING BLOOD SUGAR (70-126 mg/dL)
+    # ============================================
+    if reading.fasting_blood_sugar:
+        if reading.fasting_blood_sugar < VitalReading.NORMAL_FASTING_SUGAR_MIN:
+            alerts_to_create.append({
+                'severity': 'warning',
+                'title': 'Low Fasting Blood Sugar Alert',
+                'message': f'Fasting blood sugar is {reading.fasting_blood_sugar} mg/dL. Normal range is {VitalReading.NORMAL_FASTING_SUGAR_MIN}-{VitalReading.NORMAL_FASTING_SUGAR_MAX} mg/dL.'
+            })
+        elif reading.fasting_blood_sugar > VitalReading.NORMAL_FASTING_SUGAR_MAX:
+            alerts_to_create.append({
+                'severity': 'warning',
+                'title': 'High Fasting Blood Sugar Alert',
+                'message': f'Fasting blood sugar is {reading.fasting_blood_sugar} mg/dL. Normal range is {VitalReading.NORMAL_FASTING_SUGAR_MIN}-{VitalReading.NORMAL_FASTING_SUGAR_MAX} mg/dL.'
+            })
+    
+    # ============================================
+    # RANDOM BLOOD SUGAR (< 200 mg/dL)
+    # ============================================
+    if reading.random_blood_sugar and reading.random_blood_sugar > VitalReading.NORMAL_RANDOM_SUGAR_MAX:
+        alerts_to_create.append({
+            'severity': 'warning',
+            'title': 'High Random Blood Sugar Alert',
+            'message': f'Random blood sugar is {reading.random_blood_sugar} mg/dL. Normal is below {VitalReading.NORMAL_RANDOM_SUGAR_MAX} mg/dL.'
+        })
+    
+    # ============================================
+    # URINALYSIS ALERTS
+    # ============================================
     if reading.urine_glucose and reading.urine_glucose != 'negative':
         alerts_to_create.append({
             'severity': 'warning',
             'title': 'Urine Glucose Alert',
-            'message': 'Urine glucose is positive. This may require clinical review.'
+            'message': f'Urine glucose is {reading.get_urine_glucose_display()}. Please review.'
         })
 
     if reading.urine_protein and reading.urine_protein != 'negative':
         alerts_to_create.append({
             'severity': 'warning',
             'title': 'Urine Protein Alert',
-            'message': 'Urine protein is positive. This may suggest kidney-related concern.'
+            'message': f'Urine protein is {reading.get_urine_protein_display()}. Please review.'
         })
 
     if reading.urine_acetone and reading.urine_acetone != 'negative':
         alerts_to_create.append({
             'severity': 'warning',
             'title': 'Urine Acetone/Ketone Alert',
-            'message': 'Urine acetone/ketone is positive. This may require clinical review.'
+            'message': f'Urine acetone is {reading.get_urine_acetone_display()}. Please review.'
         })
 
     if reading.urine_bilirubin and reading.urine_bilirubin != 'negative':
         alerts_to_create.append({
             'severity': 'warning',
             'title': 'Urine Bilirubin Alert',
-            'message': 'Urine bilirubin is positive. This may require clinical review.'
+            'message': f'Urine bilirubin is {reading.get_urine_bilirubin_display()}. Please review.'
         })
 
     if reading.urine_urobilinogen and reading.urine_urobilinogen != 'weakly_positive':
         alerts_to_create.append({
             'severity': 'warning',
             'title': 'Urobilinogen Alert',
-            'message': 'Urobilinogen is above the expected weakly positive level.'
+            'message': f'Urobilinogen is {reading.get_urine_urobilinogen_display()}. Please review.'
         })
 
     if reading.urine_nitrite and reading.urine_nitrite == 'positive':
@@ -534,13 +612,15 @@ def create_alert_for_reading(reading):
             'message': 'Urine nitrite is positive. This may suggest urinary tract infection.'
         })
 
+    # Create all alerts
     for alert_data in alerts_to_create:
         Alert.objects.create(
             patient=reading.patient,
             reading=reading,
             title=alert_data['title'],
             message=alert_data['message'],
-            severity=alert_data['severity']
+            severity=alert_data['severity'],
+            status='unreviewed'
         )
 
 
@@ -622,9 +702,6 @@ def mark_alert_reviewed(request, alert_id):
     return redirect('doctor_dashboard')
 
 
-# ============================================
-# NEW: TRIAGE DESK VIEW
-# ============================================
 @login_required
 def triage_desk(request):
     """Triage desk with detailed charts for clinical review"""
@@ -683,9 +760,6 @@ def triage_desk(request):
     return render(request, 'triage_desk.html', context)
 
 
-# ============================================
-# NEW: LIVE TELEMETRY VIEW
-# ============================================
 @login_required
 def live_telemetry(request):
     """Live telemetry dashboard with real-time charts"""
@@ -750,6 +824,10 @@ def live_telemetry(request):
     
     return render(request, 'live_telemetry.html', context)
 
+
+# ============================================
+# ✅ PATIENT DETAIL VIEW
+# ============================================
 @login_required
 def patient_detail(request, patient_id):
     """
@@ -757,7 +835,7 @@ def patient_detail(request, patient_id):
     """
     user = request.user
     
-    # Get the Doctor instance for this user
+    # Check if user is a doctor
     try:
         doctor = Doctor.objects.get(user=user)
     except Doctor.DoesNotExist:
@@ -781,7 +859,6 @@ def patient_detail(request, patient_id):
     
     # Get alerts for this patient
     active_alerts = Alert.objects.filter(patient=patient, status='unreviewed')
-    resolved_alerts = Alert.objects.filter(patient=patient, status='reviewed')
     
     # Get chart data (last 30 days)
     chart_data, stats = get_patient_chart_data(patient, days=30)
@@ -789,8 +866,15 @@ def patient_detail(request, patient_id):
     # Get readings for the table (last 20)
     recent_readings = readings[:20]
     
-    # Check if patient has a user account
-    has_account = patient.user is not None
+    # Get actions for alerts
+    alert_actions = []
+    for alert in active_alerts:
+        actions = AlertAction.objects.filter(alert=alert).order_by('-created_at')
+        alert_actions.append({
+            'alert': alert,
+            'actions': actions,
+            'action_count': actions.count(),
+        })
     
     context = {
         'patient': patient,
@@ -799,11 +883,236 @@ def patient_detail(request, patient_id):
         'total_readings': total_readings,
         'latest_reading': latest_reading,
         'active_alerts': active_alerts,
-        'resolved_alerts': resolved_alerts,
         'chart_data': chart_data,
         'stats': stats,
-        'has_account': has_account,
         'alert_count': active_alerts.count(),
+        'alert_actions': alert_actions,
     }
     
     return render(request, 'patient_detail.html', context)
+
+
+# ============================================
+# ✅ PATIENT CLINICAL NOTE VIEW
+# ============================================
+@login_required
+def add_patient_note(request, patient_id):
+    """
+    Add a clinical note for a patient (not tied to a specific alert)
+    """
+    patient = get_object_or_404(Patient, id=patient_id)
+    user = request.user
+    
+    # Check authorization
+    if not is_doctor_authorized(user, patient):
+        messages.error(request, 'You are not authorized to add notes for this patient.')
+        return redirect('doctor_dashboard')
+    
+    if request.method == 'POST':
+        action_type = request.POST.get('action_type')
+        description = request.POST.get('description')
+        notes = request.POST.get('notes')
+        clinical_findings = request.POST.get('clinical_findings')
+        assessment = request.POST.get('assessment')
+        plan = request.POST.get('plan')
+        follow_up_needed = request.POST.get('follow_up_needed') == 'on'
+        follow_up_date = request.POST.get('follow_up_date')
+        is_urgent = request.POST.get('is_urgent') == 'on'
+        
+        # Get or create a "general note" alert for this patient
+        note_alert, created = Alert.objects.get_or_create(
+            patient=patient,
+            title='Clinical Note',
+            severity='normal',
+            status='reviewed',
+            defaults={
+                'message': f'Clinical note documented by Dr. {user.get_full_name()}',
+                'reading': None,
+            }
+        )
+        
+        # Create the action
+        action = AlertAction.objects.create(
+            alert=note_alert,
+            doctor=user,
+            action_type=action_type or 'other',
+            description=description or 'Clinical note documented',
+            notes=notes or '',
+            clinical_findings=clinical_findings or '',
+            assessment=assessment or '',
+            plan=plan or '',
+            follow_up_needed=follow_up_needed,
+            follow_up_date=follow_up_date if follow_up_date else None,
+        )
+        
+        # If urgent, create an alert
+        if is_urgent:
+            Alert.objects.create(
+                patient=patient,
+                reading=None,
+                title='Urgent Clinical Note',
+                message=description or 'Urgent clinical note documented',
+                severity='critical',
+                status='unreviewed'
+            )
+        
+        messages.success(request, '✅ Clinical note documented successfully!')
+        return redirect('patient_detail', patient_id=patient.id)
+    
+    context = {
+        'patient': patient,
+        'action_types': AlertAction.ACTION_CHOICES,
+    }
+    
+    return render(request, 'add_patient_note.html', context)
+
+
+# ============================================
+# ALERT ACTION VIEWS - Clinical Documentation
+# ============================================
+
+@login_required
+def alert_detail(request, alert_id):
+    """View alert details and actions"""
+    alert = get_object_or_404(Alert, id=alert_id)
+    user = request.user
+    
+    # Check if doctor has access to this patient
+    if not is_doctor_authorized(user, alert.patient):
+        messages.error(request, 'You are not authorized to view this alert.')
+        return redirect('doctor_dashboard')
+    
+    # Get all actions for this alert
+    actions = AlertAction.objects.filter(alert=alert).order_by('-created_at')
+    
+    # Get doctor instance
+    try:
+        doctor = Doctor.objects.get(user=user)
+    except Doctor.DoesNotExist:
+        messages.error(request, 'You are not registered as a doctor.')
+        return redirect('home')
+    
+    context = {
+        'alert': alert,
+        'actions': actions,
+        'patient': alert.patient,
+        'doctor': doctor,
+        'action_count': actions.count(),
+    }
+    
+    return render(request, 'alert_detail.html', context)
+
+
+@login_required
+def add_alert_action(request, alert_id):
+    """Add a clinical action for an alert"""
+    alert = get_object_or_404(Alert, id=alert_id)
+    user = request.user
+    
+    # Check authorization
+    if not is_doctor_authorized(user, alert.patient):
+        messages.error(request, 'You are not authorized to take action on this alert.')
+        return redirect('doctor_dashboard')
+    
+    if request.method == 'POST':
+        form = AlertActionForm(request.POST)
+        if form.is_valid():
+            action = form.save(commit=False)
+            action.alert = alert
+            action.doctor = user
+            action.save()
+            
+            # Update alert status if resolved
+            if form.cleaned_data.get('action_type') == 'resolved':
+                alert.status = 'reviewed'
+                alert.reviewed_at = timezone.now()
+                alert.reviewed_by = user
+                alert.save()
+            
+            messages.success(request, '✅ Action documented successfully!')
+            return redirect('alert_detail', alert_id=alert.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AlertActionForm()
+    
+    context = {
+        'alert': alert,
+        'form': form,
+        'patient': alert.patient,
+    }
+    
+    return render(request, 'add_alert_action.html', context)
+
+
+# ============================================
+# ✅ QUICK ACTION VIEW - For Triage Desk AJAX
+# ============================================
+@login_required
+def add_quick_action(request, alert_id):
+    """
+    Add a quick action via AJAX from triage desk
+    Uses the simplified form for quick actions
+    """
+    alert = get_object_or_404(Alert, id=alert_id)
+    user = request.user
+    
+    # Check authorization
+    if not is_doctor_authorized(user, alert.patient):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    if request.method == 'POST':
+        form = AlertActionSimpleForm(request.POST)
+        if form.is_valid():
+            action = form.save(commit=False)
+            action.alert = alert
+            action.doctor = user
+            action.save()
+            
+            # If action is resolved, update alert status
+            if form.cleaned_data.get('action_type') == 'resolved':
+                alert.status = 'reviewed'
+                alert.reviewed_at = timezone.now()
+                alert.reviewed_by = user
+                alert.save()
+            
+            return JsonResponse({
+                'success': True,
+                'action_id': action.id,
+                'action_type': action.get_action_type_display(),
+                'description': action.description,
+                'notes': action.notes,
+                'doctor': action.doctor.get_full_name() or action.doctor.username,
+                'time': action.created_at.strftime('%Y-%m-%d %H:%M'),
+            })
+        else:
+            return JsonResponse({'success': False, 'errors': str(form.errors)}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+
+@login_required
+def get_alert_actions(request, alert_id):
+    """Get actions for an alert via AJAX"""
+    alert = get_object_or_404(Alert, id=alert_id)
+    user = request.user
+    
+    if not is_doctor_authorized(user, alert.patient):
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    actions = AlertAction.objects.filter(alert=alert).order_by('-created_at')
+    
+    data = []
+    for action in actions:
+        data.append({
+            'id': action.id,
+            'action_type': action.get_action_type_display(),
+            'description': action.description,
+            'notes': action.notes,
+            'doctor': action.doctor.get_full_name() or action.doctor.username,
+            'time': action.created_at.strftime('%Y-%m-%d %H:%M'),
+            'follow_up_needed': action.follow_up_needed,
+            'follow_up_date': action.follow_up_date.strftime('%Y-%m-%d %H:%M') if action.follow_up_date else None,
+        })
+    
+    return JsonResponse({'success': True, 'actions': data, 'count': len(data)})

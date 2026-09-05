@@ -1,0 +1,31 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+{% if alert.severity == 'critical' %}
+<h1 style="color: #DC3545;">🚨 CRITICAL ALERT</h1>
+{% elif alert.severity == 'warning' %}
+<h1 style="color: #d97706;">⚠️ Warning Alert</h1>
+{% else %}
+<h1>ℹ️ Alert Notification</h1>
+{% endif %}
+
+<p><strong>Patient:</strong> {{ patient.full_name }}</p>
+<p><strong>Alert:</strong> {{ alert.title }}</p>
+<p><strong>Severity:</strong> 
+    <span style="{% if alert.severity == 'critical' %}color:#DC3545;font-weight:700;{% elif alert.severity == 'warning' %}color:#d97706;font-weight:700;{% endif %}">
+        {{ alert.get_severity_display }}
+    </span>
+</p>
+<p><strong>Status:</strong> {{ alert.get_status_display }}</p>
+<p><strong>Created:</strong> {{ alert.created_at|date:"F j, Y, g:i A" }}</p>
+
+<div class="info-box">
+    <div class="label">Alert Message</div>
+    <p style="margin: 8px 0 0;">{{ alert.message }}</p>
+</div>
+
+<div style="text-align: center; margin: 28px 0;">
+    <a href="{{ patient_url }}" class="btn">View Patient →</a>
+    <a href="{{ alert_url }}" class="btn btn-secondary" style="margin-left: 8px;">View Alert →</a>
+</div>
+{% endblock %}

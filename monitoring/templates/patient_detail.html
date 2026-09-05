@@ -1,1 +1,836 @@
-git
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{{ patient.full_name }} · Patient Details · RHMS</title>
+
+    <!-- Add favicon -->
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+
+    <!-- Google Fonts: Lora + Inter + DM Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom Dashboard CSS -->
+    <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
+
+    <style>
+        /* ============================================ */
+        /* CUSTOM STYLES - Professional Font System */
+        /* ============================================ */
+        :root {
+            --navy: #1a0a3e;
+            --navy-dark: #0a0518;
+            --navy-light: #2d1a5e;
+            --red: #DC3545;
+            --red-dark: #b02a37;
+            --red-glow: rgba(220, 53, 69, 0.25);
+            --red-pale: #fde8ea;
+            --red-gradient: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
+            --gold: #D4A843;
+            --gold-glow: rgba(212, 168, 67, 0.2);
+            --white: #FFFFFF;
+            --bg: #f8fafc;
+            --text: #1a1a2e;
+            --muted: #6c757d;
+            --border: #e9ecef;
+            --lora: 'Lora', serif;
+            --inter: 'Inter', sans-serif;
+            --mono: 'DM Mono', monospace;
+            --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
+            --shadow-lg: 0 20px 60px rgba(26, 10, 62, 0.12);
+            --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
+            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--inter);
+            background-color: var(--bg);
+            color: var(--text);
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-heading { font-family: var(--lora); }
+        .font-mono { font-family: var(--mono); }
+        .font-body { font-family: var(--inter); }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--mono);
+            letter-spacing: 0.3px;
+        }
+        .status-badge.critical {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+        .status-badge.warning {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+        .status-badge.stable {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+
+        /* Detail Cards */
+        .detail-card {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 20px 24px;
+            transition: var(--transition);
+        }
+        .detail-card:hover {
+            border-color: var(--red);
+            box-shadow: var(--shadow-lg);
+        }
+        .detail-card .card-title {
+            font-family: var(--lora);
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--navy);
+            margin-bottom: 16px;
+            letter-spacing: 0.2px;
+        }
+
+        /* Info Rows */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .label {
+            font-size: 13px;
+            color: var(--muted);
+            font-family: var(--inter);
+            font-weight: 500;
+        }
+        .info-row .value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: var(--inter);
+        }
+        .info-row .value .mono { font-family: var(--mono); }
+
+        /* Action Timeline */
+        .action-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .action-timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .action-item {
+            position: relative;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            background: #fafbfc;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .action-item:hover {
+            border-color: var(--red);
+            box-shadow: var(--shadow);
+        }
+        .action-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 16px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--red);
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--red);
+        }
+        .action-item.resolved::before {
+            background: #22c55e;
+            box-shadow: 0 0 0 2px #22c55e;
+        }
+        .action-item .action-type {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--navy);
+            font-family: var(--inter);
+        }
+        .action-item .action-desc {
+            font-size: 13px;
+            color: var(--text);
+            margin-top: 2px;
+            font-family: var(--inter);
+        }
+        .action-item .action-meta {
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--mono);
+            margin-top: 4px;
+        }
+
+        /* Alert Items */
+        .alert-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--red);
+            background: #fef2f2;
+            margin-bottom: 8px;
+        }
+        .alert-item.resolved {
+            border-left-color: var(--muted);
+            background: #f1f5f9;
+        }
+        .alert-item .alert-title {
+            font-weight: 600;
+            font-size: 14px;
+            font-family: var(--inter);
+        }
+        .alert-item .alert-message {
+            font-size: 13px;
+            color: var(--muted);
+            font-family: var(--inter);
+        }
+        .alert-item .alert-time {
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--mono);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: rgba(241, 245, 249, 0.5);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .chart-container:hover {
+            border-color: var(--red);
+            box-shadow: var(--shadow-md);
+        }
+        .chart-container .chart-wrapper {
+            height: 280px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Chart Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .chart-grid { grid-template-columns: 1fr; }
+        }
+
+        .chart-container .chart-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: var(--inter);
+            display: block;
+            margin-bottom: 8px;
+        }
+        .chart-container .chart-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(226, 232, 240, 0.4);
+            font-family: var(--mono);
+        }
+        .chart-container .chart-stats .stat-value {
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--red-gradient);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            font-family: var(--inter);
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 44px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-red);
+        }
+        .btn-secondary {
+            background: var(--border-light);
+            color: var(--text-secondary);
+            padding: 10px 24px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: var(--inter);
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 44px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Quick Stats Cards */
+        .stat-card {
+            background: var(--white);
+            padding: 18px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            min-height: 88px;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--red);
+        }
+        .stat-card .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: var(--inter);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--navy);
+            font-family: var(--mono);
+            line-height: 1.2;
+            letter-spacing: 0.5px;
+        }
+        .stat-card .stat-sub {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+            font-family: var(--inter);
+        }
+        .stat-card.red .stat-value { color: var(--red); }
+        .stat-card.amber .stat-value { color: #d97706; }
+        .stat-card.emerald .stat-value { color: #16a34a; }
+
+        /* Heading Overrides */
+        h1, h2, h3, h4, .font-serif {
+            font-family: var(--lora);
+        }
+
+        .text-label {
+            font-family: var(--inter);
+            font-weight: 600;
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .text-value {
+            font-family: var(--mono);
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        /* Header */
+        .page-header h1 {
+            font-family: var(--lora);
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .page-header .subtitle {
+            font-family: var(--inter);
+            color: var(--muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- ============================================ -->
+    <!-- HEADER -->
+    <!-- ============================================ -->
+    <header class="bg-white border-b-2 border-[#DC3545] px-6 md:px-8 py-4 flex items-center justify-between shadow-sm z-40">
+        <div class="page-header">
+            <h1 class="text-xl font-extrabold tracking-tight text-[#1a0a3e]">
+                👤 {{ patient.full_name }}
+            </h1>
+            <p class="subtitle mt-0.5">
+                Patient ID: {{ patient.id }} · {{ patient.care_type|title }}
+            </p>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-slate-600 hidden sm:block font-body">
+                {% if request.user.doctor_profile %}
+                    Dr. {{ request.user.get_full_name|default:request.user.username }}
+                {% else %}
+                    {{ request.user.get_full_name|default:request.user.username }}
+                {% endif %}
+            </span>
+            <a href="{% url 'triage_desk' %}" class="text-sm font-bold text-[#1a0a3e] bg-slate-100 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-200 transition font-body min-h-[44px]">
+                ← Back to Triage
+            </a>
+        </div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
+    <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+
+        <!-- ============================================ -->
+        <!-- PATIENT STATUS BANNER -->
+        <!-- ============================================ -->
+        <div class="bg-white rounded-2xl border-2 border-[#DC3545] p-6 shadow-sm">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-red-gradient flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-red-glow font-heading">
+                        {{ patient.full_name|slice:":2"|upper }}
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-body">Patient Status</p>
+                        {% if alert_count > 0 %}
+                            <span class="status-badge critical font-mono">🚨 {{ alert_count }} Active Alerts</span>
+                        {% else %}
+                            <span class="status-badge stable font-mono">✅ Stable</span>
+                        {% endif %}
+                        <p class="text-xs text-slate-400 mt-1 font-body">Last reading: {{ latest_reading.created_at|timesince|default:"Never" }} ago</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <!-- ✅ FIXED: Button now points to add_patient_note -->
+                    {% if request.user.doctor_profile %}
+                    <a href="{% url 'add_patient_note' patient.id %}" class="btn-primary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Document Clinical Note
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'patient_detail' patient.id %}" class="btn-secondary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                        Refresh
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- QUICK STATS - Professional Fonts -->
+        <!-- ============================================ -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="stat-card">
+                <span class="stat-label font-body">Age</span>
+                <p class="stat-value font-mono">
+                    {% if patient.date_of_birth %}
+                        {{ patient.date_of_birth|timesince|cut:" ago"|cut:"years"|cut:"year"|cut:"months"|cut:"month"|cut:","|cut:" " }}
+                    {% else %}—{% endif %}
+                </p>
+                <span class="stat-sub font-body">Years old</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label font-body">Gender</span>
+                <p class="stat-value font-mono">{{ patient.gender|title|default:"—" }}</p>
+                <span class="stat-sub font-body">Biological sex</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label font-body">Total Readings</span>
+                <p class="stat-value font-mono">{{ total_readings }}</p>
+                <span class="stat-sub font-body">Vitals recorded</span>
+            </div>
+            <div class="stat-card {% if alert_count > 0 %}red{% else %}emerald{% endif %}">
+                <span class="stat-label font-body">Active Alerts</span>
+                <p class="stat-value font-mono">{{ alert_count }}</p>
+                <span class="stat-sub font-body">
+                    {% if alert_count > 0 %}⚠️ Requires attention{% else %}✅ All clear{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- LATEST VITALS -->
+        <!-- ============================================ -->
+        <div class="detail-card">
+            <h3 class="card-title font-heading">📊 Latest Vitals</h3>
+            {% if latest_reading %}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-[#f8fafc] p-4 rounded-xl border border-slate-200/60">
+                    <p class="text-xs text-slate-400 font-body">❤️ Heart Rate</p>
+                    <p class="text-xl font-bold font-mono {% if latest_reading.pulse_rate > 100 or latest_reading.pulse_rate < 60 %}text-red-600{% else %}text-[#1a0a3e]{% endif %}">
+                        {{ latest_reading.pulse_rate }} <span class="text-sm font-normal text-slate-400 font-body">bpm</span>
+                    </p>
+                </div>
+                <div class="bg-[#f8fafc] p-4 rounded-xl border border-slate-200/60">
+                    <p class="text-xs text-slate-400 font-body">💉 Blood Pressure</p>
+                    <p class="text-xl font-bold font-mono {% if latest_reading.systolic_bp >= 141 or latest_reading.diastolic_bp >= 91 %}text-red-600{% else %}text-[#1a0a3e]{% endif %}">
+                        {{ latest_reading.systolic_bp }}/{{ latest_reading.diastolic_bp }} <span class="text-sm font-normal text-slate-400 font-body">mmHg</span>
+                    </p>
+                </div>
+                <div class="bg-[#f8fafc] p-4 rounded-xl border border-slate-200/60">
+                    <p class="text-xs text-slate-400 font-body">🫁 SpO2</p>
+                    <p class="text-xl font-bold font-mono {% if latest_reading.oxygen_saturation and latest_reading.oxygen_saturation < 95 %}text-red-600{% else %}text-[#1a0a3e]{% endif %}">
+                        {{ latest_reading.oxygen_saturation|default:"—" }} <span class="text-sm font-normal text-slate-400 font-body">%</span>
+                    </p>
+                </div>
+                <div class="bg-[#f8fafc] p-4 rounded-xl border border-slate-200/60">
+                    <p class="text-xs text-slate-400 font-body">🍬 Blood Sugar</p>
+                    <p class="text-xl font-bold font-mono text-[#1a0a3e]">
+                        {{ latest_reading.fasting_blood_sugar|default:"—" }} <span class="text-sm font-normal text-slate-400 font-body">mg/dL</span>
+                    </p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-3 font-mono">Recorded: {{ latest_reading.created_at }}</p>
+            {% else %}
+            <p class="text-slate-400 text-center py-8 font-body">No vitals recorded yet for this patient.</p>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- ALERTS & ACTIONS -->
+        <!-- ============================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Alerts -->
+            <div class="detail-card">
+                <h3 class="card-title font-heading">🔔 Alerts</h3>
+                {% if active_alerts %}
+                    <p class="text-xs text-red-600 mb-3 font-body">{{ active_alerts|length }} active alerts</p>
+                    {% for alert in active_alerts %}
+                    <div class="alert-item">
+                        <div>
+                            <p class="alert-title font-body">{{ alert.title }}</p>
+                            <p class="alert-message">{{ alert.message }}</p>
+                            <p class="alert-time">{{ alert.created_at|timesince }} ago</p>
+                            {% if request.user.doctor_profile %}
+                            <a href="{% url 'add_alert_action' alert.id %}" class="text-red-500 text-xs font-bold hover:text-red-700 transition mt-1 inline-block font-body">
+                                📋 Document Action
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-slate-400 text-center py-4 font-body">✅ No active alerts</p>
+                {% endif %}
+            </div>
+
+            <!-- Clinical Actions Timeline -->
+            <div class="detail-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="card-title font-heading">📋 Clinical Actions</h3>
+                    {% if request.user.doctor_profile %}
+                    <a href="{% url 'add_patient_note' patient.id %}" class="text-red-500 text-xs font-bold hover:text-red-700 transition font-body">
+                        + Document
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="action-timeline max-h-64 overflow-y-auto">
+                    {% if alert_actions %}
+                        {% for item in alert_actions %}
+                            {% for action in item.actions %}
+                            <div class="action-item {% if action.action_type == 'resolved' %}resolved{% endif %}">
+                                <div class="action-type">{{ action.get_action_type_display }}</div>
+                                <div class="action-desc">{{ action.description }}</div>
+                                {% if action.notes %}
+                                <div class="action-desc text-sm text-slate-500">📝 {{ action.notes }}</div>
+                                {% endif %}
+                                <div class="action-meta">
+                                    {{ action.doctor.get_full_name|default:action.doctor.username }} · {{ action.created_at|timesince }} ago
+                                    {% if action.follow_up_needed %}
+                                    · 🔄 Follow-up: {{ action.follow_up_date|date:"M d, Y" }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-slate-400 text-center py-8 font-body">No clinical actions documented yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ============================================ -->
+        <!-- VITALS HISTORY CHARTS -->
+        <!-- ============================================ -->
+        <div class="detail-card">
+            <h3 class="card-title font-heading">📈 Vitals History</h3>
+            <p class="text-xs text-slate-400 mb-4 font-body">Individual charts for each vital parameter</p>
+            <div class="chart-grid">
+                <!-- Blood Pressure -->
+                <div class="chart-container">
+                    <span class="chart-label font-body">💉 Blood Pressure (mmHg)</span>
+                    <div class="chart-wrapper"><canvas id="bpChart"></canvas></div>
+                    <div class="chart-stats">
+                        <span>Avg: {{ stats.avg_systolic|floatformat:0 }}/{{ stats.avg_diastolic|floatformat:0 }}</span>
+                        <span>Readings: {{ stats.readings_count }}</span>
+                        <span class="{% if stats.trend == 'up' %}text-red-500{% elif stats.trend == 'down' %}text-emerald-500{% else %}text-slate-400{% endif %}">{{ stats.trend|title }}</span>
+                    </div>
+                </div>
+                <!-- Heart Rate -->
+                <div class="chart-container">
+                    <span class="chart-label font-body">❤️ Heart Rate (bpm)</span>
+                    <div class="chart-wrapper"><canvas id="pulseChart"></canvas></div>
+                    <div class="chart-stats">
+                        <span>Avg: {{ stats.avg_pulse|floatformat:0 }} bpm</span>
+                        <span>Readings: {{ stats.readings_count }}</span>
+                        <span class="{% if stats.trend == 'up' %}text-red-500{% elif stats.trend == 'down' %}text-emerald-500{% else %}text-slate-400{% endif %}">{{ stats.trend|title }}</span>
+                    </div>
+                </div>
+                <!-- SpO2 -->
+                <div class="chart-container">
+                    <span class="chart-label font-body">🫁 Oxygen Saturation (%)</span>
+                    <div class="chart-wrapper"><canvas id="spo2Chart"></canvas></div>
+                    <div class="chart-stats">
+                        <span>Avg: {{ stats.avg_spo2|floatformat:0 }}%</span>
+                        <span>Readings: {{ stats.readings_count }}</span>
+                        <span class="{% if stats.trend == 'up' %}text-red-500{% elif stats.trend == 'down' %}text-emerald-500{% else %}text-slate-400{% endif %}">{{ stats.trend|title }}</span>
+                    </div>
+                </div>
+                <!-- Blood Sugar -->
+                <div class="chart-container">
+                    <span class="chart-label font-body">🍬 Blood Sugar (mg/dL)</span>
+                    <div class="chart-wrapper"><canvas id="sugarChart"></canvas></div>
+                    <div class="chart-stats">
+                        <span>Avg: {{ stats.avg_sugar|floatformat:0 }} mg/dL</span>
+                        <span>Readings: {{ stats.readings_count }}</span>
+                        <span class="{% if stats.trend == 'up' %}text-red-500{% elif stats.trend == 'down' %}text-emerald-500{% else %}text-slate-400{% endif %}">{{ stats.trend|title }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- PATIENT INFORMATION -->
+        <!-- ============================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Personal Information -->
+            <div class="detail-card">
+                <h3 class="card-title font-heading">👤 Personal Information</h3>
+                <div class="space-y-1">
+                    <div class="info-row"><span class="label font-body">Full Name</span><span class="value font-body">{{ patient.full_name }}</span></div>
+                    <div class="info-row"><span class="label font-body">Email</span><span class="value font-body">{{ patient.email|default:"—" }}</span></div>
+                    <div class="info-row"><span class="label font-body">Phone</span><span class="value font-body">{{ patient.phone_number|default:"—" }}</span></div>
+                    <div class="info-row"><span class="label font-body">Address</span><span class="value font-body">{{ patient.address|default:"—" }}</span></div>
+                    <div class="info-row"><span class="label font-body">Date of Birth</span><span class="value font-body">{{ patient.date_of_birth|default:"—" }}</span></div>
+                    <div class="info-row"><span class="label font-body">Gender</span><span class="value font-body">{{ patient.gender|title|default:"—" }}</span></div>
+                </div>
+            </div>
+            <!-- Medical Information -->
+            <div class="detail-card">
+                <h3 class="card-title font-heading">🏥 Medical Information</h3>
+                <div class="space-y-1">
+                    <div class="info-row"><span class="label font-body">Care Type</span><span class="value font-body">{{ patient.care_type|title|default:"—" }}</span></div>
+                    <div class="info-row"><span class="label font-body">Assigned Doctor</span><span class="value font-body">{% if patient.assigned_doctor %}Dr. {{ patient.assigned_doctor.user.get_full_name }}{% else %}—{% endif %}</span></div>
+                    <div class="info-row"><span class="label font-body">Assigned Caregiver</span><span class="value font-body">{% if patient.assigned_caregiver %}{{ patient.assigned_caregiver.user.get_full_name }}{% else %}—{% endif %}</span></div>
+                    <div class="info-row"><span class="label font-body">Joined</span><span class="value font-body font-mono">{{ patient.created_at|date:"M d, Y" }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- RECENT READINGS TABLE -->
+        <!-- ============================================ -->
+        <div class="detail-card">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <h3 class="card-title font-heading">📋 Recent Readings</h3>
+                <span class="text-xs text-slate-400 font-mono">{{ readings|length }} of {{ total_readings }} total</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-200">
+                            <th class="text-left py-2 px-3 font-bold text-[#1a0a3e] font-body text-xs uppercase tracking-wider">Date</th>
+                            <th class="text-left py-2 px-3 font-bold text-[#1a0a3e] font-body text-xs uppercase tracking-wider">BP</th>
+                            <th class="text-left py-2 px-3 font-bold text-[#1a0a3e] font-body text-xs uppercase tracking-wider">HR</th>
+                            <th class="text-left py-2 px-3 font-bold text-[#1a0a3e] font-body text-xs uppercase tracking-wider">SpO2</th>
+                            <th class="text-left py-2 px-3 font-bold text-[#1a0a3e] font-body text-xs uppercase tracking-wider">Glucose</th>
+                            <th class="text-left py-2 px-3 font-bold text-[#1a0a3e] font-body text-xs uppercase tracking-wider">Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reading in readings %}
+                        <tr class="border-b border-slate-100 hover:bg-[#fde8ea]/20 transition">
+                            <td class="py-2 px-3 font-mono text-xs">{{ reading.created_at|date:"M d, H:i" }}</td>
+                            <td class="py-2 px-3 font-mono text-sm">{{ reading.systolic_bp }}/{{ reading.diastolic_bp }}</td>
+                            <td class="py-2 px-3 font-mono text-sm">{{ reading.pulse_rate }}</td>
+                            <td class="py-2 px-3 font-mono text-sm">{{ reading.oxygen_saturation|default:"—" }}%</td>
+                            <td class="py-2 px-3 font-mono text-sm">{{ reading.fasting_blood_sugar|default:"—" }}</td>
+                            <td class="py-2 px-3 text-xs font-body text-slate-500">{{ reading.get_source_display }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="py-8 text-center text-slate-400 font-body">No readings recorded yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================ -->
+    <!-- CHARTS SCRIPTS -->
+    <!-- ============================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartData = {
+                labels: {{ chart_data.labels|safe }},
+                systolic: {{ chart_data.systolic|safe }},
+                diastolic: {{ chart_data.diastolic|safe }},
+                pulse: {{ chart_data.pulse|safe }},
+                spo2: {{ chart_data.spo2|safe }},
+                sugar: {{ chart_data.sugar|safe }}
+            };
+
+            function createChart(canvasId, label, data, color, unit, yAxisLabel) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                const validData = data.filter(d => d !== null && d !== undefined);
+                const validLabels = chartData.labels.filter((_, i) => data[i] !== null && data[i] !== undefined);
+                if (validData.length < 2) {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '12px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No data available', canvas.width / 2, canvas.height / 2 + 4);
+                    return;
+                }
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: validLabels,
+                        datasets: [{
+                            label: label,
+                            data: validData,
+                            borderColor: color || '#3b82f6',
+                            backgroundColor: (color || '#3b82f6') + '15',
+                            borderWidth: 2.5,
+                            pointRadius: 2,
+                            pointHoverRadius: 6,
+                            fill: true,
+                            tension: 0.3,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: function(context) { return context.parsed.y.toFixed(1) + (unit || ''); } } }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: 9, family: "'DM Mono', monospace" }, maxTicksLimit: 10, autoSkip: true }
+                            },
+                            y: {
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { font: { size: 9, family: "'DM Mono', monospace" } },
+                                title: { display: true, text: yAxisLabel || '', font: { size: 9, family: "'Inter', sans-serif" } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Blood Pressure (Systolic + Diastolic combined)
+            const bpCanvas = document.getElementById('bpChart');
+            if (bpCanvas) {
+                const bpCtx = bpCanvas.getContext('2d');
+                const validSys = chartData.systolic.filter(d => d !== null && d !== undefined);
+                const validDia = chartData.diastolic.filter(d => d !== null && d !== undefined);
+                if (validSys.length > 0 || validDia.length > 0) {
+                    new Chart(bpCtx, {
+                        type: 'line',
+                        data: {
+                            labels: chartData.labels,
+                            datasets: [
+                                { label: 'Systolic', data: chartData.systolic, borderColor: '#DC3545', backgroundColor: 'rgba(220,53,69,0.08)', borderWidth: 2.5, pointRadius: 2, pointHoverRadius: 6, fill: true, tension: 0.3, spanGaps: true },
+                                { label: 'Diastolic', data: chartData.diastolic, borderColor: '#D4A843', backgroundColor: 'rgba(212,168,67,0.08)', borderWidth: 2.5, pointRadius: 2, pointHoverRadius: 6, fill: true, tension: 0.3, spanGaps: true }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 10, family: "'Inter', sans-serif", weight: '500' } } },
+                                tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y.toFixed(0) + ' mmHg'; } } }
+                            },
+                            scales: {
+                                x: { grid: { display: false }, ticks: { font: { size: 9, family: "'DM Mono', monospace" }, maxTicksLimit: 10, autoSkip: true } },
+                                y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 9, family: "'DM Mono', monospace" } }, title: { display: true, text: 'mmHg', font: { size: 9, family: "'Inter', sans-serif" } } }
+                            },
+                            interaction: { mode: 'index', intersect: false }
+                        }
+                    });
+                }
+            }
+
+            // Individual charts
+            createChart('pulseChart', 'Heart Rate', chartData.pulse, '#0d9488', ' bpm', 'bpm');
+            createChart('spo2Chart', 'SpO2', chartData.spo2, '#8b5cf6', '%', '%');
+            createChart('sugarChart', 'Blood Sugar', chartData.sugar, '#f59e0b', ' mg/dL', 'mg/dL');
+        });
+    </script>
+
+</body>
+</html>
