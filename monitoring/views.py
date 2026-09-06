@@ -8,9 +8,13 @@ from django.db.models import Count, Avg, Q
 from django.http import JsonResponse
 from datetime import timedelta
 from collections import defaultdict
+import logging
 
 from .forms import VitalReadingForm, AlertActionForm, AlertActionSimpleForm
 from .models import Patient, VitalReading, Alert, Doctor, Caregiver, AlertAction
+from .email_utils import send_vital_alert_email
+
+logger = logging.getLogger(__name__)
 
 
 def landing_page(request):
@@ -624,9 +628,12 @@ def create_alert_for_reading(reading):
         )
 
 
+# ============================================
+# ✅ ADD VITAL READING - UPDATED with Email Notifications
+# ============================================
 @login_required
 def add_vital_reading(request):
-    """Client/Patient vital entry with doctor notification"""
+    """Client/Patient vital entry with doctor and admin notification"""
     
     try:
         client = Patient.objects.get(user=request.user)
@@ -647,15 +654,50 @@ def add_vital_reading(request):
             reading.entered_by = request.user
             reading.save()
             
+            # Create alerts for abnormal vitals
             create_alert_for_reading(reading)
             
+            # Get alerts created for this reading
+            alerts = Alert.objects.filter(reading=reading)
+            has_alerts = alerts.exists()
+            
+            # ============================================
+            # SEND EMAIL NOTIFICATIONS
+            # ============================================
             doctor_name = "your doctor"
+            doctor_emails = []
+            
+            # Get assigned doctor's email
             if reading.patient.assigned_doctor:
-                doctor_name = f"Dr. {reading.patient.assigned_doctor.user.get_full_name() or reading.patient.assigned_doctor.user.username}"
+                doctor_user = reading.patient.assigned_doctor.user
+                doctor_name = f"Dr. {doctor_user.get_full_name() or doctor_user.username}"
+                if doctor_user.email:
+                    doctor_emails.append(doctor_user.email)
             
-            alerts_created = Alert.objects.filter(reading=reading).exists()
+            # Get admin emails (users with is_superuser=True or is_staff=True)
+            admin_emails = list(User.objects.filter(
+                Q(is_superuser=True) | Q(is_staff=True)
+            ).exclude(email='').values_list('email', flat=True))
             
-            if alerts_created:
+            # Send email notification
+            try:
+                email_sent = send_vital_alert_email(
+                    patient=reading.patient,
+                    reading=reading,
+                    alerts=alerts,
+                    doctor_emails=doctor_emails,
+                    admin_emails=admin_emails,
+                    doctor_name=doctor_name
+                )
+                if email_sent:
+                    logger.info(f"✅ Vital alert email sent for {reading.patient.full_name}")
+                else:
+                    logger.warning(f"⚠️ Vital alert email failed for {reading.patient.full_name}")
+            except Exception as e:
+                logger.error(f"❌ Email error: {str(e)}")
+            
+            # Prepare success messages
+            if has_alerts:
                 success_message = (
                     f'✅ Vital reading submitted successfully! '
                     f'{doctor_name} has been notified and will review your results.'
@@ -1003,6 +1045,9 @@ def alert_detail(request, alert_id):
     return render(request, 'alert_detail.html', context)
 
 
+# ============================================
+# ✅ ADD ALERT ACTION - UPDATED with Proper Form Handling
+# ============================================
 @login_required
 def add_alert_action(request, alert_id):
     """Add a clinical action for an alert"""
@@ -1014,32 +1059,77 @@ def add_alert_action(request, alert_id):
         messages.error(request, 'You are not authorized to take action on this alert.')
         return redirect('doctor_dashboard')
     
+    # Get doctor instance
+    try:
+        doctor = Doctor.objects.get(user=user)
+    except Doctor.DoesNotExist:
+        messages.error(request, 'You are not registered as a doctor.')
+        return redirect('home')
+    
     if request.method == 'POST':
-        form = AlertActionForm(request.POST)
-        if form.is_valid():
-            action = form.save(commit=False)
-            action.alert = alert
-            action.doctor = user
-            action.save()
+        # Get form data from POST
+        action_type = request.POST.get('action_type')
+        description = request.POST.get('description', '').strip()
+        notes = request.POST.get('notes', '').strip()
+        clinical_findings = request.POST.get('clinical_findings', '').strip()
+        assessment = request.POST.get('assessment', '').strip()
+        plan = request.POST.get('plan', '').strip()
+        follow_up_needed = request.POST.get('follow_up_needed') == 'on'
+        follow_up_date = request.POST.get('follow_up_date')
+        
+        # Validate required fields
+        if not action_type:
+            messages.error(request, 'Please select an action type.')
+            return redirect('alert_detail', alert_id=alert.id)
+        
+        if not description:
+            messages.error(request, 'Please provide a description of the action taken.')
+            return redirect('alert_detail', alert_id=alert.id)
+        
+        try:
+            # Create the action
+            action = AlertAction.objects.create(
+                alert=alert,
+                doctor=user,
+                action_type=action_type,
+                description=description,
+                notes=notes or '',
+                clinical_findings=clinical_findings or '',
+                assessment=assessment or '',
+                plan=plan or '',
+                follow_up_needed=follow_up_needed,
+                follow_up_date=follow_up_date if follow_up_date else None,
+            )
             
-            # Update alert status if resolved
-            if form.cleaned_data.get('action_type') == 'resolved':
-                alert.status = 'reviewed'
+            # Update alert status based on action type
+            if action_type == 'resolved':
+                alert.status = 'resolved'
                 alert.reviewed_at = timezone.now()
                 alert.reviewed_by = user
                 alert.save()
+                messages.success(request, '✅ Alert resolved and action documented successfully!')
+            else:
+                # If not resolved, mark as reviewed if it was unreviewed
+                if alert.status == 'unreviewed':
+                    alert.status = 'reviewed'
+                    alert.reviewed_at = timezone.now()
+                    alert.reviewed_by = user
+                    alert.save()
+                messages.success(request, f'✅ Action "{action.get_action_type_display()}" documented successfully!')
             
-            messages.success(request, '✅ Action documented successfully!')
             return redirect('alert_detail', alert_id=alert.id)
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = AlertActionForm()
+            
+        except Exception as e:
+            logger.error(f"❌ Error creating alert action: {str(e)}")
+            messages.error(request, f'Error saving action: {str(e)}')
+            return redirect('alert_detail', alert_id=alert.id)
     
+    # GET request - show the form
     context = {
         'alert': alert,
-        'form': form,
         'patient': alert.patient,
+        'doctor': doctor,
+        'action_types': AlertAction.ACTION_CHOICES,
     }
     
     return render(request, 'add_alert_action.html', context)
@@ -1116,3 +1206,55 @@ def get_alert_actions(request, alert_id):
         })
     
     return JsonResponse({'success': True, 'actions': data, 'count': len(data)})
+
+
+# ============================================
+# ✅ PATIENT FEEDBACK VIEW
+# ============================================
+@login_required
+def patient_feedback(request):
+    """
+    Show feedback/clinical actions from doctors to the patient
+    """
+    user = request.user
+    
+    # Get the patient profile
+    try:
+        patient = Patient.objects.get(user=user)
+    except Patient.DoesNotExist:
+        messages.error(request, 'No patient profile found.')
+        return redirect('home')
+    
+    # Get all alerts for this patient with actions
+    alerts = Alert.objects.filter(
+        patient=patient
+    ).order_by('-created_at')
+    
+    # Get all actions for these alerts
+    alert_actions = []
+    for alert in alerts:
+        actions = AlertAction.objects.filter(alert=alert).order_by('-created_at')
+        if actions.exists():
+            alert_actions.append({
+                'alert': alert,
+                'actions': actions,
+                'latest_action': actions.first(),
+                'action_count': actions.count(),
+            })
+    
+    # Get latest reading
+    latest_reading = VitalReading.objects.filter(patient=patient).order_by('-created_at').first()
+    
+    # Get active alerts count
+    active_alerts_count = Alert.objects.filter(patient=patient, status='unreviewed').count()
+    
+    context = {
+        'patient': patient,
+        'alert_actions': alert_actions,
+        'latest_reading': latest_reading,
+        'active_alerts_count': active_alerts_count,
+        'total_alerts': alerts.count(),
+        'total_actions': sum(a['action_count'] for a in alert_actions),
+    }
+    
+    return render(request, 'patient_feedback.html', context)

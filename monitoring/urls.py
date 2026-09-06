@@ -37,4 +37,9 @@ urlpatterns = [
     
     # Patient Clinical Note
     path('patient/<int:patient_id>/note/', views.add_patient_note, name='add_patient_note'),
+    
+    
+    
+      # ✅ Patient Feedback View
+    path('patient/feedback/', views.patient_feedback, name='patient_feedback'),
 ]

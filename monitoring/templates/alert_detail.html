@@ -1,0 +1,433 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Detail · RHMS</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+        }
+        .font-heading { font-family: 'Lora', serif; }
+        .font-mono { font-family: 'DM Mono', monospace; }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .severity-critical {
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+        }
+        .severity-warning {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+        }
+        .severity-normal {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+        }
+        .btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #1a0a3e;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2d1a5e;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #b02a37;
+        }
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #15803d;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1a0a3e;
+            color: #1a0a3e;
+        }
+        .btn-outline:hover {
+            background: #1a0a3e;
+            color: white;
+        }
+        .action-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .action-timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .action-item {
+            position: relative;
+            padding: 16px 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .action-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #3b82f6;
+        }
+        .action-item.resolved::before {
+            background: #22c55e;
+            box-shadow: 0 0 0 3px #22c55e;
+        }
+        .action-item.urgent::before {
+            background: #dc2626;
+            box-shadow: 0 0 0 3px #dc2626;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-[#1a0a3e] text-white px-6 py-4 flex items-center justify-between shadow-lg">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'doctor_dashboard' %}" class="text-white hover:text-[#DC3545] transition">
+                <svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back
+            </a>
+            <span class="text-xl font-heading">Alert Details</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-300">{{ user.get_full_name|default:user.username }}</span>
+            <a href="{% url 'logout' %}" class="text-sm text-gray-400 hover:text-white transition">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto p-6">
+        
+        <!-- Alert Header -->
+        <div class="card {% if alert.severity == 'critical' %}severity-critical{% elif alert.severity == 'warning' %}severity-warning{% else %}severity-normal{% endif %}">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <span class="text-sm font-semibold text-gray-500">Alert #{{ alert.id }}</span>
+                    <h1 class="text-2xl font-heading font-bold text-[#1a0a3e]">{{ alert.title }}</h1>
+                    <p class="text-gray-600 mt-1">{{ alert.message }}</p>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <span class="px-4 py-2 rounded-full text-sm font-bold
+                        {% if alert.severity == 'critical' %}bg-red-100 text-red-700
+                        {% elif alert.severity == 'warning' %}bg-amber-100 text-amber-700
+                        {% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ alert.get_severity_display }}
+                    </span>
+                    <span class="text-sm text-gray-500 font-mono">{{ alert.created_at|date:"F j, Y, g:i A" }}</span>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200 flex flex-wrap gap-3">
+                <span class="text-sm"><strong>Patient:</strong> 
+                    <a href="{% url 'patient_detail' patient.id %}" class="text-[#DC3545] hover:underline">
+                        {{ patient.full_name }}
+                    </a>
+                </span>
+                <span class="text-sm"><strong>Status:</strong> 
+                    <span class="font-mono
+                        {% if alert.status == 'unreviewed' %}text-red-600
+                        {% elif alert.status == 'reviewed' %}text-amber-600
+                        {% else %}text-green-600{% endif %}">
+                        {{ alert.get_status_display }}
+                    </span>
+                </span>
+                {% if alert.reading %}
+                <span class="text-sm"><strong>Reading:</strong> 
+                    <a href="{% url 'patient_detail' patient.id %}#reading-{{ alert.reading.id }}" class="text-[#1a0a3e] hover:underline">
+                        {{ alert.reading.created_at|date:"Y-m-d H:i" }}
+                    </a>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h2 class="text-lg font-heading font-bold text-[#1a0a3e] mb-4">Quick Actions</h2>
+            <div class="flex flex-wrap gap-3">
+                <form method="POST" action="{% url 'add_quick_action' alert.id %}" class="inline quick-action-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action_type" value="resolved">
+                    <input type="hidden" name="description" value="Resolved by doctor">
+                    <input type="hidden" name="notes" value="Alert resolved via quick action">
+                    <button type="submit" class="btn btn-success">
+                        ✅ Resolve
+                    </button>
+                </form>
+                <form method="POST" action="{% url 'add_quick_action' alert.id %}" class="inline quick-action-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action_type" value="assessed">
+                    <input type="hidden" name="description" value="Patient assessed">
+                    <input type="hidden" name="notes" value="Patient assessment completed">
+                    <button type="submit" class="btn btn-primary">
+                        👀 Assess
+                    </button>
+                </form>
+                <form method="POST" action="{% url 'add_quick_action' alert.id %}" class="inline quick-action-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action_type" value="escalated">
+                    <input type="hidden" name="description" value="Escalated to specialist">
+                    <input type="hidden" name="notes" value="Case escalated for specialist review">
+                    <button type="submit" class="btn btn-danger">
+                        🚨 Escalate
+                    </button>
+                </form>
+                <a href="{% url 'add_alert_action' alert.id %}" class="btn btn-outline">
+                    📋 Document
+                </a>
+                <a href="{% url 'patient_detail' patient.id %}" class="btn btn-outline">
+                    👤 Patient Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Document Clinical Action Form -->
+        <div class="card">
+            <h2 class="text-lg font-heading font-bold text-[#1a0a3e] mb-4">📋 Document Clinical Action</h2>
+            <p class="text-sm text-gray-500 mb-4">For alert on <strong>{{ patient.full_name }}</strong></p>
+            
+            <form method="POST" action="{% url 'add_alert_action' alert.id %}" id="documentActionForm">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <!-- Action Type -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Action Type</label>
+                        <select name="action_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#DC3545] focus:border-transparent">
+                            <option value="">Select action type...</option>
+                            <option value="assessed">Patient Assessed</option>
+                            <option value="monitored">Vitals Monitored</option>
+                            <option value="medication">Medication Adjusted</option>
+                            <option value="referred">Referred to Specialist</option>
+                            <option value="contacted">Patient Contacted</option>
+                            <option value="lab_test">Lab Test Ordered</option>
+                            <option value="imaging">Imaging Ordered</option>
+                            <option value="follow_up">Follow-up Scheduled</option>
+                            <option value="escalated">Escalated to Emergency</option>
+                            <option value="resolved">Resolved/Closed</option>
+                            <option value="other">Other Action</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+                        <textarea name="description" rows="2" required placeholder="Describe the action taken..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#DC3545] focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Additional Notes</label>
+                        <textarea name="notes" rows="3" placeholder="Any additional notes or observations..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#DC3545] focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <!-- Clinical Findings -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Clinical Findings</label>
+                        <textarea name="clinical_findings" rows="2" placeholder="What did you find during assessment?" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#DC3545] focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <!-- Assessment -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Assessment</label>
+                        <textarea name="assessment" rows="2" placeholder="Your clinical assessment..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#DC3545] focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <!-- Plan -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Plan</label>
+                        <textarea name="plan" rows="2" placeholder="What is the plan going forward?" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#DC3545] focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <!-- Follow-up -->
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="follow_up_needed" value="on" class="w-4 h-4 text-[#DC3545]">
+                            <span class="text-sm font-medium text-gray-700">Follow-up Needed</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700">Follow-up Date:</label>
+                            <input type="datetime-local" name="follow_up_date" class="px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#DC3545] focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-full py-3 text-lg">
+                        ✅ Submit Clinical Action
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Action Timeline -->
+        <div class="card">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-heading font-bold text-[#1a0a3e]">📜 Action Timeline</h2>
+                <span class="text-sm text-gray-500">{{ action_count }} action{{ action_count|pluralize }}</span>
+            </div>
+            
+            {% if actions %}
+            <div class="action-timeline">
+                {% for action in actions %}
+                <div class="action-item {% if action.action_type == 'resolved' %}resolved{% elif action.action_type == 'escalated' %}urgent{% endif %}">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="font-bold text-[#1a0a3e]">{{ action.get_action_type_display }}</span>
+                            <p class="text-gray-600 text-sm mt-1">{{ action.description }}</p>
+                            {% if action.notes %}
+                            <p class="text-gray-500 text-sm mt-1">{{ action.notes }}</p>
+                            {% endif %}
+                            {% if action.clinical_findings %}
+                            <p class="text-gray-500 text-sm mt-1"><strong>Findings:</strong> {{ action.clinical_findings }}</p>
+                            {% endif %}
+                            {% if action.assessment %}
+                            <p class="text-gray-500 text-sm"><strong>Assessment:</strong> {{ action.assessment }}</p>
+                            {% endif %}
+                            {% if action.plan %}
+                            <p class="text-gray-500 text-sm"><strong>Plan:</strong> {{ action.plan }}</p>
+                            {% endif %}
+                            {% if action.follow_up_needed %}
+                            <p class="text-amber-600 text-sm font-semibold">🔄 Follow-up required{% if action.follow_up_date %} by {{ action.follow_up_date|date:"F j, Y" }}{% endif %}</p>
+                            {% endif %}
+                        </div>
+                        <div class="text-right flex-shrink-0 ml-4">
+                            <span class="text-xs text-gray-400 font-mono">{{ action.created_at|date:"Y-m-d H:i" }}</span>
+                            <p class="text-xs text-gray-500">Dr. {{ action.doctor.get_full_name|default:action.doctor.username }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-400 text-center py-8">No actions documented for this alert yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Back Button -->
+        <div class="text-center">
+            <a href="{% url 'triage_desk' %}" class="text-[#1a0a3e] hover:text-[#DC3545] transition font-medium">
+                ← Back to Triage Desk
+            </a>
+        </div>
+    </div>
+
+    <!-- JavaScript for AJAX Quick Actions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Quick action forms - handle with AJAX
+            document.querySelectorAll('.quick-action-form').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    const actionType = formData.get('action_type');
+                    
+                    // Show loading state
+                    const btn = form.querySelector('button');
+                    const originalText = btn.textContent;
+                    btn.textContent = '⏳ Processing...';
+                    btn.disabled = true;
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showToast('✅ Action "' + actionType + '" completed successfully!', 'success');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast('❌ Action failed: ' + (data.error || 'Unknown error'), 'error');
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        showToast('❌ Network error. Please try again.', 'error');
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    });
+                });
+            });
+
+            // Toast notification
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;padding:14px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:500;box-shadow:0 10px 40px rgba(0,0,0,0.15);animation:slideIn 0.5s ease;max-width:400px;' + 
+                    (type === 'success' ? 'background:#dcfce7;color:#16a34a;border:1px solid #86efac;' : 'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;');
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
+    
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+
+</body>
+</html>

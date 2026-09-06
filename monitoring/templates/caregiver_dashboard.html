@@ -418,6 +418,32 @@
             background: rgba(255, 215, 0, 0.08);
         }
 
+        /* ============================================ */
+        /* FEEDBACK BUTTON IN SIDEBAR */
+        /* ============================================ */
+        .gradient-sidebar .nav-item.feedback-nav {
+            color: var(--yellow);
+            border: 1px solid rgba(255, 215, 0, 0.12);
+            margin-top: 4px;
+        }
+
+        .gradient-sidebar .nav-item.feedback-nav .icon-wrapper {
+            background: rgba(255, 215, 0, 0.06);
+        }
+
+        .gradient-sidebar .nav-item.feedback-nav .icon-wrapper svg {
+            color: var(--yellow);
+        }
+
+        .gradient-sidebar .nav-item.feedback-nav .nav-label {
+            color: var(--yellow);
+        }
+
+        .gradient-sidebar .nav-item.feedback-nav:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 215, 0, 0.08);
+        }
+
         /* User Section */
         .gradient-sidebar .sidebar-user {
             padding: 16px 20px calc(20px + var(--safe-bottom));
@@ -781,6 +807,57 @@
             transform: translateX(6px);
         }
 
+        /* Feedback Card */
+        .feedback-card {
+            background: linear-gradient(135deg, #fef9e7, #fef3c7);
+            border: 2px solid var(--yellow);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+            min-height: 48px;
+        }
+        .feedback-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.25);
+        }
+        .feedback-card .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #b8960f;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: var(--inter);
+        }
+        .feedback-card .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--navy);
+            font-family: var(--montserrat);
+        }
+        .feedback-card .arrow {
+            font-size: 20px;
+            color: var(--navy);
+            transition: transform 0.3s ease;
+        }
+        .feedback-card:hover .arrow {
+            transform: translateX(6px);
+        }
+        .feedback-card .badge-count {
+            background: var(--red);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-family: var(--mono);
+        }
+
         /* GRID 2 */
         .grid-2 {
             display: grid;
@@ -830,6 +907,11 @@
             background: var(--red-pale);
             color: var(--red);
             border: 1px solid var(--red);
+        }
+        .card-badge.feedback-badge {
+            background: #fef3c7;
+            color: #b8960f;
+            border: 1px solid var(--yellow);
         }
 
         /* Scroll Area */
@@ -1220,6 +1302,13 @@
                 font-size: 15px;
             }
 
+            .feedback-card {
+                padding: 14px 16px;
+            }
+            .feedback-card .value {
+                font-size: 15px;
+            }
+
             .care-team-section {
                 padding: 16px;
             }
@@ -1285,6 +1374,11 @@
                 background: var(--red-gradient);
                 color: var(--white);
                 box-shadow: var(--shadow-red);
+            }
+            .mobile-dock a.feedback-dock {
+                background: #fef3c7;
+                color: #b8960f;
+                border: 1px solid var(--yellow);
             }
             .mobile-dock a:active {
                 transform: scale(0.96);
@@ -1422,6 +1516,18 @@
                 <span class="nav-label">Add New Reading</span>
             </a>
 
+            <!-- ✅ FEEDBACK NAV LINK - Added to Sidebar -->
+            <a href="{% url 'patient_feedback' %}" class="nav-item feedback-nav">
+                <div class="icon-wrapper">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                        <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+                    </svg>
+                </div>
+                <span class="nav-label">💬 Doctor's Feedback</span>
+                <span class="badge badge-yellow">New</span>
+            </a>
+
             <div class="nav-label">Overview</div>
 
             <a href="#" class="nav-item">
@@ -1557,10 +1663,11 @@
                     {% endif %}
                 </div>
             </div>
-            <a href="{% url 'add_vital_reading' %}" class="quick-action-card">
+            <!-- ✅ FEEDBACK QUICK ACTION CARD -->
+            <a href="{% url 'patient_feedback' %}" class="feedback-card">
                 <div>
-                    <div class="label">Quick Action</div>
-                    <div class="value">+ Record Vitals</div>
+                    <div class="label">💬 Doctor's Feedback</div>
+                    <div class="value">View Responses</div>
                 </div>
                 <span class="arrow">→</span>
             </a>
@@ -1746,6 +1853,10 @@
         <a href="#alertsCard">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <span>Alerts</span>
+        </a>
+        <a href="{% url 'patient_feedback' %}" class="feedback-dock">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
+            <span>Feedback</span>
         </a>
         <a href="{% url 'add_vital_reading' %}" class="primary">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>

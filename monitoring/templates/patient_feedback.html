@@ -1,0 +1,680 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>My Feedback · RGMS</title>
+
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Lora (headings) + Inter (body) + DM Mono (data) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #1a0a3e;
+            --navy-dark: #0a0518;
+            --navy-light: #2d1a5e;
+            --red: #DC3545;
+            --red-dark: #b02a37;
+            --red-pale: #fde8ea;
+            --red-gradient: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
+            --gold: #D4A843;
+            --gold-glow: rgba(212, 168, 67, 0.2);
+            --white: #FFFFFF;
+            --bg: #f8fafc;
+            --text: #1a1a2e;
+            --muted: #6c757d;
+            --border: #e9ecef;
+            --lora: 'Lora', serif;
+            --inter: 'Inter', sans-serif;
+            --mono: 'DM Mono', monospace;
+            --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
+            --shadow-lg: 0 16px 44px rgba(26, 10, 62, 0.12);
+            --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
+            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: var(--inter);
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .font-heading { font-family: var(--lora); }
+        .font-mono { font-family: var(--mono); }
+
+        :focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+
+        /* ============================================ */
+        /* TOP BAR                                       */
+        /* ============================================ */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: linear-gradient(180deg, #1a0a3e 0%, #150833 100%);
+            padding: calc(14px + var(--safe-top)) 20px 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .topbar-inner {
+            max-width: 56rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 4px;
+            min-height: 44px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .back-link:hover { color: var(--white); }
+        .back-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        .topbar-title {
+            font-family: var(--lora);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .topbar-user .user-name {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+        .topbar-user .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--red-gradient);
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .topbar-user .logout {
+            color: rgba(255, 255, 255, 0.45);
+            text-decoration: none;
+            font-size: 12px;
+            padding: 8px 4px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+        .topbar-user .logout:hover { color: var(--red); }
+
+        .ecg-trace {
+            max-width: 56rem;
+            margin: 8px auto 0;
+            height: 14px;
+            opacity: 0.35;
+            overflow: hidden;
+        }
+        .ecg-trace svg { width: 100%; height: 100%; display: block; }
+        .ecg-trace polyline {
+            fill: none;
+            stroke: var(--gold);
+            stroke-width: 1.3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        @media (max-width: 640px) {
+            .topbar-user .user-name { display: none; }
+            .back-link span { display: none; }
+        }
+
+        /* ============================================ */
+        /* CONTAINER                                     */
+        /* ============================================ */
+        .page {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 22px 20px calc(28px + var(--safe-bottom));
+        }
+
+        @media (max-width: 768px) {
+            .page { padding-bottom: calc(96px + var(--safe-bottom)); }
+        }
+
+        /* ============================================ */
+        /* CARDS                                         */
+        /* ============================================ */
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 22px 24px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+        .card:hover { box-shadow: var(--shadow-lg); }
+
+        .card-title {
+            font-family: var(--lora);
+            font-weight: 600;
+            font-size: 17px;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        /* Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            padding: 16px 14px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .stat-card:hover { border-color: var(--red); box-shadow: var(--shadow-lg); }
+        .stat-card .stat-value {
+            font-family: var(--mono);
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--navy);
+            font-variant-numeric: tabular-nums;
+        }
+        .stat-card.red .stat-value { color: var(--red); }
+        .stat-card.emerald .stat-value { color: #16a34a; }
+        .stat-card .stat-label {
+            font-size: 10.5px;
+            color: var(--muted);
+            margin-top: 4px;
+            letter-spacing: 0.02em;
+        }
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-card .stat-value { font-size: 20px; }
+        }
+
+        /* Vitals chips */
+        .vital-chip {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            transition: var(--transition);
+        }
+        .vital-chip:hover { border-color: var(--red); }
+        .vital-chip .vital-label { font-size: 11px; color: var(--muted); }
+        .vital-chip .vital-value { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--navy); }
+        .vital-chip .vital-unit { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+        /* Status badges — shared vocabulary with the rest of RGMS */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 10.5px;
+            font-weight: 600;
+            font-family: var(--mono);
+        }
+        .status-badge.critical { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .status-badge.warning { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
+        .status-badge.stable { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
+        .status-badge.open { background: var(--red-pale); color: var(--red); border: 1px solid #f5b5bc; }
+
+        /* ============================================ */
+        /* FEEDBACK TIMELINE                             */
+        /* ============================================ */
+        .timeline { position: relative; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-entry {
+            position: relative;
+            padding-left: 44px;
+            margin-bottom: 20px;
+        }
+        .timeline-entry:last-child { margin-bottom: 0; }
+
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 14px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            z-index: 1;
+        }
+        .timeline-entry.critical .timeline-dot { border-color: var(--red); background: var(--red-pale); }
+        .timeline-entry.warning .timeline-dot { border-color: #fcd34d; background: #fffbeb; }
+        .timeline-entry.stable .timeline-dot { border-color: #86efac; background: #f0fdf4; }
+
+        .feedback-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            transition: var(--transition);
+        }
+        .feedback-card:hover { border-color: var(--red); box-shadow: var(--shadow); }
+
+        .feedback-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .feedback-title {
+            font-weight: 600;
+            font-size: 14.5px;
+            color: var(--navy);
+        }
+        .feedback-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+        .feedback-date {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        .feedback-message {
+            font-size: 13.5px;
+            color: var(--muted);
+            margin-top: 10px;
+            line-height: 1.55;
+        }
+
+        .doctor-response {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border);
+        }
+        .doctor-response-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .response-card {
+            display: flex;
+            gap: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .response-card:last-child { margin-bottom: 0; }
+
+        .response-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--navy-light);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-family: var(--inter);
+        }
+
+        .response-body { min-width: 0; flex: 1; }
+        .response-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .response-type { font-weight: 600; font-size: 13px; color: var(--navy); }
+        .response-time { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+        .response-desc { font-size: 13px; color: var(--text); margin-top: 4px; }
+        .response-notes { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .response-plan { font-size: 12px; color: var(--navy); margin-top: 4px; }
+        .response-followup {
+            font-size: 12px;
+            color: #b45309;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .response-doctor { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+        }
+        .empty-state svg { width: 52px; height: 52px; margin: 0 auto 14px; color: #cbd5e1; }
+        .empty-state p.title { color: var(--muted); font-size: 15px; }
+        .empty-state p.sub { color: #94a3b8; font-size: 12.5px; margin-top: 4px; }
+
+        /* ============================================ */
+        /* QUICK ACTIONS                                 */
+        /* ============================================ */
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary, .btn-secondary {
+            font-family: var(--inter);
+            font-weight: 600;
+            font-size: 13.5px;
+            border-radius: 12px;
+            padding: 11px 22px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: var(--red-gradient);
+            color: white;
+            box-shadow: var(--shadow-red);
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-secondary {
+            background: var(--white);
+            color: var(--navy);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: var(--bg); border-color: var(--navy); }
+
+        @media (max-width: 768px) {
+            .quick-actions { display: none; }
+        }
+
+        /* ============================================ */
+        /* MOBILE DOCK                                   */
+        /* ============================================ */
+        .mobile-dock {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .mobile-dock {
+                display: flex;
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 50;
+                gap: 10px;
+                padding: 10px 16px calc(10px + var(--safe-bottom));
+                background: rgba(255, 255, 255, 0.94);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid var(--border);
+                box-shadow: 0 -8px 24px rgba(26, 10, 62, 0.08);
+            }
+            .mobile-dock a {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                min-height: 48px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 13px;
+            }
+            .mobile-dock a.primary { background: var(--red-gradient); color: white; box-shadow: var(--shadow-red); }
+            .mobile-dock a.secondary { background: var(--bg); color: var(--navy); border: 1px solid var(--border); }
+            .mobile-dock a:active { transform: scale(0.97); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================ -->
+    <!-- TOP BAR -->
+    <!-- ============================================ -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="{% url 'caregiver_dashboard' %}" class="back-link">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <span class="topbar-title">📋 My Feedback</span>
+            <div class="topbar-user">
+                <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                <div class="avatar">{{ user.first_name|first|default:user.username|first|upper }}</div>
+                <a href="{% url 'logout' %}" class="logout">Logout</a>
+            </div>
+        </div>
+        <div class="ecg-trace" aria-hidden="true">
+            <svg viewBox="0 0 400 14" preserveAspectRatio="none">
+                <polyline points="0,7 90,7 100,2 110,12 120,7 180,7 190,2 200,12 210,7 280,7 290,2 300,12 310,7 400,7"/>
+            </svg>
+        </div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
+    <div class="page">
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <p class="stat-value">{{ total_alerts }}</p>
+                <p class="stat-label">Total Alerts</p>
+            </div>
+            <div class="stat-card {% if active_alerts_count > 0 %}red{% endif %}">
+                <p class="stat-value">{{ active_alerts_count }}</p>
+                <p class="stat-label">Active Alerts</p>
+            </div>
+            <div class="stat-card emerald">
+                <p class="stat-value">{{ total_actions }}</p>
+                <p class="stat-label">Doctor Responses</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-value">{{ alert_actions|length }}</p>
+                <p class="stat-label">With Feedback</p>
+            </div>
+        </div>
+
+        <!-- Latest Reading -->
+        {% if latest_reading %}
+        <div class="card">
+            <h2 class="card-title">📊 Latest Vitals</h2>
+            <p class="text-xs text-slate-400 mb-3">Most recent reading on file</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {% if latest_reading.systolic_bp %}
+                <div class="vital-chip">
+                    <p class="vital-label">💉 Blood Pressure</p>
+                    <p class="vital-value">{{ latest_reading.systolic_bp }}/{{ latest_reading.diastolic_bp }} <span class="vital-unit">mmHg</span></p>
+                </div>
+                {% endif %}
+                {% if latest_reading.pulse_rate %}
+                <div class="vital-chip">
+                    <p class="vital-label">❤️ Heart Rate</p>
+                    <p class="vital-value">{{ latest_reading.pulse_rate }} <span class="vital-unit">bpm</span></p>
+                </div>
+                {% endif %}
+                {% if latest_reading.oxygen_saturation %}
+                <div class="vital-chip">
+                    <p class="vital-label">🫁 Oxygen Saturation</p>
+                    <p class="vital-value">{{ latest_reading.oxygen_saturation }} <span class="vital-unit">% SpO2</span></p>
+                </div>
+                {% endif %}
+                {% if latest_reading.fasting_blood_sugar %}
+                <div class="vital-chip">
+                    <p class="vital-label">🍬 Blood Sugar</p>
+                    <p class="vital-value">{{ latest_reading.fasting_blood_sugar }} <span class="vital-unit">mg/dL</span></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Feedback Timeline -->
+        <div class="card">
+            <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+                <h2 class="card-title mb-0">💬 Doctor's Feedback</h2>
+                <span class="text-xs text-slate-400 font-mono">{{ total_actions }} response{{ total_actions|pluralize }}</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-5">Most recent alerts and how your care team responded</p>
+
+            {% if alert_actions %}
+            <div class="timeline">
+                {% for item in alert_actions %}
+                <div class="timeline-entry {% if item.alert.severity == 'critical' %}critical{% elif item.alert.severity == 'warning' %}warning{% else %}stable{% endif %}">
+                    <div class="timeline-dot">
+                        {% if item.alert.severity == 'critical' %}🚨{% elif item.alert.severity == 'warning' %}⚠️{% else %}✅{% endif %}
+                    </div>
+                    <div class="feedback-card">
+                        <div class="feedback-head">
+                            <div>
+                                <span class="feedback-title">{{ item.alert.title }}</span>
+                                <div class="feedback-badges">
+                                    <span class="status-badge {% if item.alert.severity == 'critical' %}critical{% elif item.alert.severity == 'warning' %}warning{% else %}stable{% endif %}">
+                                        {{ item.alert.get_severity_display }}
+                                    </span>
+                                    <span class="status-badge {% if item.alert.status == 'unreviewed' %}open{% else %}stable{% endif %}">
+                                        {{ item.alert.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="feedback-date">{{ item.alert.created_at|date:"F j, Y" }}</span>
+                        </div>
+
+                        <p class="feedback-message">{{ item.alert.message }}</p>
+
+                        <div class="doctor-response">
+                            <p class="doctor-response-label">🩺 Doctor's Response</p>
+                            {% for action in item.actions %}
+                            <div class="response-card">
+                                <div class="response-avatar">{{ action.doctor.get_full_name|default:action.doctor.username|slice:":1"|upper }}</div>
+                                <div class="response-body">
+                                    <div class="response-top">
+                                        <span class="response-type">{{ action.get_action_type_display }}</span>
+                                        <span class="response-time">{{ action.created_at|date:"M d, Y H:i" }}</span>
+                                    </div>
+                                    <p class="response-desc">{{ action.description }}</p>
+                                    {% if action.notes %}
+                                    <p class="response-notes">{{ action.notes }}</p>
+                                    {% endif %}
+                                    {% if action.plan %}
+                                    <p class="response-plan"><strong>Plan:</strong> {{ action.plan }}</p>
+                                    {% endif %}
+                                    {% if action.follow_up_needed %}
+                                    <p class="response-followup">🔄 Follow-up required{% if action.follow_up_date %} by {{ action.follow_up_date|date:"F j, Y" }}{% endif %}</p>
+                                    {% endif %}
+                                    <p class="response-doctor">👨‍⚕️ Dr. {{ action.doctor.get_full_name|default:action.doctor.username }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <p class="title">No feedback from doctors yet.</p>
+                    <p class="sub">When your doctor responds to your vitals, it will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions (desktop / tablet) -->
+        <div class="quick-actions">
+            <a href="{% url 'add_vital_reading' %}" class="btn-primary">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Add New Vitals
+            </a>
+            <a href="{% url 'caregiver_dashboard' %}" class="btn-secondary">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MOBILE DOCK -->
+    <!-- ============================================ -->
+    <nav class="mobile-dock" aria-label="Quick actions">
+        <a href="{% url 'caregiver_dashboard' %}" class="secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Dashboard
+        </a>
+        <a href="{% url 'add_vital_reading' %}" class="primary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Add Vitals
+        </a>
+    </nav>
+
+</body>
+</html>
