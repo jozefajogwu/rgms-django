@@ -473,7 +473,96 @@ def caregiver_dashboard(request):
 
 
 # ============================================
-# ✅ CREATE ALERT FOR READING - UPDATED with Normal Ranges
+# ✅ PATIENT RECORDS VIEW - ADD THIS
+# ============================================
+@login_required(login_url='/login/')
+def patient_records(request):
+    """View for patients and caregivers to see their health records"""
+    user = request.user
+    
+    # Check if user is a patient
+    try:
+        patient = Patient.objects.get(user=user)
+        is_patient = True
+    except Patient.DoesNotExist:
+        patient = None
+        is_patient = False
+    
+    # Check if user is a caregiver
+    try:
+        caregiver = Caregiver.objects.get(user=user)
+        is_caregiver = True
+    except Caregiver.DoesNotExist:
+        caregiver = None
+        is_caregiver = False
+    
+    # If user is a patient, show their records
+    if is_patient:
+        vital_readings = VitalReading.objects.filter(patient=patient).order_by('-created_at')
+        alerts = Alert.objects.filter(patient=patient).order_by('-created_at')
+        
+        context = {
+            'is_patient': True,
+            'is_caregiver': False,
+            'patient': patient,
+            'vital_readings': vital_readings,
+            'alerts': alerts,
+            'total_readings': vital_readings.count(),
+            'total_alerts': alerts.count(),
+            'active_alerts_count': alerts.filter(status='unreviewed').count(),
+            'user': user,
+        }
+        return render(request, 'patient_records.html', context)
+    
+    # If user is a caregiver, show patients they care for
+    elif is_caregiver:
+        patients = Patient.objects.filter(assigned_caregiver=caregiver)
+        
+        # Get all readings for all patients
+        all_readings = VitalReading.objects.filter(
+            patient__in=patients
+        ).order_by('-created_at')
+        
+        # Get all alerts for all patients
+        all_alerts = Alert.objects.filter(
+            patient__in=patients
+        ).order_by('-created_at')
+        
+        # Prepare patient data with their readings
+        patient_data = []
+        for p in patients:
+            readings = VitalReading.objects.filter(patient=p).order_by('-created_at')
+            alerts = Alert.objects.filter(patient=p).order_by('-created_at')
+            patient_data.append({
+                'patient': p,
+                'readings': readings,
+                'alerts': alerts,
+                'total_readings': readings.count(),
+                'total_alerts': alerts.count(),
+                'active_alerts': alerts.filter(status='unreviewed').count(),
+                'latest_reading': readings.first(),
+            })
+        
+        context = {
+            'is_patient': False,
+            'is_caregiver': True,
+            'caregiver': caregiver,
+            'patients': patient_data,
+            'total_patients': patients.count(),
+            'total_readings': all_readings.count(),
+            'total_alerts': all_alerts.count(),
+            'user': user,
+        }
+        return render(request, 'caregiver_records.html', context)
+    
+    # If user is neither patient nor caregiver
+    else:
+        messages.error(request, 'You do not have any health records to view.')
+        return redirect('home')
+
+
+# ============================================
+# CREATE ALERT FOR READING - UPDATED with Normal Ranges
 # ============================================
 def create_alert_for_reading(reading):
     """
@@ -629,7 +718,7 @@ def create_alert_for_reading(reading):
 
 
 # ============================================
-# ✅ ADD VITAL READING - UPDATED with Email Notifications
+# ADD VITAL READING - UPDATED with Email Notifications
 # ============================================
 @login_required
 def add_vital_reading(request):
@@ -868,7 +957,7 @@ def live_telemetry(request):
 
 
 # ============================================
-# ✅ PATIENT DETAIL VIEW
+# PATIENT DETAIL VIEW
 # ============================================
 @login_required
 def patient_detail(request, patient_id):
@@ -935,7 +1024,7 @@ def patient_detail(request, patient_id):
 
 
 # ============================================
-# ✅ PATIENT CLINICAL NOTE VIEW
+# PATIENT CLINICAL NOTE VIEW
 # ============================================
 @login_required
 def add_patient_note(request, patient_id):
@@ -1046,7 +1135,7 @@ def alert_detail(request, alert_id):
 
 
 # ============================================
-# ✅ ADD ALERT ACTION - UPDATED with Proper Form Handling
+# ADD ALERT ACTION - UPDATED with Proper Form Handling
 # ============================================
 @login_required
 def add_alert_action(request, alert_id):
@@ -1136,7 +1225,7 @@ def add_alert_action(request, alert_id):
 
 
 # ============================================
-# ✅ QUICK ACTION VIEW - For Triage Desk AJAX
+# QUICK ACTION VIEW - For Triage Desk AJAX
 # ============================================
 @login_required
 def add_quick_action(request, alert_id):
@@ -1209,7 +1298,7 @@ def get_alert_actions(request, alert_id):
 
 
 # ============================================
-# ✅ PATIENT FEEDBACK VIEW
+# PATIENT FEEDBACK VIEW
 # ============================================
 @login_required
 def patient_feedback(request):
@@ -1248,6 +1337,10 @@ def patient_feedback(request):
     # Get active alerts count
     active_alerts_count = Alert.objects.filter(patient=patient, status='unreviewed').count()
     
+    # Get assigned doctor and caregiver
+    assigned_doctor = patient.assigned_doctor
+    assigned_caregiver = patient.assigned_caregiver
+    
     context = {
         'patient': patient,
         'alert_actions': alert_actions,
@@ -1255,94 +1348,9 @@ def patient_feedback(request):
         'active_alerts_count': active_alerts_count,
         'total_alerts': alerts.count(),
         'total_actions': sum(a['action_count'] for a in alert_actions),
+        'assigned_doctor': assigned_doctor,
+        'assigned_caregiver': assigned_caregiver,
+        'user': user,
     }
     
     return render(request, 'patient_feedback.html', context)
-
-# monitoring/views.py - add_alert_action
-
-@login_required
-def add_alert_action(request, alert_id):
-    """Add a clinical action for an alert"""
-    alert = get_object_or_404(Alert, id=alert_id)
-    user = request.user
-    
-    # Check authorization
-    if not is_doctor_authorized(user, alert.patient):
-        messages.error(request, 'You are not authorized to take action on this alert.')
-        return redirect('doctor_dashboard')
-    
-    # Get doctor instance
-    try:
-        doctor = Doctor.objects.get(user=user)
-    except Doctor.DoesNotExist:
-        messages.error(request, 'You are not registered as a doctor.')
-        return redirect('home')
-    
-    if request.method == 'POST':
-        # Get form data from POST
-        action_type = request.POST.get('action_type')
-        description = request.POST.get('description', '').strip()
-        notes = request.POST.get('notes', '').strip()
-        clinical_findings = request.POST.get('clinical_findings', '').strip()
-        assessment = request.POST.get('assessment', '').strip()
-        plan = request.POST.get('plan', '').strip()
-        follow_up_needed = request.POST.get('follow_up_needed') == 'on'
-        follow_up_date = request.POST.get('follow_up_date')
-        
-        # Validate required fields
-        if not action_type:
-            messages.error(request, 'Please select an action type.')
-            return redirect('alert_detail', alert_id=alert.id)
-        
-        if not description:
-            messages.error(request, 'Please provide a description of the action taken.')
-            return redirect('alert_detail', alert_id=alert.id)
-        
-        try:
-            # Create the action
-            action = AlertAction.objects.create(
-                alert=alert,
-                doctor=user,
-                action_type=action_type,
-                description=description,
-                notes=notes or '',
-                clinical_findings=clinical_findings or '',
-                assessment=assessment or '',
-                plan=plan or '',
-                follow_up_needed=follow_up_needed,
-                follow_up_date=follow_up_date if follow_up_date else None,
-            )
-            
-            # Update alert status based on action type
-            if action_type == 'resolved':
-                alert.status = 'resolved'
-                alert.reviewed_at = timezone.now()
-                alert.reviewed_by = user
-                alert.save()
-                messages.success(request, '✅ Alert resolved and action documented successfully!')
-            else:
-                # If not resolved, mark as reviewed if it was unreviewed
-                if alert.status == 'unreviewed':
-                    alert.status = 'reviewed'
-                    alert.reviewed_at = timezone.now()
-                    alert.reviewed_by = user
-                    alert.save()
-                messages.success(request, f'✅ Action "{action.get_action_type_display()}" documented successfully!')
-            
-            return redirect('alert_detail', alert_id=alert.id)
-            
-        except Exception as e:
-            logger.error(f"❌ Error creating alert action: {str(e)}")
-            messages.error(request, f'Error saving action: {str(e)}')
-            return redirect('alert_detail', alert_id=alert.id)
-    
-    # GET request - show the form
-    context = {
-        'alert': alert,
-        'patient': alert.patient,
-        'doctor': doctor,
-        'action_types': AlertAction.ACTION_CHOICES,
-    }
-    
-    return render(request, 'add_alert_action.html', context)

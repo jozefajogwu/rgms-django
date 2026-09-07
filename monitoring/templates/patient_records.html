@@ -1,0 +1,476 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>My Records · Genesis Seniors Hub</title>
+
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    colors: {
+                        genesis: {
+                            indigo: '#3B2E92',
+                            crimson: '#E32626',
+                            cyan: '#19A3DF',
+                            amber: '#F59E0B',
+                            canvas: '#F8FAFC',
+                            sidebar: '#0F172A',
+                        },
+                    },
+                    boxShadow: {
+                        card: '0 1px 2px 0 rgba(15, 23, 42, 0.04)',
+                        'card-hover': '0 10px 28px -8px rgba(59, 46, 146, 0.18)',
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        html, body { max-width: 100%; overflow-x: hidden; }
+        body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .tap-target { min-height: 44px; min-width: 44px; }
+
+        a:focus-visible, button:focus-visible, .nav-item:focus-visible {
+            outline: 2px solid #F59E0B;
+            outline-offset: 2px;
+            border-radius: 8px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
+        .safe-top { padding-top: var(--safe-top); }
+        .safe-bottom { padding-bottom: var(--safe-bottom); }
+
+        /* ---- ECG heartbeat pulse trace ---- */
+        .ecg-trace svg { width: 100%; height: 26px; display: block; overflow: visible; }
+        .ecg-trace path {
+            fill: none;
+            stroke: #E32626;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 3px rgba(227, 38, 38, 0.45));
+            stroke-dasharray: 260;
+            stroke-dashoffset: 260;
+            animation: ecg-draw 2.6s ease-in-out infinite;
+        }
+        @keyframes ecg-draw {
+            0%   { stroke-dashoffset: 260; opacity: 0.15; }
+            8%   { opacity: 0.9; }
+            45%  { stroke-dashoffset: 0; opacity: 0.9; }
+            65%  { opacity: 0.25; }
+            100% { stroke-dashoffset: 0; opacity: 0.15; }
+        }
+        .heartbeat-dot {
+            animation: heartbeat 1.4s ease-in-out infinite;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            25% { transform: scale(1.35); opacity: 0.85; }
+            40% { transform: scale(0.9); opacity: 1; }
+        }
+
+        @media (max-width: 1023.98px) {
+            #sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                width: min(288px, 84vw);
+                z-index: 100;
+            }
+            #sidebar.open { transform: translateX(0); }
+        }
+
+        .hamburger span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #1e293b;
+            border-radius: 2px;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        .hamburger.is-open span:nth-child(2) { opacity: 0; }
+        .hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+    </style>
+</head>
+
+<body class="min-h-screen bg-genesis-canvas text-slate-800 antialiased flex">
+
+    <!-- Mobile overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-950/50 z-[90] hidden"></div>
+
+    <!-- ============================================ -->
+    <!-- DARK SIDEBAR -->
+    <!-- ============================================ -->
+    <aside id="sidebar" class="w-72 shrink-0 bg-genesis-sidebar flex flex-col">
+
+        <div class="safe-top px-6 pt-6 pb-5 border-b border-white/5 flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-genesis-crimson text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-genesis-crimson/30">GS</div>
+            <div class="leading-tight">
+                <div class="text-base font-bold text-white">Genesis <span class="text-genesis-amber">Seniors Hub</span></div>
+                <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mt-0.5">Patient Portal</div>
+            </div>
+        </div>
+
+        <div class="ecg-trace px-6 py-3 border-b border-white/5 flex items-center gap-2" aria-hidden="true">
+            <span class="w-1.5 h-1.5 rounded-full bg-genesis-crimson heartbeat-dot shrink-0"></span>
+            <svg viewBox="0 0 220 26" preserveAspectRatio="none">
+                <path d="M0,13 L52,13 L60,4 L70,23 L80,13 L96,13 L104,8 L112,18 L120,13 L220,13" />
+            </svg>
+        </div>
+
+        <div class="px-6 py-3 border-b border-white/5 flex flex-wrap gap-1.5">
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-genesis-crimson/15 text-red-300 border border-genesis-crimson/25">Patient</span>
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-white/10">Client</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+            <div class="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Main</div>
+
+            <a href="{% url 'caregiver_dashboard' %}" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                </svg>
+                <span class="flex-1">Dashboard</span>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-genesis-crimson/30 text-red-300 border border-genesis-crimson/40">LIVE</span>
+            </a>
+
+            <a href="{% url 'patient_records' %}" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-genesis-indigo bg-slate-800 text-white font-medium">
+                <svg class="w-5 h-5 text-genesis-cyan shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span class="flex-1 truncate">My Records</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-genesis-cyan/15 text-sky-300 shrink-0">{{ total_readings }}</span>
+            </a>
+
+            <a href="{% url 'add_vital_reading' %}" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-genesis-amber bg-amber-500/10 hover:bg-amber-500/15 transition-colors duration-200">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 4v16M4 12h16"/>
+                </svg>
+                <span class="flex-1 font-medium">Add New Reading</span>
+            </a>
+
+            <a href="{% url 'patient_feedback' %}" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+                </svg>
+                <span class="flex-1 truncate">Doctor's Feedback</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-genesis-cyan/15 text-sky-300 shrink-0">{{ total_alerts }}</span>
+            </a>
+
+            <div class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Overview</div>
+
+            <a href="#" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200"
+               onclick="document.getElementById('recordsSection').scrollIntoView({behavior:'smooth'}); return false;">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                <span class="flex-1 truncate">All Records</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/5 text-slate-300 shrink-0">{{ total_readings }}</span>
+            </a>
+        </nav>
+
+        <div class="safe-bottom px-4 pt-3 pb-4 border-t border-white/5 space-y-2">
+            <div class="flex items-center gap-3 px-2 py-2 rounded-lg">
+                <div class="w-9 h-9 rounded-full bg-genesis-indigo text-white flex items-center justify-center text-xs font-semibold shrink-0">
+                    {{ user.first_name|first|default:user.username|first|upper }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-sm font-medium text-white truncate">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="text-[11px] text-slate-400">Patient Portal</div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+            </div>
+            <a href="{% url 'logout' %}" class="flex items-center gap-2 p-2 rounded-lg text-sm text-slate-400 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span>End Session</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
+    <main id="mainContent" class="flex-1 min-h-screen w-full min-w-0 bg-genesis-canvas safe-top px-4 sm:px-6 lg:px-10 py-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-10">
+
+        <header class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pb-5 mb-6 border-b border-slate-200">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <button id="hamburgerBtn" class="hamburger tap-target flex lg:hidden items-center justify-center rounded-lg hover:bg-slate-200/60 active:bg-slate-200 shrink-0" aria-label="Toggle sidebar" aria-expanded="false">
+                    <span class="sr-only">Menu</span>
+                    <span class="flex flex-col gap-[5px]"><span></span><span></span><span></span></span>
+                </button>
+                <div class="min-w-0">
+                    <h1 class="text-lg sm:text-xl font-bold text-genesis-indigo truncate">📊 My Health Records</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 truncate">View all your vital readings and health history</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-[10px] font-semibold text-emerald-700">Live & Active</span>
+                </div>
+
+                <a href="{% url 'add_vital_reading' %}"
+                   class="hidden sm:inline-flex items-center gap-2 bg-genesis-indigo hover:bg-genesis-amber text-white transition-colors duration-200 px-4 py-2 rounded-lg font-medium shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>
+                    Add Reading
+                </a>
+
+                <a href="{% url 'caregiver_dashboard' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200/60 hover:bg-slate-200 text-slate-600 hover:text-genesis-indigo transition-colors duration-200 font-medium text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span class="hidden sm:inline">Back</span>
+                </a>
+
+                <div class="relative" id="profileMenuWrap">
+                    <button id="profileMenuBtn" type="button"
+                            class="tap-target flex items-center gap-2 pl-1 pr-2.5 rounded-full border border-slate-200 hover:border-genesis-amber/60 transition-colors duration-200"
+                            aria-haspopup="true" aria-expanded="false">
+                        <span class="w-8 h-8 rounded-full bg-genesis-indigo text-white flex items-center justify-center text-xs font-semibold shrink-0">
+                            {{ user.first_name|first|default:user.username|first|upper }}
+                        </span>
+                        <span class="hidden md:inline text-sm font-medium text-slate-700 max-w-[9rem] truncate">{{ user.get_full_name|default:user.username }}</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div id="profileMenu" class="hidden absolute right-0 mt-2 w-[min(12rem,85vw)] bg-white border border-slate-200 rounded-lg shadow-card-hover py-1 z-20">
+                        <div class="px-3.5 py-2 border-b border-slate-100">
+                            <div class="text-sm font-medium text-slate-800 truncate">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="text-xs text-slate-400">Patient</div>
+                        </div>
+                        <a href="{% url 'logout' %}" class="block px-3.5 py-2 text-sm text-genesis-crimson hover:bg-red-50">End Session</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:border-genesis-amber hover:shadow-md transition-all duration-200">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Total Readings</div>
+                <div class="mt-2 text-2xl sm:text-3xl font-bold text-genesis-indigo tabular-nums">{{ total_readings }}</div>
+                <div class="mt-1 text-xs text-slate-500">All time</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:border-genesis-amber hover:shadow-md transition-all duration-200">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Total Alerts</div>
+                <div class="mt-2 text-2xl sm:text-3xl font-bold text-genesis-indigo tabular-nums">{{ total_alerts }}</div>
+                <div class="mt-1 text-xs text-slate-500">All time</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:border-genesis-amber hover:shadow-md transition-all duration-200">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Latest Reading</div>
+                <div class="mt-2 text-lg font-bold text-genesis-indigo leading-snug">
+                    {% if vital_readings %}
+                        {% with latest=vital_readings|first %}
+                            {% if latest.systolic_bp %}
+                                {{ latest.systolic_bp }}/{{ latest.diastolic_bp }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+                <div class="mt-1 text-xs text-slate-500">
+                    {% if vital_readings %}
+                        {% with latest=vital_readings|first %}
+                            {{ latest.created_at|date:"M d, Y" }}
+                        {% endwith %}
+                    {% else %}
+                        No readings yet
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:border-genesis-amber hover:shadow-md transition-all duration-200">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Patient Name</div>
+                <div class="mt-2 text-lg font-bold text-genesis-indigo truncate">{{ patient.full_name }}</div>
+                <div class="mt-1 text-xs text-slate-500">ID: {{ patient.id }}</div>
+            </div>
+        </div>
+
+        <!-- Records List -->
+        <section id="recordsSection" class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h2 class="text-base font-bold text-genesis-indigo">📋 All Vital Readings</h2>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">{{ total_readings }} reading{{ total_readings|pluralize }}</span>
+            </div>
+
+            {% if vital_readings %}
+            <div class="space-y-3">
+                {% for reading in vital_readings %}
+                <div class="border border-slate-200 rounded-lg p-4 hover:bg-amber-50/50 hover:border-genesis-amber/40 transition-all duration-200">
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-800">{{ reading.created_at|date:"F j, Y H:i" }}</div>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                {% if reading.systolic_bp %}
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                                    💉 {{ reading.systolic_bp }}/{{ reading.diastolic_bp }} mmHg
+                                </span>
+                                {% endif %}
+                                {% if reading.pulse_rate %}
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                                    ❤️ {{ reading.pulse_rate }} bpm
+                                </span>
+                                {% endif %}
+                                {% if reading.oxygen_saturation %}
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                                    🫁 {{ reading.oxygen_saturation }}%
+                                </span>
+                                {% endif %}
+                                {% if reading.fasting_blood_sugar %}
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                                    🍬 {{ reading.fasting_blood_sugar }} mg/dL
+                                </span>
+                                {% endif %}
+                                {% if reading.random_blood_sugar %}
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                                    🍬 {{ reading.random_blood_sugar }} mg/dL (Random)
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if reading.is_abnormal %}
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">⚠️ Needs Review</span>
+                        {% else %}
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">✅ Normal</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <div class="text-4xl mb-4">📊</div>
+                <p class="text-sm font-semibold text-slate-500">No readings yet</p>
+                <p class="text-xs text-slate-400 mt-1">Start tracking your health by adding your first reading.</p>
+                <a href="{% url 'add_vital_reading' %}" class="inline-flex items-center gap-2 mt-4 bg-genesis-indigo hover:bg-genesis-amber text-white transition-colors duration-200 px-4 py-2 rounded-lg font-medium shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>
+                    Add Your First Reading
+                </a>
+            </div>
+            {% endif %}
+        </section>
+
+    </main>
+
+    <!-- Mobile Dock -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-[80] safe-bottom bg-white/90 backdrop-blur border-t border-slate-200 flex items-stretch px-3 py-2 gap-1.5" aria-label="Quick actions">
+        <a href="{% url 'caregiver_dashboard' %}" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-slate-500 hover:text-genesis-amber hover:bg-slate-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="{% url 'add_vital_reading' %}" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-white bg-genesis-indigo">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>
+            <span>Add Reading</span>
+        </a>
+        <a href="{% url 'patient_feedback' %}" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-genesis-crimson bg-red-50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
+            <span>Feedback</span>
+        </a>
+        <a href="#" id="mobileDockMenuBtn" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-slate-500 hover:text-genesis-amber hover:bg-slate-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Menu</span>
+        </a>
+    </nav>
+
+    <script>
+        const hamburger = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const mobileDockMenuBtn = document.getElementById('mobileDockMenuBtn');
+
+        function toggleSidebar(open) {
+            sidebar.classList.toggle('open', open);
+            overlay.classList.toggle('hidden', !open);
+            hamburger.classList.toggle('is-open', open);
+            hamburger.setAttribute('aria-expanded', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+
+        hamburger.addEventListener('click', () => toggleSidebar(!sidebar.classList.contains('open')));
+        overlay.addEventListener('click', () => toggleSidebar(false));
+
+        if (mobileDockMenuBtn) {
+            mobileDockMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleSidebar(!sidebar.classList.contains('open'));
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && sidebar.classList.contains('open')) toggleSidebar(false);
+        });
+
+        document.querySelectorAll('#sidebar a').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth < 1024) toggleSidebar(false);
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024 && sidebar.classList.contains('open')) {
+                toggleSidebar(false);
+            }
+        });
+
+        const profileBtn = document.getElementById('profileMenuBtn');
+        const profileMenu = document.getElementById('profileMenu');
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = !profileMenu.classList.contains('hidden');
+            profileMenu.classList.toggle('hidden', isOpen);
+            profileBtn.setAttribute('aria-expanded', !isOpen);
+        });
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('profileMenuWrap').contains(e.target)) {
+                profileMenu.classList.add('hidden');
+                profileBtn.setAttribute('aria-expanded', false);
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                profileMenu.classList.add('hidden');
+                profileBtn.setAttribute('aria-expanded', false);
+            }
+        });
+    </script>
+
+</body>
+</html>
