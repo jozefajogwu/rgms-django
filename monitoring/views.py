@@ -1258,3 +1258,91 @@ def patient_feedback(request):
     }
     
     return render(request, 'patient_feedback.html', context)
+
+# monitoring/views.py - add_alert_action
+
+@login_required
+def add_alert_action(request, alert_id):
+    """Add a clinical action for an alert"""
+    alert = get_object_or_404(Alert, id=alert_id)
+    user = request.user
+    
+    # Check authorization
+    if not is_doctor_authorized(user, alert.patient):
+        messages.error(request, 'You are not authorized to take action on this alert.')
+        return redirect('doctor_dashboard')
+    
+    # Get doctor instance
+    try:
+        doctor = Doctor.objects.get(user=user)
+    except Doctor.DoesNotExist:
+        messages.error(request, 'You are not registered as a doctor.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Get form data from POST
+        action_type = request.POST.get('action_type')
+        description = request.POST.get('description', '').strip()
+        notes = request.POST.get('notes', '').strip()
+        clinical_findings = request.POST.get('clinical_findings', '').strip()
+        assessment = request.POST.get('assessment', '').strip()
+        plan = request.POST.get('plan', '').strip()
+        follow_up_needed = request.POST.get('follow_up_needed') == 'on'
+        follow_up_date = request.POST.get('follow_up_date')
+        
+        # Validate required fields
+        if not action_type:
+            messages.error(request, 'Please select an action type.')
+            return redirect('alert_detail', alert_id=alert.id)
+        
+        if not description:
+            messages.error(request, 'Please provide a description of the action taken.')
+            return redirect('alert_detail', alert_id=alert.id)
+        
+        try:
+            # Create the action
+            action = AlertAction.objects.create(
+                alert=alert,
+                doctor=user,
+                action_type=action_type,
+                description=description,
+                notes=notes or '',
+                clinical_findings=clinical_findings or '',
+                assessment=assessment or '',
+                plan=plan or '',
+                follow_up_needed=follow_up_needed,
+                follow_up_date=follow_up_date if follow_up_date else None,
+            )
+            
+            # Update alert status based on action type
+            if action_type == 'resolved':
+                alert.status = 'resolved'
+                alert.reviewed_at = timezone.now()
+                alert.reviewed_by = user
+                alert.save()
+                messages.success(request, '✅ Alert resolved and action documented successfully!')
+            else:
+                # If not resolved, mark as reviewed if it was unreviewed
+                if alert.status == 'unreviewed':
+                    alert.status = 'reviewed'
+                    alert.reviewed_at = timezone.now()
+                    alert.reviewed_by = user
+                    alert.save()
+                messages.success(request, f'✅ Action "{action.get_action_type_display()}" documented successfully!')
+            
+            return redirect('alert_detail', alert_id=alert.id)
+            
+        except Exception as e:
+            logger.error(f"❌ Error creating alert action: {str(e)}")
+            messages.error(request, f'Error saving action: {str(e)}')
+            return redirect('alert_detail', alert_id=alert.id)
+    
+    # GET request - show the form
+    context = {
+        'alert': alert,
+        'patient': alert.patient,
+        'doctor': doctor,
+        'action_types': AlertAction.ACTION_CHOICES,
+    }
+    
+    return render(request, 'add_alert_action.html', context)

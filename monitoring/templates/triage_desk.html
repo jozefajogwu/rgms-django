@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Triage Desk · RHMS</title>
+    <title>Triage Desk · RGMS</title>
     
     <!-- Add favicon -->
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
@@ -340,75 +340,95 @@
         .priority-warning { border-left: 4px solid #f59e0b; }
         .priority-stable { border-left: 4px solid #22c55e; }
 
-        .quick-action-btn {
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 600;
+        /* ============================================ */
+        /* REVIEW BUTTON - Single per patient */
+        /* ============================================ */
+        .review-btn {
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
             font-family: var(--inter);
             border: none;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 36px;
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
+            text-decoration: none;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border: 1px solid #8b5cf6;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
         }
 
-        .quick-action-btn:hover {
-            transform: translateY(-1px);
+        .review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
         }
-        .quick-action-btn:active {
+
+        .review-btn:active {
             transform: scale(0.97);
         }
 
-        .quick-action-btn.resolve {
-            background: #dcfce7;
-            color: #16a34a;
-            border: 1px solid #86efac;
+        .review-btn .icon {
+            font-size: 16px;
         }
-        .quick-action-btn.resolve:hover { background: #bbf7d0; }
 
-        .quick-action-btn.acknowledge {
-            background: #dbeafe;
-            color: #2563eb;
-            border: 1px solid #93c5fd;
+        /* For Critical Patients - use a more urgent color */
+        .priority-critical .review-btn {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-color: #ef4444;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
         }
-        .quick-action-btn.acknowledge:hover { background: #bfdbfe; }
 
-        .quick-action-btn.escalate {
-            background: #fee2e2;
+        .priority-critical .review-btn:hover {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+        }
+
+        /* For Stable Patients - use a calming color */
+        .priority-stable .review-btn {
+            background: linear-gradient(135deg, #059669, #047857);
+            border-color: #34d399;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .priority-stable .review-btn:hover {
+            background: linear-gradient(135deg, #34d399, #059669);
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4);
+        }
+
+        /* Alert tags - compact display */
+        .alert-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            font-family: var(--mono);
+        }
+
+        .alert-tag.critical {
+            background: #fef2f2;
             color: #dc2626;
             border: 1px solid #fca5a5;
         }
-        .quick-action-btn.escalate:hover { background: #fecaca; }
 
-        .quick-action-btn.monitor {
-            background: #fef3c7;
+        .alert-tag.warning {
+            background: #fffbeb;
             color: #d97706;
             border: 1px solid #fcd34d;
         }
-        .quick-action-btn.monitor:hover { background: #fde68a; }
 
-        .quick-action-btn.document {
-            background: #f3e8ff;
-            color: #7c3aed;
-            border: 1px solid #c4b5fd;
-        }
-        .quick-action-btn.document:hover { background: #e9d5ff; }
-
-        .quick-action-success {
-            font-size: 11px;
+        .alert-tag.stable {
+            background: #f0fdf4;
             color: #16a34a;
-            font-family: var(--mono);
-            animation: fadeInOut 2s ease forwards;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(-10px); }
-            20% { opacity: 1; transform: translateY(0); }
-            80% { opacity: 1; }
-            100% { opacity: 0; transform: translateY(-10px); }
+            border: 1px solid #86efac;
         }
 
         /* ============================================ */
@@ -475,10 +495,10 @@
                 padding: 16px !important;
                 padding-bottom: calc(16px + 80px) !important;
             }
-            .quick-action-btn {
-                font-size: 10px;
-                padding: 4px 10px;
-                min-height: 32px;
+            .review-btn {
+                font-size: 13px;
+                padding: 8px 16px;
+                min-height: 40px;
             }
             .top-right-group {
                 flex-wrap: wrap;
@@ -728,37 +748,29 @@
                                 {% for alert in item.alerts|slice:":3" %}
                                 <span class="bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1 rounded-full text-xs font-bold font-mono">⚠️ {{ alert.title }}</span>
                                 {% endfor %}
-                                {% with alert=item.alerts|first %}
-                                    {% if alert and alert.id %}
-                                        <a href="{% url 'alert_detail' alert.id %}" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition min-h-[44px] inline-flex items-center">
-                                            View Details
-                                        </a>
-                                    {% else %}
-                                        <span class="bg-slate-200 text-slate-500 px-4 py-2 rounded-lg text-xs font-bold min-h-[44px] inline-flex items-center">No details</span>
-                                    {% endif %}
-                                {% endwith %}
+                                <span class="text-xs text-slate-400 font-mono">+{{ item.alerts|length|add:"-3" }} more</span>
                             </div>
                         </div>
 
-                        <!-- Quick Action Buttons -->
-                        <div class="mt-3 flex flex-wrap gap-2 pt-3 border-t border-rose-200">
-                            {% for alert in item.alerts|slice:":3" %}
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-xs text-slate-500 font-body">Alert #{{ alert.id }}:</span>
-                                <button onclick="quickAction('{{ alert.id }}', 'resolved', '{{ item.patient.full_name }}')" class="quick-action-btn resolve"><span class="icon">✅</span> Resolve</button>
-                                <button onclick="quickAction('{{ alert.id }}', 'acknowledged', '{{ item.patient.full_name }}')" class="quick-action-btn acknowledge"><span class="icon">👀</span> Acknowledge</button>
-                                <button onclick="quickAction('{{ alert.id }}', 'escalated', '{{ item.patient.full_name }}')" class="quick-action-btn escalate"><span class="icon">🚨</span> Escalate</button>
-                                {% if alert.id %}
-                                    <a href="{% url 'add_alert_action' alert.id %}" class="quick-action-btn document"><span class="icon">📋</span> Document</a>
-                                    <a href="{% url 'alert_detail' alert.id %}" class="quick-action-btn document" style="background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd;">
-                                        <span class="icon">👁️</span> View
-                                    </a>
-                                {% else %}
-                                    <span class="text-xs text-slate-400">(No detail view)</span>
-                                {% endif %}
-                                <span id="quickActionSuccess_{{ alert.id }}" class="quick-action-success" style="display:none;"></span>
+                        <!-- ✅ Single Review Button for all alerts -->
+                        <div class="mt-3 flex flex-wrap items-center gap-3 pt-3 border-t border-rose-200">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-500 font-body font-semibold">
+                                    {{ item.alerts|length }} active alert{{ item.alerts|pluralize }}
+                                </span>
+                                <span class="text-xs text-slate-300">•</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% for alert in item.alerts|slice:":3" %}
+                                    <span class="alert-tag critical">{{ alert.title|truncatechars:20 }}</span>
+                                    {% endfor %}
+                                    {% if item.alerts|length > 3 %}
+                                    <span class="text-xs text-slate-400">+{{ item.alerts|length|add:"-3" }}</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            {% endfor %}
+                            <a href="{% url 'triage_desk' %}#" class="review-btn" onclick="reviewPatientAlerts('{{ item.patient.id }}')">
+                                <span class="icon">🔍</span> Review All Alerts
+                            </a>
                         </div>
 
                         <!-- Charts -->
@@ -819,7 +831,7 @@
             {% endif %}
 
             <!-- ============================================ -->
-            <!-- WARNING PATIENTS -->
+            <!-- WARNING PATIENTS - CLEANED UP -->
             <!-- ============================================ -->
             {% if warning_patients %}
             <div class="mb-8">
@@ -842,37 +854,29 @@
                                 {% for alert in item.alerts|slice:":3" %}
                                 <span class="bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold font-mono">⚠️ {{ alert.title }}</span>
                                 {% endfor %}
-                                {% with alert=item.alerts|first %}
-                                    {% if alert and alert.id %}
-                                        <a href="{% url 'alert_detail' alert.id %}" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition min-h-[44px] inline-flex items-center">
-                                            Review
-                                        </a>
-                                    {% else %}
-                                        <span class="bg-slate-200 text-slate-500 px-4 py-2 rounded-lg text-xs font-bold min-h-[44px] inline-flex items-center">No details</span>
-                                    {% endif %}
-                                {% endwith %}
+                                <span class="text-xs text-slate-400 font-mono">+{{ item.alerts|length|add:"-3" }} more</span>
                             </div>
                         </div>
 
-                        <!-- Quick Action Buttons -->
-                        <div class="mt-3 flex flex-wrap gap-2 pt-3 border-t border-amber-200">
-                            {% for alert in item.alerts|slice:":3" %}
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-xs text-slate-500 font-body">Alert #{{ alert.id }}:</span>
-                                <button onclick="quickAction('{{ alert.id }}', 'resolved', '{{ item.patient.full_name }}')" class="quick-action-btn resolve"><span class="icon">✅</span> Resolve</button>
-                                <button onclick="quickAction('{{ alert.id }}', 'acknowledged', '{{ item.patient.full_name }}')" class="quick-action-btn acknowledge"><span class="icon">👀</span> Acknowledge</button>
-                                <button onclick="quickAction('{{ alert.id }}', 'monitored', '{{ item.patient.full_name }}')" class="quick-action-btn monitor"><span class="icon">📊</span> Monitor</button>
-                                {% if alert.id %}
-                                    <a href="{% url 'add_alert_action' alert.id %}" class="quick-action-btn document"><span class="icon">📋</span> Document</a>
-                                    <a href="{% url 'alert_detail' alert.id %}" class="quick-action-btn document" style="background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd;">
-                                        <span class="icon">👁️</span> View
-                                    </a>
-                                {% else %}
-                                    <span class="text-xs text-slate-400">(No detail view)</span>
-                                {% endif %}
-                                <span id="quickActionSuccess_{{ alert.id }}" class="quick-action-success" style="display:none;"></span>
+                        <!-- ✅ Single Review Button for all alerts -->
+                        <div class="mt-3 flex flex-wrap items-center gap-3 pt-3 border-t border-amber-200">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-500 font-body font-semibold">
+                                    {{ item.alerts|length }} active alert{{ item.alerts|pluralize }}
+                                </span>
+                                <span class="text-xs text-slate-300">•</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% for alert in item.alerts|slice:":3" %}
+                                    <span class="alert-tag warning">{{ alert.title|truncatechars:20 }}</span>
+                                    {% endfor %}
+                                    {% if item.alerts|length > 3 %}
+                                    <span class="text-xs text-slate-400">+{{ item.alerts|length|add:"-3" }}</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            {% endfor %}
+                            <a href="{% url 'triage_desk' %}#" class="review-btn" onclick="reviewPatientAlerts('{{ item.patient.id }}')">
+                                <span class="icon">🔍</span> Review All Alerts
+                            </a>
                         </div>
 
                         <!-- Charts -->
@@ -911,7 +915,7 @@
             {% endif %}
 
             <!-- ============================================ -->
-            <!-- STABLE PATIENTS -->
+            <!-- STABLE PATIENTS - CLEANED UP -->
             <!-- ============================================ -->
             {% if stable_patients %}
             <div>
@@ -928,24 +932,28 @@
                         <p class="text-xs text-slate-400 mt-1 font-mono">Last reading: {{ item.latest_reading.created_at|timesince }} ago</p>
                         {% endif %}
 
-                        <div class="mt-3 flex flex-wrap gap-2 pt-3 border-t border-emerald-200">
+                        <!-- ✅ Single Review Button for all alerts -->
+                        <div class="mt-3 flex flex-wrap items-center gap-3 pt-3 border-t border-emerald-200">
                             {% if item.alerts %}
-                                {% for alert in item.alerts|slice:":2" %}
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="text-xs text-slate-500 font-body">Alert #{{ alert.id }}:</span>
-                                    <button onclick="quickAction('{{ alert.id }}', 'resolved', '{{ item.patient.full_name }}')" class="quick-action-btn resolve"><span class="icon">✅</span> Resolve</button>
-                                    <button onclick="quickAction('{{ alert.id }}', 'acknowledged', '{{ item.patient.full_name }}')" class="quick-action-btn acknowledge"><span class="icon">👀</span> Acknowledge</button>
-                                    <button onclick="quickAction('{{ alert.id }}', 'monitored', '{{ item.patient.full_name }}')" class="quick-action-btn monitor"><span class="icon">📊</span> Monitor</button>
-                                    {% if alert.id %}
-                                        <a href="{% url 'add_alert_action' alert.id %}" class="quick-action-btn document"><span class="icon">📋</span> Document</a>
-                                    {% else %}
-                                        <span class="text-xs text-slate-400">(No detail view)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-slate-500 font-body font-semibold">
+                                    {{ item.alerts|length }} active alert{{ item.alerts|pluralize }}
+                                </span>
+                                <span class="text-xs text-slate-300">•</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% for alert in item.alerts|slice:":2" %}
+                                    <span class="alert-tag stable">{{ alert.title|truncatechars:20 }}</span>
+                                    {% endfor %}
+                                    {% if item.alerts|length > 2 %}
+                                    <span class="text-xs text-slate-400">+{{ item.alerts|length|add:"-2" }}</span>
                                     {% endif %}
-                                    <span id="quickActionSuccess_{{ alert.id }}" class="quick-action-success" style="display:none;"></span>
                                 </div>
-                                {% endfor %}
+                            </div>
+                            <a href="{% url 'triage_desk' %}#" class="review-btn" onclick="reviewPatientAlerts('{{ item.patient.id }}')">
+                                <span class="icon">🔍</span> Review
+                            </a>
                             {% else %}
-                                <span class="text-xs text-slate-400">No active alerts</span>
+                            <span class="text-xs text-slate-400">No active alerts</span>
                             {% endif %}
                         </div>
 
@@ -1068,73 +1076,12 @@
         });
     </script>
 
-    <!-- ============================================ -->
-    <!-- QUICK ACTION JAVASCRIPT -->
-    <!-- ============================================ -->
+    <!-- JavaScript for Patient Alert Review -->
     <script>
-        function quickAction(alertId, actionType, patientName) {
-            if (!alertId || alertId === 'None' || alertId === '') {
-                showToast('❌ Cannot perform action: Alert ID is missing', 'error');
-                return;
-            }
-
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]');
-            const formData = new FormData();
-            formData.append('action_type', actionType);
-            formData.append('description', actionType.charAt(0).toUpperCase() + actionType.slice(1) + ' by doctor');
-            formData.append('notes', 'Quick ' + actionType + ' action taken via Triage Desk');
-            
-            const successSpan = document.getElementById('quickActionSuccess_' + alertId);
-            if (successSpan) {
-                successSpan.style.display = 'inline-block';
-                successSpan.textContent = '⏳ Processing...';
-                successSpan.style.color = '#6c757d';
-            }
-            
-            fetch('/alert/' + alertId + '/quick-action/', {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrftoken ? csrftoken.value : '' },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (successSpan) {
-                        successSpan.textContent = '✅ ' + actionType.charAt(0).toUpperCase() + actionType.slice(1) + '!';
-                        successSpan.style.color = '#16a34a';
-                        setTimeout(() => { successSpan.style.display = 'none'; }, 3000);
-                    }
-                    showToast('✅ Action documented: ' + actionType + ' for ' + patientName, 'success');
-                    setTimeout(() => { location.reload(); }, 1500);
-                } else {
-                    if (successSpan) {
-                        successSpan.textContent = '❌ Failed';
-                        successSpan.style.color = '#dc2626';
-                        setTimeout(() => { successSpan.style.display = 'none'; }, 3000);
-                    }
-                    showToast('❌ Action failed: ' + (data.error || 'Unknown error'), 'error');
-                }
-            })
-            .catch(error => {
-                if (successSpan) {
-                    successSpan.textContent = '❌ Error';
-                    successSpan.style.color = '#dc2626';
-                    setTimeout(() => { successSpan.style.display = 'none'; }, 3000);
-                }
-                showToast('❌ Network error. Please try again.', 'error');
-            });
-        }
-
-        function showToast(message, type) {
-            const toast = document.createElement('div');
-            toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;padding:14px 20px;border-radius:12px;font-family:Inter,sans-serif;font-size:14px;font-weight:500;box-shadow:0 10px 40px rgba(0,0,0,0.15);animation:slideIn 0.5s ease;max-width:400px;' + 
-                (type === 'success' ? 'background:#dcfce7;color:#16a34a;border:1px solid #86efac;' : 'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;');
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'fadeOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+        function reviewPatientAlerts(patientId) {
+            // This function can be expanded to handle patient alert review
+            // For now, it redirects to the patient detail page
+            window.location.href = '/doctor/patient/' + patientId + '/';
         }
     </script>
 
