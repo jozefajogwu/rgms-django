@@ -4,38 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Client Vital Entry · RGMS</title>
+    <title>Client Vital Entry · Genesis Seniors Hub</title>
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
-    
-    <!-- Google Fonts: Lora (headings) + Inter (body) + DM Mono (numbers) -->
+
+    <!-- Inter Font - Clean Sans-Serif -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
     <style>
-        /* ----- GLOBAL DESIGN SYSTEM (Genesis Medevac) ----- */
+        /* ----- SENIOR-FRIENDLY DESIGN SYSTEM ----- */
         :root {
-            --navy: #211568;
-            --navy-light: #3a2a8a;
-            --red: #DC3545;
-            --red-glow: rgba(220, 53, 69, 0.25);
-            --red-pale: #fde8ea;
-            --gold: #D4A843;
-            --gold-glow: rgba(212, 168, 67, 0.2);
-            --sky-blue: #AED9F6;
-            --cyan: #00A3E0;
-            --cyan-glow: rgba(0, 163, 224, 0.2);
+            --brand-indigo: #3B2E92;
+            --brand-indigo-dark: #2F2475;
+            --brand-crimson: #E32626;
+            --brand-crimson-dark: #c41e1e;
+            --brand-cyan: #19A3DF;
+            --brand-amber: #F59E0B;
             --white: #FFFFFF;
-            --bg: #f8f9fa;
-            --text: #1a1a2e;
-            --muted: #6c757d;
-            --border: #e9ecef;
-            --lora: 'Lora', serif;
-            --inter: 'Inter', sans-serif;
-            --mono: 'DM Mono', monospace;
-            --shadow: 0 4px 20px rgba(33, 21, 104, 0.06);
-            --shadow-lg: 0 20px 60px rgba(33, 21, 104, 0.08);
+            --bg: #F8FAFC;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
+            --shadow: 0 4px 20px rgba(59, 46, 146, 0.06);
+            --shadow-lg: 0 20px 60px rgba(59, 46, 146, 0.08);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
+            /* Vital range colors - only for status evaluation */
+            --status-normal: #16a34a;
+            --status-elevated: #d97706;
+            --status-high-risk: #dc2626;
+            --status-normal-bg: #dcfce7;
+            --status-elevated-bg: #fef3c7;
+            --status-high-risk-bg: #fee2e2;
         }
 
         * {
@@ -46,7 +48,7 @@
 
         body {
             font-family: var(--inter);
-            background: var(--navy);
+            background: var(--brand-indigo);
             color: var(--text);
             min-height: 100vh;
             min-height: 100dvh;
@@ -58,7 +60,7 @@
             justify-content: center;
         }
 
-        /* ----- ANIMATED BACKGROUND ----- */
+        /* ----- ANIMATED AMBIENT BACKGROUND ----- */
         .bg-ambient {
             position: fixed;
             inset: 0;
@@ -76,7 +78,7 @@
         .bg-orb:nth-child(1) {
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(220, 53, 69, 0.25), transparent 70%);
+            background: radial-gradient(circle, rgba(227, 38, 38, 0.25), transparent 70%);
             top: -200px;
             right: -100px;
             animation-duration: 32s;
@@ -84,7 +86,7 @@
         .bg-orb:nth-child(2) {
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(212, 168, 67, 0.12), transparent 70%);
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.12), transparent 70%);
             bottom: -150px;
             left: -100px;
             animation-duration: 26s;
@@ -99,56 +101,55 @@
         .container {
             position: relative;
             z-index: 5;
-            max-width: 860px;
+            max-width: 880px;
             width: 100%;
             margin: 0 auto;
         }
 
-        /* ----- BACK LINK ----- */
+        /* ----- BACK LINK - Senior friendly (min 48px touch target) ----- */
         .back-link {
             display: inline-flex;
             align-items: center;
             gap: 10px;
             color: rgba(255, 255, 255, 0.7);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
             text-decoration: none;
-            padding: 8px 4px 20px 4px;
+            padding: 10px 6px 20px 6px;
             transition: all 0.2s ease;
             font-family: var(--inter);
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
             min-height: 48px;
+            min-width: 48px;
         }
         .back-link:hover {
             color: var(--white);
             transform: translateX(-4px);
         }
         .back-link:focus-visible {
-            outline: 3px solid var(--gold);
+            outline: 3px solid var(--brand-amber);
             outline-offset: 4px;
             border-radius: 4px;
         }
         .back-link svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             stroke-width: 2.5;
             stroke: currentColor;
         }
 
-        /* ----- FORM CARD ----- */
+        /* ----- FORM CARD - No red borders on default containers ----- */
         .form-card {
             background: var(--white);
-            border-radius: 24px;
-            border: 2px solid var(--red);
+            border-radius: 28px;
+            border: 1px solid var(--border);
             padding: 48px 52px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.40);
+            box-shadow: var(--shadow-lg);
             transition: all 0.3s ease;
             position: relative;
         }
 
         .form-card:hover {
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.50);
+            box-shadow: var(--shadow-lg), 0 0 0 2px rgba(59, 46, 146, 0.06);
         }
 
         /* ----- HEADER ----- */
@@ -158,7 +159,7 @@
             justify-content: space-between;
             margin-bottom: 32px;
             padding-bottom: 24px;
-            border-bottom: 2px solid var(--red);
+            border-bottom: 2px solid var(--brand-indigo);
             flex-wrap: wrap;
             gap: 16px;
         }
@@ -170,41 +171,40 @@
         }
 
         .form-header-left .icon-wrapper {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--red), #b02a37);
-            border-radius: 14px;
+            width: 56px;
+            height: 56px;
+            background: var(--brand-indigo);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 8px;
-            box-shadow: 0 4px 16px var(--red-glow);
-            min-height: 48px;
-            min-width: 48px;
+            min-height: 56px;
+            min-width: 56px;
         }
 
         .form-header-left .icon-wrapper svg {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             stroke: var(--white);
             stroke-width: 2;
         }
 
         .form-header h1 {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 700;
-            color: var(--navy);
-            font-family: var(--lora);
-            letter-spacing: 0.5px;
+            color: var(--brand-indigo);
+            font-family: var(--inter);
+            letter-spacing: -0.5px;
             line-height: 1.2;
         }
 
         .form-header h1 span {
-            color: var(--red);
+            color: var(--brand-crimson);
         }
 
         .form-header .subtitle {
-            font-size: 14px;
+            font-size: 16px;
             color: var(--muted);
             font-family: var(--inter);
             margin-top: 2px;
@@ -220,86 +220,83 @@
         .badge-self {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: var(--red-pale);
-            color: var(--red);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
+            gap: 8px;
+            background: #eef2ff;
+            color: var(--brand-indigo);
+            padding: 8px 18px;
+            border-radius: 24px;
+            font-size: 14px;
             font-weight: 600;
-            letter-spacing: 0.3px;
-            border: 1px solid var(--red);
+            border: 1px solid rgba(59, 46, 146, 0.15);
             white-space: nowrap;
             font-family: var(--inter);
-            text-transform: uppercase;
-            min-height: 36px;
+            min-height: 44px;
         }
 
         .badge-self svg {
-            width: 14px;
-            height: 14px;
-            stroke: var(--red);
+            width: 18px;
+            height: 18px;
+            stroke: var(--brand-indigo);
             stroke-width: 2.5;
         }
 
         .badge-required {
-            background: var(--red-pale);
-            color: var(--red);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 10px;
+            background: #f1f5f9;
+            color: var(--muted);
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 12px;
             font-weight: 600;
-            letter-spacing: 0.3px;
-            border: 1px solid var(--red);
             font-family: var(--inter);
-            min-height: 28px;
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
         }
 
         /* ----- MESSAGES ----- */
         .msg-success {
             background: #f0fdf4;
-            border: 1px solid #22c55e;
-            border-radius: 12px;
-            padding: 14px 20px;
+            border: 1px solid #86efac;
+            border-radius: 14px;
+            padding: 16px 22px;
             color: #16a34a;
             font-weight: 500;
+            font-size: 16px;
             font-family: var(--inter);
             margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            min-height: 52px;
+            gap: 12px;
+            min-height: 56px;
         }
 
         .msg-success svg {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             stroke: #16a34a;
             stroke-width: 2.5;
             flex-shrink: 0;
         }
 
-        /* ============================================ */
-        /* ERROR SUMMARY */
-        /* ============================================ */
+        /* ----- ERROR SUMMARY - No red borders on default containers ----- */
         .error-summary {
-            background: var(--red-pale);
-            border: 1px solid var(--red);
-            border-radius: 12px;
-            padding: 16px 20px;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 14px;
+            padding: 18px 22px;
             margin-bottom: 24px;
         }
 
         .error-summary .error-header {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 14px;
         }
 
         .error-summary .error-header svg {
-            width: 20px;
-            height: 20px;
-            stroke: var(--red);
+            width: 24px;
+            height: 24px;
+            stroke: var(--brand-crimson);
             stroke-width: 2.5;
             flex-shrink: 0;
             margin-top: 2px;
@@ -307,11 +304,9 @@
 
         .error-summary .error-title {
             font-weight: 700;
-            color: var(--red);
-            font-size: 14px;
+            color: var(--brand-crimson);
+            font-size: 15px;
             font-family: var(--inter);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .error-summary .error-list {
@@ -321,8 +316,8 @@
         }
 
         .error-summary .error-list li {
-            color: var(--red);
-            font-size: 13px;
+            color: var(--brand-crimson);
+            font-size: 14px;
             margin-top: 2px;
             display: flex;
             align-items: flex-start;
@@ -337,33 +332,33 @@
 
         /* ----- CLIENT INFO CARD ----- */
         .client-info-card {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            background: var(--bg);
             border-radius: 16px;
-            padding: 16px 20px;
+            padding: 18px 22px;
             border: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 18px;
             flex-wrap: wrap;
-            margin-bottom: 4px;
-            min-height: 76px;
+            margin-bottom: 8px;
+            min-height: 80px;
         }
 
         .client-info-card .avatar {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--red), #b02a37);
-            border-radius: 12px;
+            width: 52px;
+            height: 52px;
+            background: var(--brand-indigo);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--white);
             font-weight: 700;
-            font-size: 16px;
+            font-size: 18px;
             font-family: var(--inter);
             flex-shrink: 0;
-            min-height: 44px;
-            min-width: 44px;
+            min-height: 52px;
+            min-width: 52px;
         }
 
         .client-info-card .info {
@@ -371,7 +366,7 @@
         }
 
         .client-info-card .info .label {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--muted);
             text-transform: uppercase;
@@ -380,38 +375,38 @@
         }
 
         .client-info-card .info .name {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
-            color: var(--navy);
-            font-family: var(--lora);
+            color: var(--text);
+            font-family: var(--inter);
         }
 
         .client-info-card .info .email {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--muted);
             font-family: var(--inter);
         }
 
         .client-info-card .status-badge {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--red);
-            background: var(--red-pale);
-            padding: 4px 14px;
+            color: var(--status-normal);
+            background: var(--status-normal-bg);
+            padding: 4px 16px;
             border-radius: 20px;
-            border: 1px solid var(--red);
+            border: 1px solid #86efac;
             white-space: nowrap;
             font-family: var(--inter);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            min-height: 32px;
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
         }
 
-        /* ----- FORM ELEMENTS ----- */
+        /* ----- FORM ELEMENTS - Senior friendly (16px+ fonts, 52px+ touch targets) ----- */
         form {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 26px;
             margin-top: 8px;
         }
 
@@ -422,109 +417,114 @@
         }
 
         .field-group label {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
-            color: var(--navy);
+            color: var(--text);
             font-family: var(--inter);
-            letter-spacing: 0.3px;
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 6px;
-            text-transform: uppercase;
         }
 
         .field-group label .required {
-            color: var(--red);
-            font-size: 16px;
+            color: var(--brand-crimson);
+            font-size: 18px;
         }
 
         .field-group label .unit {
             font-weight: 400;
             color: var(--muted);
-            font-size: 12px;
+            font-size: 13px;
             font-family: var(--inter);
-            text-transform: none;
         }
 
-        /* 🔥 MONO DIGITS FOR ALL NUMBER INPUTS */
+        /* All inputs: 16px+ font, 52px+ height for senior accessibility */
         .field-group input[type="number"],
         .field-group input[type="text"],
         .field-group input,
         .field-group select,
         .field-group textarea {
             width: 100%;
-            padding: 12px 16px;
-            background: #fafbfc;
+            padding: 14px 18px;
+            background: var(--white);
             border: 2px solid var(--border);
-            border-radius: 12px;
+            border-radius: 14px;
             font-family: var(--inter);
-            font-size: 14px;
+            font-size: 18px;
             color: var(--text);
             transition: all 0.2s ease;
             outline: none;
-            min-height: 48px;
+            min-height: 56px;
         }
 
         .field-group input[type="number"] {
-            font-family: var(--mono);
-            font-size: 15px;
+            font-weight: 500;
             letter-spacing: 0.5px;
+            -moz-appearance: textfield;
+        }
+        .field-group input[type="number"]::-webkit-inner-spin-button,
+        .field-group input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .field-group input:focus,
         .field-group select:focus,
         .field-group textarea:focus {
-            border-color: var(--red);
+            border-color: var(--brand-indigo);
             background: var(--white);
-            box-shadow: 0 0 0 4px var(--red-glow);
+            box-shadow: 0 0 0 4px rgba(59, 46, 146, 0.08);
         }
 
         .field-group input:focus-visible,
         .field-group select:focus-visible,
         .field-group textarea:focus-visible {
-            outline: 3px solid var(--gold);
+            outline: 3px solid var(--brand-amber);
             outline-offset: 2px;
         }
 
-        /* Error state for form fields */
         .field-group input.error,
         .field-group select.error,
         .field-group textarea.error {
-            border-color: var(--red);
-            background: var(--red-pale);
+            border-color: var(--brand-crimson);
+            background: #fef2f2;
         }
 
         .field-group input.error:focus,
         .field-group select.error:focus,
         .field-group textarea.error:focus {
-            border-color: var(--red);
-            box-shadow: 0 0 0 4px var(--red-glow);
+            border-color: var(--brand-crimson);
+            box-shadow: 0 0 0 4px rgba(227, 38, 38, 0.08);
         }
 
         .field-group input::placeholder,
         .field-group textarea::placeholder {
             color: #a0aec0;
             font-family: var(--inter);
+            font-size: 16px;
         }
 
         .field-group textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 100px;
+            font-size: 17px;
         }
 
         .field-group select {
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
+            background-position: right 18px center;
+            padding-right: 48px;
             cursor: pointer;
-            min-height: 48px;
+            min-height: 56px;
+            font-size: 17px;
         }
 
         .field-group .error-text {
-            font-size: 12px;
-            color: var(--red);
+            font-size: 13px;
+            color: var(--brand-crimson);
             font-family: var(--inter);
             margin-top: 2px;
             display: flex;
@@ -534,37 +534,98 @@
         }
 
         .field-group .help-text {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--muted);
             font-family: var(--inter);
             margin-top: 2px;
-            font-style: italic;
+        }
+
+        /* ----- REAL-TIME STATUS BADGE ----- */
+        .status-badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--inter);
+            min-height: 32px;
+            transition: all 0.3s ease;
+            margin-top: 4px;
+        }
+        .status-badge-live.normal {
+            background: var(--status-normal-bg);
+            color: var(--status-normal);
+            border: 1px solid #86efac;
+        }
+        .status-badge-live.elevated {
+            background: var(--status-elevated-bg);
+            color: var(--status-elevated);
+            border: 1px solid #fcd34d;
+        }
+        .status-badge-live.high-risk {
+            background: var(--status-high-risk-bg);
+            color: var(--status-high-risk);
+            border: 1px solid #fca5a5;
+        }
+        .status-badge-live .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-badge-live.normal .dot { background: var(--status-normal); }
+        .status-badge-live.elevated .dot { background: var(--status-elevated); }
+        .status-badge-live.high-risk .dot { background: var(--status-high-risk); }
+
+        /* ----- BP COMBINED FIELD ----- */
+        .bp-combined {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .bp-combined .bp-field {
+            flex: 1;
+            min-width: 0;
+        }
+        .bp-combined .bp-slash {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--muted);
+            padding: 0 2px;
+            user-select: none;
+        }
+        .bp-combined .bp-unit {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 500;
+            padding-left: 4px;
+            white-space: nowrap;
         }
 
         /* ----- GRID LAYOUTS ----- */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 22px;
         }
-
         .grid-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
+            gap: 22px;
         }
-
         .grid-4 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 20px;
+            gap: 22px;
         }
 
         /* ----- SECTION DIVIDER ----- */
         .section-divider {
             border: none;
-            border-top: 2px solid var(--red);
-            margin: 4px 0 8px 0;
+            border-top: 2px solid var(--border);
+            margin: 4px 0 10px 0;
         }
 
         .section-header {
@@ -572,71 +633,100 @@
         }
 
         .section-header h2 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
-            color: var(--navy);
-            font-family: var(--lora);
+            color: var(--text);
+            font-family: var(--inter);
             display: flex;
             align-items: center;
             gap: 10px;
-            letter-spacing: 0.3px;
+            letter-spacing: -0.3px;
         }
 
         .section-header h2 .section-icon {
-            font-size: 20px;
+            font-size: 22px;
         }
 
         .section-header p {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--muted);
             font-family: var(--inter);
             margin-top: 2px;
-            margin-left: 32px;
+            margin-left: 34px;
         }
 
-        /* ----- SUBMIT BUTTON ----- */
+        /* ----- SUBMIT BUTTON - Large, clear, with loading state ----- */
         .submit-btn {
             width: 100%;
-            padding: 18px 24px;
-            background: linear-gradient(135deg, var(--red), #b02a37);
+            padding: 20px 28px;
+            background: var(--brand-indigo);
             color: var(--white);
             border: none;
-            border-radius: 14px;
+            border-radius: 16px;
             font-family: var(--inter);
-            font-size: 17px;
+            font-size: 19px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px var(--red-glow);
+            box-shadow: 0 4px 20px rgba(59, 46, 146, 0.25);
             margin-top: 8px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            min-height: 60px;
+            gap: 14px;
+            min-height: 64px;
+            position: relative;
         }
 
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 32px var(--red-glow);
+        .submit-btn:hover:not(:disabled) {
+            background: var(--brand-indigo-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(59, 46, 146, 0.35);
         }
 
-        .submit-btn:active {
-            transform: translateY(-1px);
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         .submit-btn:focus-visible {
-            outline: 3px solid var(--gold);
+            outline: 3px solid var(--brand-amber);
             outline-offset: 4px;
         }
 
         .submit-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             stroke: var(--white);
             stroke-width: 2.5;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--white);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .submit-btn.loading .spinner {
+            display: inline-block;
+        }
+        .submit-btn.loading .btn-text {
+            display: none;
+        }
+        .submit-btn.loading .btn-icon {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* ----- RESPONSIVE ----- */
@@ -658,11 +748,11 @@
             }
 
             .form-header h1 {
-                font-size: 22px;
+                font-size: 24px;
             }
 
-            .form-header .badge-group {
-                flex-wrap: wrap;
+            .form-header .subtitle {
+                font-size: 14px;
             }
 
             .grid-2,
@@ -673,9 +763,8 @@
             }
 
             .section-header h2 {
-                font-size: 17px;
+                font-size: 18px;
             }
-
             .section-header p {
                 margin-left: 0;
             }
@@ -694,16 +783,23 @@
                 align-self: center;
             }
 
+            .bp-combined {
+                flex-wrap: wrap;
+            }
+            .bp-combined .bp-field {
+                min-width: 80px;
+            }
+
             .submit-btn {
-                padding: 16px;
-                font-size: 15px;
-                min-height: 56px;
+                padding: 18px;
+                font-size: 17px;
+                min-height: 60px;
             }
         }
 
         @media (max-width: 480px) {
             .form-card {
-                padding: 20px 14px;
+                padding: 18px 12px;
                 border-radius: 16px;
             }
 
@@ -718,19 +814,17 @@
             .field-group input,
             .field-group select,
             .field-group textarea {
-                padding: 10px 14px;
-                font-size: 13px;
-                min-height: 44px;
+                padding: 12px 14px;
+                font-size: 16px;
+                min-height: 52px;
             }
 
-            .badge-self {
-                font-size: 10px;
-                padding: 4px 12px;
-                min-height: 32px;
+            .field-group input[type="number"] {
+                font-size: 17px;
             }
 
             .client-info-card .info .name {
-                font-size: 15px;
+                font-size: 16px;
             }
 
             .grid-2,
@@ -741,74 +835,38 @@
             }
 
             .submit-btn {
-                min-height: 52px;
+                min-height: 56px;
+                font-size: 15px;
+                padding: 16px;
+            }
+
+            .badge-self {
+                font-size: 12px;
+                padding: 6px 14px;
+                min-height: 38px;
+            }
+
+            .back-link {
                 font-size: 14px;
-                padding: 14px;
             }
         }
 
-        /* 🔥 Snap-scroll for stat row under 380px */
-        @media (max-width: 380px) {
-            .grid-4 {
-                display: flex;
-                gap: 12px;
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-                -webkit-overflow-scrolling: touch;
-                padding: 4px 0 8px 0;
-                scrollbar-width: none;
-            }
-            .grid-4::-webkit-scrollbar {
-                display: none;
-            }
-            .grid-4 .field-group {
-                flex: 0 0 140px;
-                scroll-snap-align: start;
-            }
-        }
-
-        /* Animated input focus rings */
-        .field-group input:focus,
-        .field-group select:focus,
-        .field-group textarea:focus {
-            border-color: var(--red);
-            background: var(--white);
-            box-shadow: 0 0 0 4px var(--red-glow);
-        }
-
-        /* Subtle hover on form fields */
-        .field-group input:hover,
-        .field-group select:hover,
-        .field-group textarea:hover {
-            border-color: var(--red);
-        }
-
-        /* Reduced motion */
+        /* ----- REDUCED MOTION ----- */
         @media (prefers-reduced-motion: reduce) {
-            .bg-orb {
-                animation: none;
-            }
-            .form-card:hover {
-                box-shadow: 0 30px 80px rgba(0, 0, 0, 0.40);
-            }
-            .form-card:hover {
-                transform: none;
-            }
-            .submit-btn:hover {
-                transform: none;
-            }
-            .back-link:hover {
-                transform: none;
-            }
+            .bg-orb { animation: none; }
+            .form-card:hover { box-shadow: var(--shadow-lg); }
+            .submit-btn:hover:not(:disabled) { transform: none; }
+            .back-link:hover { transform: none; }
+            .spinner { animation-duration: 1.5s; }
         }
 
-        /* Focus-visible for keyboard nav */
+        /* ----- FOCUS VISIBLE (keyboard navigation) ----- */
         :focus-visible {
-            outline: 3px solid var(--gold);
+            outline: 3px solid var(--brand-amber);
             outline-offset: 2px;
         }
 
-        /* Safe area insets for notch/home indicator */
+        /* ----- SAFE AREA SUPPORT ----- */
         @supports (padding: max(0px)) {
             body {
                 padding-left: max(24px, env(safe-area-inset-left));
@@ -817,20 +875,33 @@
                 padding-bottom: max(32px, env(safe-area-inset-bottom));
             }
         }
+
+        /* ----- UTILITY: hide visually but keep accessible ----- */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
     </style>
 </head>
 
 <body>
 
     <!-- ══ AMBIENT BACKGROUND ══ -->
-    <div class="bg-ambient">
+    <div class="bg-ambient" aria-hidden="true">
         <div class="bg-orb"></div>
         <div class="bg-orb"></div>
     </div>
 
     <div class="container">
 
-        <!-- Back Link -->
+        <!-- Back Link - Senior friendly touch target -->
         <a href="{% url 'caregiver_dashboard' %}" class="back-link" aria-label="Return to dashboard">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -850,7 +921,7 @@
                         </svg>
                     </div>
                     <h1>Client <span>Vital</span> Entry</h1>
-                    <div class="subtitle">Record your daily health metrics accurately</div>
+                    <div class="subtitle">Record daily health metrics with confidence</div>
                 </div>
                 <div class="badge-group">
                     <span class="badge-self">
@@ -859,7 +930,7 @@
                         </svg>
                         Self-Reporting
                     </span>
-                    <span class="badge-required">* Required</span>
+                    <span class="badge-required">* Required fields</span>
                 </div>
             </div>
 
@@ -907,22 +978,84 @@
                     <div class="email">{{ client.email|default:"No email on file" }}</div>
                 </div>
                 <span class="status-badge">● Active</span>
-                <!-- Hidden field to submit the client ID -->
                 <input type="hidden" name="patient" value="{{ client.id }}">
             </div>
 
-            <form method="POST" novalidate>
+            <form method="POST" novalidate id="vitalForm">
                 {% csrf_token %}
 
-                <!-- Blood Sugar -->
+                <!-- ============================================ -->
+                <!-- BLOOD PRESSURE - Combined Systolic/Diastolic -->
+                <!-- ============================================ -->
+                <div class="field-group">
+                    <label for="{{ form.systolic_bp.id_for_label }}">
+                        Blood Pressure
+                        <span class="unit">(mmHg)</span>
+                        <span class="required">*</span>
+                    </label>
+                    <div class="bp-combined">
+                        <div class="bp-field">
+                            {{ form.systolic_bp }}
+                            <span class="help-text">Systolic (top number)</span>
+                        </div>
+                        <span class="bp-slash" aria-hidden="true">/</span>
+                        <div class="bp-field">
+                            {{ form.diastolic_bp }}
+                            <span class="help-text">Diastolic (bottom number)</span>
+                        </div>
+                        <span class="bp-unit">mmHg</span>
+                    </div>
+                    <!-- Live BP status badge -->
+                    <div id="bpStatusBadge" class="status-badge-live normal" style="display:none;">
+                        <span class="dot"></span>
+                        <span id="bpStatusText">Normal</span>
+                    </div>
+                    {% if form.systolic_bp.errors or form.diastolic_bp.errors %}
+                        <span class="error-text">{{ form.systolic_bp.errors.0 }}{{ form.diastolic_bp.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- ============================================ -->
+                <!-- HEART RATE -->
+                <!-- ============================================ -->
+                <div class="field-group">
+                    <label for="{{ form.pulse_rate.id_for_label }}">
+                        Heart Rate
+                        <span class="unit">(bpm)</span>
+                        <span class="required">*</span>
+                    </label>
+                    <div style="position:relative;">
+                        {{ form.pulse_rate }}
+                        <span style="position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);font-weight:500;pointer-events:none;">bpm</span>
+                    </div>
+                    <div id="hrStatusBadge" class="status-badge-live normal" style="display:none;">
+                        <span class="dot"></span>
+                        <span id="hrStatusText">Normal</span>
+                    </div>
+                    <span class="help-text">Normal: 60-100 bpm</span>
+                    {% if form.pulse_rate.errors %}
+                        <span class="error-text">{{ form.pulse_rate.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- ============================================ -->
+                <!-- BLOOD GLUCOSE + Context -->
+                <!-- ============================================ -->
                 <div class="grid-2">
                     <div class="field-group">
                         <label for="{{ form.fasting_blood_sugar.id_for_label }}">
-                            Fasting Blood Sugar
+                            Blood Glucose
                             <span class="unit">(mg/dL)</span>
                         </label>
-                        {{ form.fasting_blood_sugar }}
-                        <span class="help-text">After 8+ hours of fasting</span>
+                        <div style="position:relative;">
+                            {{ form.fasting_blood_sugar }}
+                            <span style="position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);font-weight:500;pointer-events:none;">mg/dL</span>
+                        </div>
+                        <div id="glucoseStatusBadge" class="status-badge-live normal" style="display:none;">
+                            <span class="dot"></span>
+                            <span id="glucoseStatusText">Normal</span>
+                        </div>
+                        <span class="help-text">Normal fasting: 70-126 mg/dL</span>
                         {% if form.fasting_blood_sugar.errors %}
                             <span class="error-text">{{ form.fasting_blood_sugar.errors.0 }}</span>
                         {% endif %}
@@ -930,80 +1063,74 @@
 
                     <div class="field-group">
                         <label for="{{ form.random_blood_sugar.id_for_label }}">
-                            Random Blood Sugar
-                            <span class="unit">(mg/dL)</span>
+                            Glucose Context
+                            <span class="unit">(optional)</span>
                         </label>
-                        {{ form.random_blood_sugar }}
-                        <span class="help-text">Any time of day</span>
-                        {% if form.random_blood_sugar.errors %}
-                            <span class="error-text">{{ form.random_blood_sugar.errors.0 }}</span>
-                        {% endif %}
+                        <select name="glucose_context" id="glucoseContext" class="w-full">
+                            <option value="fasting">Fasting (8+ hours)</option>
+                            <option value="post_meal">Post-Meal</option>
+                            <option value="random" selected>Random</option>
+                        </select>
+                        <span class="help-text">Select when the reading was taken</span>
                     </div>
                 </div>
 
-                <!-- BP, Pulse, SpO2 -->
-                <div class="grid-4">
-                    <div class="field-group">
-                        <label for="{{ form.systolic_bp.id_for_label }}">
-                            Systolic BP
-                            <span class="unit">(mmHg)</span>
-                            <span class="required">*</span>
-                        </label>
-                        {{ form.systolic_bp }}
-                        <span class="help-text">Normal: 90-120 mmHg</span>
-                        {% if form.systolic_bp.errors %}
-                            <span class="error-text">{{ form.systolic_bp.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="field-group">
-                        <label for="{{ form.diastolic_bp.id_for_label }}">
-                            Diastolic BP
-                            <span class="unit">(mmHg)</span>
-                            <span class="required">*</span>
-                        </label>
-                        {{ form.diastolic_bp }}
-                        <span class="help-text">Normal: 60-80 mmHg</span>
-                        {% if form.diastolic_bp.errors %}
-                            <span class="error-text">{{ form.diastolic_bp.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="field-group">
-                        <label for="{{ form.pulse_rate.id_for_label }}">
-                            Pulse Rate
-                            <span class="unit">(bpm)</span>
-                            <span class="required">*</span>
-                        </label>
-                        {{ form.pulse_rate }}
-                        <span class="help-text">Normal: 60-100 bpm</span>
-                        {% if form.pulse_rate.errors %}
-                            <span class="error-text">{{ form.pulse_rate.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="field-group">
-                        <label for="{{ form.oxygen_saturation.id_for_label }}">
-                            SpO₂
-                            <span class="unit">(%)</span>
-                        </label>
+                <!-- ============================================ -->
+                <!-- OXYGEN SATURATION (SpO2) -->
+                <!-- ============================================ -->
+                <div class="field-group">
+                    <label for="{{ form.oxygen_saturation.id_for_label }}">
+                        Oxygen Saturation (SpO₂)
+                        <span class="unit">(%)</span>
+                    </label>
+                    <div style="position:relative;">
                         {{ form.oxygen_saturation }}
-                        <span class="help-text">Normal: 95-100%</span>
-                        {% if form.oxygen_saturation.errors %}
-                            <span class="error-text">{{ form.oxygen_saturation.errors.0 }}</span>
-                        {% endif %}
+                        <span style="position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);font-weight:500;pointer-events:none;">%</span>
                     </div>
+                    <span class="help-text">Normal: 95-100%</span>
+                    {% if form.oxygen_saturation.errors %}
+                        <span class="error-text">{{ form.oxygen_saturation.errors.0 }}</span>
+                    {% endif %}
                 </div>
 
-                <!-- Urinalysis -->
+                <!-- ============================================ -->
+                <!-- BODY TEMPERATURE -->
+                <!-- ============================================ -->
+                <div class="field-group">
+                    <label for="body_temperature">
+                        Body Temperature
+                        <span class="unit">(°F / °C)</span>
+                    </label>
+                    <div style="position:relative;">
+                        <input type="number" id="body_temperature" name="body_temperature" 
+                               step="0.1" min="95" max="108" 
+                               placeholder="e.g., 98.6" 
+                               inputmode="decimal"
+                               class="w-full">
+                        <span style="position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);font-weight:500;pointer-events:none;">°F</span>
+                    </div>
+                    <div class="flex gap-4 mt-2">
+                        <label class="flex items-center gap-2 text-sm text-slate-600">
+                            <input type="radio" name="temp_unit" value="F" checked class="w-4 h-4"> °F
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-slate-600">
+                            <input type="radio" name="temp_unit" value="C" class="w-4 h-4"> °C
+                        </label>
+                    </div>
+                    <span class="help-text">Normal: 97-99°F (36.1-37.2°C)</span>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- URINALYSIS -->
+                <!-- ============================================ -->
                 <hr class="section-divider">
 
                 <div class="section-header">
                     <h2>
                         <span class="section-icon" aria-hidden="true">🧪</span>
-                        Urinalysis Result
+                        Urinalysis (Optional)
                     </h2>
-                    <p>Select the result shown on the urine dipstick test strip</p>
+                    <p>Select results from the urine dipstick test strip</p>
                 </div>
 
                 <div class="grid-3">
@@ -1056,37 +1183,252 @@
                     </div>
                 </div>
 
-                <!-- Symptoms -->
+                <!-- ============================================ -->
+                <!-- SYMPTOMS & NOTES -->
+                <!-- ============================================ -->
                 <div class="field-group">
                     <label for="{{ form.symptoms.id_for_label }}">Symptoms</label>
                     {{ form.symptoms }}
-                    <span class="help-text">Describe any symptoms you're experiencing (e.g., headache, dizziness, shortness of breath)</span>
+                    <span class="help-text">Describe any symptoms (e.g., headache, dizziness, shortness of breath)</span>
                     {% if form.symptoms.errors %}
                         <span class="error-text">{{ form.symptoms.errors.0 }}</span>
                     {% endif %}
                 </div>
 
-                <!-- Notes -->
                 <div class="field-group">
                     <label for="{{ form.notes.id_for_label }}">Additional Notes</label>
                     {{ form.notes }}
-                    <span class="help-text">Any additional information about your health or the reading conditions</span>
+                    <span class="help-text">Any other information about your health or reading conditions</span>
                     {% if form.notes.errors %}
                         <span class="error-text">{{ form.notes.errors.0 }}</span>
                     {% endif %}
                 </div>
 
-                <!-- Submit -->
-                <button type="submit" class="submit-btn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    Submit Vital Reading
+                <!-- ============================================ -->
+                <!-- SUBMIT BUTTON - with loading state -->
+                <!-- ============================================ -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="spinner"></span>
+                    <span class="btn-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </span>
+                    <span class="btn-text">Submit Vital Reading</span>
                 </button>
             </form>
 
         </div>
     </div>
+
+    <!-- ============================================ -->
+    <!-- JAVASCRIPT - Real-time monitoring & UI feedback -->
+    <!-- ============================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ==========================================
+            // 1. REAL-TIME VITAL STATUS EVALUATION
+            // ==========================================
+
+            // Get form fields
+            const systolicInput = document.getElementById('{{ form.systolic_bp.id_for_label }}');
+            const diastolicInput = document.getElementById('{{ form.diastolic_bp.id_for_label }}');
+            const pulseInput = document.getElementById('{{ form.pulse_rate.id_for_label }}');
+            const glucoseInput = document.getElementById('{{ form.fasting_blood_sugar.id_for_label }}');
+
+            // Status badge elements
+            const bpBadge = document.getElementById('bpStatusBadge');
+            const bpStatusText = document.getElementById('bpStatusText');
+            const hrBadge = document.getElementById('hrStatusBadge');
+            const hrStatusText = document.getElementById('hrStatusText');
+            const glucoseBadge = document.getElementById('glucoseStatusBadge');
+            const glucoseStatusText = document.getElementById('glucoseStatusText');
+
+            // ==========================================
+            // BP STATUS
+            // ==========================================
+            function updateBPStatus() {
+                const sys = parseFloat(systolicInput?.value);
+                const dia = parseFloat(diastolicInput?.value);
+
+                if (!sys || !dia || sys < 50 || dia < 30) {
+                    bpBadge.style.display = 'none';
+                    return;
+                }
+
+                bpBadge.style.display = 'inline-flex';
+
+                let status = 'normal';
+                let text = 'Normal';
+
+                // Senior-friendly BP ranges
+                if (sys >= 180 || dia >= 120) {
+                    status = 'high-risk';
+                    text = '⚠️ Hypertensive Crisis — Seek immediate care';
+                } else if (sys >= 140 || dia >= 90) {
+                    status = 'elevated';
+                    text = '⚠️ Elevated — Consult your doctor';
+                } else if (sys < 90 || dia < 60) {
+                    status = 'elevated';
+                    text = '⚠️ Low — Consult your doctor';
+                } else {
+                    status = 'normal';
+                    text = '✅ Normal';
+                }
+
+                bpBadge.className = 'status-badge-live ' + status;
+                bpStatusText.textContent = text;
+            }
+
+            // ==========================================
+            // HEART RATE STATUS
+            // ==========================================
+            function updateHRStatus() {
+                const val = parseFloat(pulseInput?.value);
+
+                if (!val || val < 20) {
+                    hrBadge.style.display = 'none';
+                    return;
+                }
+
+                hrBadge.style.display = 'inline-flex';
+
+                let status = 'normal';
+                let text = 'Normal';
+
+                if (val > 120) {
+                    status = 'high-risk';
+                    text = '⚠️ Very High — Seek medical attention';
+                } else if (val > 100) {
+                    status = 'elevated';
+                    text = '⚠️ Elevated — Consult your doctor';
+                } else if (val < 50) {
+                    status = 'elevated';
+                    text = '⚠️ Low — Consult your doctor';
+                } else {
+                    status = 'normal';
+                    text = '✅ Normal';
+                }
+
+                hrBadge.className = 'status-badge-live ' + status;
+                hrStatusText.textContent = text;
+            }
+
+            // ==========================================
+            // GLUCOSE STATUS
+            // ==========================================
+            function updateGlucoseStatus() {
+                const val = parseFloat(glucoseInput?.value);
+
+                if (!val || val < 20) {
+                    glucoseBadge.style.display = 'none';
+                    return;
+                }
+
+                glucoseBadge.style.display = 'inline-flex';
+
+                let status = 'normal';
+                let text = 'Normal';
+
+                // Fasting ranges (70-126 mg/dL normal)
+                if (val >= 200) {
+                    status = 'high-risk';
+                    text = '⚠️ Very High — Seek medical attention';
+                } else if (val > 126) {
+                    status = 'elevated';
+                    text = '⚠️ Elevated — Consult your doctor';
+                } else if (val < 70) {
+                    status = 'elevated';
+                    text = '⚠️ Low — Consult your doctor';
+                } else {
+                    status = 'normal';
+                    text = '✅ Normal';
+                }
+
+                glucoseBadge.className = 'status-badge-live ' + status;
+                glucoseStatusText.textContent = text;
+            }
+
+            // ==========================================
+            // ATTACH EVENT LISTENERS
+            // ==========================================
+            if (systolicInput) {
+                systolicInput.addEventListener('input', updateBPStatus);
+                systolicInput.addEventListener('change', updateBPStatus);
+            }
+            if (diastolicInput) {
+                diastolicInput.addEventListener('input', updateBPStatus);
+                diastolicInput.addEventListener('change', updateBPStatus);
+            }
+            if (pulseInput) {
+                pulseInput.addEventListener('input', updateHRStatus);
+                pulseInput.addEventListener('change', updateHRStatus);
+            }
+            if (glucoseInput) {
+                glucoseInput.addEventListener('input', updateGlucoseStatus);
+                glucoseInput.addEventListener('change', updateGlucoseStatus);
+            }
+
+            // ==========================================
+            // 2. AUTO-FOCUS TRANSITION: Systolic → Diastolic
+            // ==========================================
+            if (systolicInput && diastolicInput) {
+                systolicInput.addEventListener('input', function(e) {
+                    // When systolic has 3 digits, auto-advance to diastolic
+                    if (this.value.length >= 3) {
+                        diastolicInput.focus();
+                    }
+                });
+
+                // Also advance on Enter key
+                systolicInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && this.value.length > 0) {
+                        e.preventDefault();
+                        diastolicInput.focus();
+                    }
+                });
+            }
+
+            // ==========================================
+            // 3. DOUBLE-SUBMISSION PREVENTION
+            // ==========================================
+            const form = document.getElementById('vitalForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (form && submitBtn) {
+                form.addEventListener('submit', function(e) {
+                    // Disable button and show loading state
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('loading');
+
+                    // Re-enable after 10 seconds (safety net)
+                    setTimeout(function() {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                    }, 10000);
+                });
+            }
+
+            // ==========================================
+            // 4. INPUTMODE FOR NUMERIC FIELDS
+            // ==========================================
+            // All number inputs already have inputmode="numeric" or "decimal"
+            // This is handled in the HTML attributes.
+
+            // ==========================================
+            // 5. INITIAL STATUS CHECK
+            // ==========================================
+            // Check initial values on page load
+            setTimeout(function() {
+                updateBPStatus();
+                updateHRStatus();
+                updateGlucoseStatus();
+            }, 100);
+
+        })();
+    </script>
 
 </body>
 </html>

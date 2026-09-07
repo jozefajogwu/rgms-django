@@ -4,632 +4,713 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>My Feedback · RGMS</title>
+    <title>My Feedback · Genesis Seniors Hub</title>
 
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: { DEFAULT: '#1a0a3e', 700: '#140830', 100: '#ece8f6' },
+                        crimson: { DEFAULT: '#dc3545', 700: '#b02a37', 50: '#fdecee' }
+                    },
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] }
+                }
+            }
+        };
+    </script>
 
-    <!-- Google Fonts: Lora (headings) + Inter (body) + DM Mono (data) -->
+    <!-- Inter Font — used exclusively, full weight range -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --navy: #1a0a3e;
-            --navy-dark: #0a0518;
-            --navy-light: #2d1a5e;
-            --red: #DC3545;
-            --red-dark: #b02a37;
-            --red-pale: #fde8ea;
-            --red-gradient: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
-            --gold: #D4A843;
-            --gold-glow: rgba(212, 168, 67, 0.2);
-            --white: #FFFFFF;
-            --bg: #f8fafc;
-            --text: #1a1a2e;
-            --muted: #6c757d;
-            --border: #e9ecef;
-            --lora: 'Lora', serif;
-            --inter: 'Inter', sans-serif;
-            --mono: 'DM Mono', monospace;
-            --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
-            --shadow-lg: 0 16px 44px rgba(26, 10, 62, 0.12);
-            --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
-            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * { box-sizing: border-box; }
 
-        body {
-            font-family: var(--inter);
-            background: var(--bg);
-            color: var(--text);
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
         }
 
-        .font-heading { font-family: var(--lora); }
-        .font-mono { font-family: var(--mono); }
+        body {
+            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 16px;
+            line-height: 1.55;
+        }
 
+        /* Any user-generated / clinical text wraps instead of overflowing,
+           no matter the device width */
+        .wrap-safe {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        /* ============================================ */
+        /* FLUID GRIDS — column count adapts to available*/
+        /* width itself, so it holds up on any device    */
+        /* (foldables, small phones, tablets, desktops)  */
+        /* rather than relying on a few fixed breakpoints*/
+        /* ============================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+            gap: 10px;
+        }
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+            gap: 12px;
+        }
+
+        /* Tabular figures for every numeric readout — clean data alignment */
+        .tnum {
+            font-feature-settings: "tnum" 1, "lnum" 1;
+            font-variant-numeric: tabular-nums lining-nums;
+        }
+
+        /* AAA-compliant focus ring — 3px, high contrast, never suppressed */
         :focus-visible {
-            outline: 3px solid var(--gold);
-            outline-offset: 2px;
+            outline: 3px solid #1a0a3e;
+            outline-offset: 3px;
             border-radius: 6px;
         }
+        a, button { -webkit-tap-highlight-color: transparent; }
 
         @media (prefers-reduced-motion: reduce) {
             * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
 
         /* ============================================ */
-        /* TOP BAR                                       */
+        /* STICKY HEADER                                 */
         /* ============================================ */
         .topbar {
             position: sticky;
             top: 0;
             z-index: 40;
-            background: linear-gradient(180deg, #1a0a3e 0%, #150833 100%);
-            padding: calc(14px + var(--safe-top)) 20px 14px;
-            box-shadow: var(--shadow);
+            background: #1a0a3e;
+            padding-top: var(--safe-top);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.06);
         }
 
-        .topbar-inner {
-            max-width: 56rem;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .back-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.75);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            padding: 8px 4px;
-            min-height: 44px;
-            transition: var(--transition);
+        .logo-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #ffffff;
+            display: grid;
+            place-items: center;
             flex-shrink: 0;
         }
-        .back-link:hover { color: var(--white); }
-        .back-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .logo-mark svg { width: 22px; height: 22px; stroke: #1a0a3e; }
 
-        .topbar-title {
-            font-family: var(--lora);
-            font-size: 16px;
+        /* Live pulse indicator — animated but calm, reduced-motion safe */
+        .pulse-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 12px 6px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+        .pulse-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #4ade80;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .pulse-dot::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            border: 2px solid #4ade80;
+            animation: pulseRing 2.2s ease-out infinite;
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.6); opacity: 0.9; }
+            100% { transform: scale(1.9); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pulse-dot::after { animation: none; opacity: 0.5; }
+        }
+        .pulse-live span {
+            font-size: 12px;
             font-weight: 600;
-            color: var(--white);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: #d1fae5;
+            letter-spacing: 0.03em;
         }
 
-        .topbar-user {
+        .user-chip {
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-shrink: 0;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            padding: 6px 8px 6px 14px;
+            border-radius: 999px;
         }
-        .topbar-user .user-name {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.55);
-        }
-        .topbar-user .avatar {
-            width: 32px;
-            height: 32px;
+        .user-chip .avatar {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            background: var(--red-gradient);
+            background: #dc3545;
             display: grid;
             place-items: center;
             color: white;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
         }
-        .topbar-user .logout {
-            color: rgba(255, 255, 255, 0.45);
-            text-decoration: none;
-            font-size: 12px;
-            padding: 8px 4px;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-        }
-        .topbar-user .logout:hover { color: var(--red); }
-
-        .ecg-trace {
-            max-width: 56rem;
-            margin: 8px auto 0;
-            height: 14px;
-            opacity: 0.35;
-            overflow: hidden;
-        }
-        .ecg-trace svg { width: 100%; height: 100%; display: block; }
-        .ecg-trace polyline {
-            fill: none;
-            stroke: var(--gold);
-            stroke-width: 1.3;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        @media (max-width: 640px) {
-            .topbar-user .user-name { display: none; }
-            .back-link span { display: none; }
+        .user-chip .name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f1f5f9;
         }
 
         /* ============================================ */
-        /* CONTAINER                                     */
-        /* ============================================ */
-        .page {
-            max-width: 56rem;
-            margin: 0 auto;
-            padding: 22px 20px calc(28px + var(--safe-bottom));
-        }
-
-        @media (max-width: 768px) {
-            .page { padding-bottom: calc(96px + var(--safe-bottom)); }
-        }
-
-        /* ============================================ */
-        /* CARDS                                         */
+        /* CARDS — border-first, minimal shadow          */
         /* ============================================ */
         .card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            padding: 22px 24px;
-            margin-bottom: 20px;
-            transition: var(--transition);
-        }
-        .card:hover { box-shadow: var(--shadow-lg); }
-
-        .card-title {
-            font-family: var(--lora);
-            font-weight: 600;
-            font-size: 17px;
-            color: var(--navy);
-            margin-bottom: 4px;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 18px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
-        /* Stats */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
         .stat-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            box-shadow: var(--shadow);
-            padding: 16px 14px;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 18px 16px;
             text-align: center;
-            transition: var(--transition);
         }
-        .stat-card:hover { border-color: var(--red); box-shadow: var(--shadow-lg); }
-        .stat-card .stat-value {
-            font-family: var(--mono);
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--navy);
-            font-variant-numeric: tabular-nums;
+        .stat-card .stat-accent {
+            width: 34px;
+            height: 4px;
+            border-radius: 4px;
+            margin: 0 auto 12px;
+            background: #cbd5e1;
         }
-        .stat-card.red .stat-value { color: var(--red); }
-        .stat-card.emerald .stat-value { color: #16a34a; }
-        .stat-card .stat-label {
-            font-size: 10.5px;
-            color: var(--muted);
-            margin-top: 4px;
-            letter-spacing: 0.02em;
+        .stat-card.accent-crimson .stat-accent { background: #dc3545; }
+        .stat-card.accent-navy .stat-accent { background: #1a0a3e; }
+        .stat-card.accent-green .stat-accent { background: #16a34a; }
+        .stat-card.is-active {
+            background: #fdecee;
+            border-color: #dc3545;
         }
-        @media (max-width: 480px) {
-            .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .stat-card .stat-value { font-size: 20px; }
-        }
-
-        /* Vitals chips */
-        .vital-chip {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            transition: var(--transition);
-        }
-        .vital-chip:hover { border-color: var(--red); }
-        .vital-chip .vital-label { font-size: 11px; color: var(--muted); }
-        .vital-chip .vital-value { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--navy); }
-        .vital-chip .vital-unit { font-size: 11px; color: var(--muted); font-weight: 400; }
-
-        /* Status badges — shared vocabulary with the rest of RGMS */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 12px;
-            border-radius: 20px;
-            font-size: 10.5px;
-            font-weight: 600;
-            font-family: var(--mono);
-        }
-        .status-badge.critical { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
-        .status-badge.warning { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
-        .status-badge.stable { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
-        .status-badge.open { background: var(--red-pale); color: var(--red); border: 1px solid #f5b5bc; }
 
         /* ============================================ */
-        /* FEEDBACK TIMELINE                             */
+        /* VITALS                                        */
+        /* ============================================ */
+        .vital-tile {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+        .vital-tile.flagged {
+            background: #fdecee;
+            border-color: #dc3545;
+        }
+        .vital-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: #ece8f6;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+        .vital-icon svg { width: 18px; height: 18px; stroke: #1a0a3e; }
+        .vital-tile.flagged .vital-icon { background: #ffffff; border: 1.5px solid #dc3545; }
+        .vital-tile.flagged .vital-icon svg { stroke: #b02a37; }
+
+        .flag-pill {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: #b02a37;
+            background: #ffffff;
+            border: 1.5px solid #dc3545;
+            padding: 2px 9px;
+            border-radius: 999px;
+        }
+
+        /* ============================================ */
+        /* STATUS BADGES — AAA-contrast text on tint bg  */
+        /* ============================================ */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+        .badge.critical { background: #fee2e2; color: #991b1b; border: 1.5px solid #dc2626; }
+        .badge.warning  { background: #fef3c7; color: #92400e; border: 1.5px solid #d97706; }
+        .badge.stable   { background: #dcfce7; color: #166534; border: 1.5px solid #16a34a; }
+        .badge.open     { background: #fdecee; color: #b02a37; border: 1.5px solid #dc3545; }
+
+        /* ============================================ */
+        /* CLINICAL TIMELINE                             */
         /* ============================================ */
         .timeline { position: relative; }
         .timeline::before {
             content: '';
             position: absolute;
-            left: 15px;
-            top: 8px;
-            bottom: 8px;
+            left: 19px;
+            top: 6px;
+            bottom: 6px;
             width: 2px;
-            background: var(--border);
+            background: #e2e8f0;
         }
-
         .timeline-entry {
             position: relative;
-            padding-left: 44px;
-            margin-bottom: 20px;
+            padding-left: 52px;
         }
-        .timeline-entry:last-child { margin-bottom: 0; }
+        .timeline-entry + .timeline-entry { margin-top: 24px; }
 
         .timeline-dot {
             position: absolute;
             left: 0;
-            top: 2px;
-            width: 32px;
-            height: 32px;
+            top: 0;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: grid;
             place-items: center;
-            font-size: 14px;
-            background: var(--bg);
-            border: 2px solid var(--border);
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
             z-index: 1;
         }
-        .timeline-entry.critical .timeline-dot { border-color: var(--red); background: var(--red-pale); }
-        .timeline-entry.warning .timeline-dot { border-color: #fcd34d; background: #fffbeb; }
-        .timeline-entry.stable .timeline-dot { border-color: #86efac; background: #f0fdf4; }
+        .timeline-dot svg { width: 19px; height: 19px; }
+        .timeline-entry.critical .timeline-dot { border-color: #dc2626; background: #fee2e2; }
+        .timeline-entry.critical .timeline-dot svg { stroke: #991b1b; }
+        .timeline-entry.warning .timeline-dot { border-color: #d97706; background: #fef3c7; }
+        .timeline-entry.warning .timeline-dot svg { stroke: #92400e; }
+        .timeline-entry.stable .timeline-dot { border-color: #16a34a; background: #dcfce7; }
+        .timeline-entry.stable .timeline-dot svg { stroke: #166534; }
 
-        .feedback-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px 18px;
-            transition: var(--transition);
+        .alert-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-left: 5px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 18px 20px;
         }
-        .feedback-card:hover { border-color: var(--red); box-shadow: var(--shadow); }
+        .timeline-entry.critical .alert-card { border-left-color: #dc2626; }
+        .timeline-entry.warning .alert-card { border-left-color: #d97706; }
+        .timeline-entry.stable .alert-card { border-left-color: #16a34a; }
 
-        .feedback-head {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .feedback-title {
-            font-weight: 600;
-            font-size: 14.5px;
-            color: var(--navy);
-        }
-        .feedback-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-        .feedback-date {
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--muted);
-            white-space: nowrap;
-        }
-        .feedback-message {
-            font-size: 13.5px;
-            color: var(--muted);
-            margin-top: 10px;
-            line-height: 1.55;
-        }
-
-        .doctor-response {
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px dashed var(--border);
-        }
-        .doctor-response-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .response-card {
+        /* ---- nested doctor directive card ---- */
+        .directive-card {
             display: flex;
             gap: 12px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 16px;
         }
-        .response-card:last-child { margin-bottom: 0; }
+        .directive-card + .directive-card { margin-top: 10px; }
 
-        .response-avatar {
-            width: 30px;
-            height: 30px;
+        .directive-avatar {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: var(--navy-light);
+            background: #1a0a3e;
             color: white;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 700;
             display: grid;
             place-items: center;
             flex-shrink: 0;
-            font-family: var(--inter);
         }
 
-        .response-body { min-width: 0; flex: 1; }
-        .response-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .response-type { font-weight: 600; font-size: 13px; color: var(--navy); }
-        .response-time { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
-        .response-desc { font-size: 13px; color: var(--text); margin-top: 4px; }
-        .response-notes { font-size: 12px; color: var(--muted); margin-top: 4px; }
-        .response-plan { font-size: 12px; color: var(--navy); margin-top: 4px; }
-        .response-followup {
-            font-size: 12px;
-            color: #b45309;
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .response-doctor { font-size: 11px; color: var(--muted); margin-top: 6px; }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 48px 20px;
-        }
-        .empty-state svg { width: 52px; height: 52px; margin: 0 auto 14px; color: #cbd5e1; }
-        .empty-state p.title { color: var(--muted); font-size: 15px; }
-        .empty-state p.sub { color: #94a3b8; font-size: 12.5px; margin-top: 4px; }
-
-        /* ============================================ */
-        /* QUICK ACTIONS                                 */
-        /* ============================================ */
-        .quick-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .btn-primary, .btn-secondary {
-            font-family: var(--inter);
-            font-weight: 600;
+        .directive-block {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
             font-size: 13.5px;
+            line-height: 1.55;
+        }
+        .directive-block.notes {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            color: #334155;
+        }
+        .directive-block.plan {
+            background: #ece8f6;
+            border: 1.5px solid #c9bff0;
+            color: #1a0a3e;
+        }
+        .directive-block .block-label {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .directive-block.plan .block-label { color: #4c3a8a; }
+
+        .followup-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #92400e;
+            background: #fef3c7;
+            border: 1.5px solid #d97706;
+            padding: 6px 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        /* Micro-labels — subtle uppercase */
+        .micro-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        /* ============================================ */
+        /* BUTTONS                                       */
+        /* ============================================ */
+        .btn-primary, .btn-secondary {
+            font-weight: 700;
+            font-size: 14.5px;
             border-radius: 12px;
-            padding: 11px 22px;
+            padding: 12px 22px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            min-height: 44px;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
+            min-height: 48px;
+            border: 1.5px solid transparent;
         }
-        .btn-primary {
-            background: var(--red-gradient);
-            color: white;
-            box-shadow: var(--shadow-red);
-        }
-        .btn-primary:hover { transform: translateY(-2px); }
-        .btn-secondary {
-            background: var(--white);
-            color: var(--navy);
-            border: 1px solid var(--border);
-        }
-        .btn-secondary:hover { background: var(--bg); border-color: var(--navy); }
-
-        @media (max-width: 768px) {
-            .quick-actions { display: none; }
-        }
+        .btn-primary { background: #dc3545; color: #ffffff; }
+        .btn-primary:hover { background: #b02a37; }
+        .btn-secondary { background: #ffffff; color: #1a0a3e; border-color: #cbd5e1; }
+        .btn-secondary:hover { background: #f1f5f9; border-color: #1a0a3e; }
 
         /* ============================================ */
         /* MOBILE DOCK                                   */
         /* ============================================ */
-        .mobile-dock {
-            display: none;
-        }
+        .mobile-dock { display: none; }
         @media (max-width: 768px) {
+            .page { padding-bottom: calc(104px + var(--safe-bottom)); }
             .mobile-dock {
                 display: flex;
                 position: fixed;
-                left: 0;
-                right: 0;
-                bottom: 0;
+                left: 0; right: 0; bottom: 0;
                 z-index: 50;
                 gap: 10px;
                 padding: 10px 16px calc(10px + var(--safe-bottom));
-                background: rgba(255, 255, 255, 0.94);
-                backdrop-filter: blur(10px);
-                border-top: 1px solid var(--border);
-                box-shadow: 0 -8px 24px rgba(26, 10, 62, 0.08);
+                background: rgba(255,255,255,0.92);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1.5px solid #e2e8f0;
+                box-shadow: 0 -6px 20px rgba(15,23,42,0.06);
             }
             .mobile-dock a {
                 flex: 1;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
-                min-height: 48px;
-                border-radius: 12px;
+                gap: 7px;
+                min-height: 50px;
+                border-radius: 13px;
                 text-decoration: none;
-                font-weight: 600;
-                font-size: 13px;
+                font-weight: 700;
+                font-size: 14px;
             }
-            .mobile-dock a.primary { background: var(--red-gradient); color: white; box-shadow: var(--shadow-red); }
-            .mobile-dock a.secondary { background: var(--bg); color: var(--navy); border: 1px solid var(--border); }
+            .mobile-dock a.primary { background: #dc3545; color: #ffffff; }
+            .mobile-dock a.secondary { background: #f1f5f9; color: #1a0a3e; border: 1.5px solid #e2e8f0; }
             .mobile-dock a:active { transform: scale(0.97); }
+            .quick-actions { display: none; }
         }
+
+        @media (max-width: 640px) {
+            .topbar-username { display: none; }
+            .back-label { display: none; }
+        }
+
+        /* Very narrow phones (small Android, Fold cover screen, iPhone SE) —
+           trim the header so nothing wraps or clips */
+        @media (max-width: 480px) {
+            .pulse-live { display: none; }
+            .logout-label { display: none; }
+            .user-chip { padding: 5px 6px; gap: 6px; }
+            .logo-mark { width: 32px; height: 32px; border-radius: 9px; }
+            .logo-mark svg { width: 17px; height: 17px; }
+        }
+
+        @media (max-width: 360px) {
+            .user-chip .avatar { width: 30px; height: 30px; font-size: 12px; }
+        }
+
+        /* Short / landscape viewports (phone rotated) — reclaim vertical
+           space from the sticky header and bottom dock */
+        @media (max-height: 480px) and (orientation: landscape) {
+            .topbar-inner { padding-top: 8px; padding-bottom: 8px; }
+            .mobile-dock { padding-top: 6px; padding-bottom: calc(6px + var(--safe-bottom)); }
+            .mobile-dock a { min-height: 40px; }
+            .page { padding-top: 16px; }
+        }
+
+        /* Large desktop monitors — cap comfortable reading width already
+           handled by max-w-4xl on the container; nothing further needed */
     </style>
 </head>
 <body>
 
     <!-- ============================================ -->
-    <!-- TOP BAR -->
+    <!-- STICKY HEADER -->
     <!-- ============================================ -->
     <header class="topbar">
-        <div class="topbar-inner">
-            <a href="{% url 'caregiver_dashboard' %}" class="back-link">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <div class="topbar-inner max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 py-3">
+
+            <a href="{% url 'caregiver_dashboard' %}" class="flex items-center gap-2 text-white/75 hover:text-white transition-colors min-h-[44px] px-2 rounded-lg flex-shrink-0" aria-label="Back to dashboard">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                <span>Dashboard</span>
+                <span class="back-label text-sm font-semibold">Dashboard</span>
             </a>
-            <span class="topbar-title">📋 My Feedback</span>
-            <div class="topbar-user">
-                <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
-                <div class="avatar">{{ user.first_name|first|default:user.username|first|upper }}</div>
-                <a href="{% url 'logout' %}" class="logout">Logout</a>
+
+            <div class="flex items-center gap-2 min-w-0 flex-1 justify-center">
+                <div class="logo-mark flex-shrink-0" aria-hidden="true">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <h1 class="text-white font-bold text-base sm:text-lg tracking-tight truncate min-w-0">My Feedback</h1>
             </div>
-        </div>
-        <div class="ecg-trace" aria-hidden="true">
-            <svg viewBox="0 0 400 14" preserveAspectRatio="none">
-                <polyline points="0,7 90,7 100,2 110,12 120,7 180,7 190,2 200,12 210,7 280,7 290,2 300,12 310,7 400,7"/>
-            </svg>
+
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <div class="pulse-live" aria-hidden="true">
+                    <span class="pulse-dot"></span>
+                    <span>Live</span>
+                </div>
+                <div class="user-chip">
+                    <span class="topbar-username name">{{ user.get_full_name|default:user.username }}</span>
+                    <div class="avatar">{{ user.first_name|first|default:user.username|first|upper }}</div>
+                    <a href="{% url 'logout' %}" class="text-white/60 hover:text-white text-xs font-semibold px-2 min-h-[44px] flex items-center gap-1.5 rounded-lg hover:bg-crimson/40 transition-colors" aria-label="Logout">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m0-9H5a2 2 0 00-2 2v14a2 2 0 002 2h2"/></svg>
+                        <span class="logout-label">Logout</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- ============================================ -->
     <!-- MAIN CONTENT -->
     <!-- ============================================ -->
-    <div class="page">
+    <main class="page max-w-4xl mx-auto px-4 sm:px-5 py-6">
 
-        <!-- Stats -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <p class="stat-value">{{ total_alerts }}</p>
-                <p class="stat-label">Total Alerts</p>
+        <!-- Key Metrics Grid -->
+        <section aria-label="Feedback summary" class="stats-grid mb-6">
+            <div class="stat-card accent-navy">
+                <div class="stat-accent" aria-hidden="true"></div>
+                <p class="tnum text-3xl font-extrabold text-navy">{{ total_alerts }}</p>
+                <p class="micro-label mt-1.5">Total Alerts</p>
             </div>
-            <div class="stat-card {% if active_alerts_count > 0 %}red{% endif %}">
-                <p class="stat-value">{{ active_alerts_count }}</p>
-                <p class="stat-label">Active Alerts</p>
+            <div class="stat-card accent-crimson {% if active_alerts_count > 0 %}is-active{% endif %}">
+                <div class="stat-accent" aria-hidden="true"></div>
+                <p class="tnum text-3xl font-extrabold {% if active_alerts_count > 0 %}text-crimson-700{% else %}text-navy{% endif %}">{{ active_alerts_count }}</p>
+                <p class="micro-label mt-1.5 {% if active_alerts_count > 0 %}text-crimson-700{% endif %}">Active Alerts</p>
             </div>
-            <div class="stat-card emerald">
-                <p class="stat-value">{{ total_actions }}</p>
-                <p class="stat-label">Doctor Responses</p>
+            <div class="stat-card accent-green">
+                <div class="stat-accent" aria-hidden="true"></div>
+                <p class="tnum text-3xl font-extrabold text-navy">{{ total_actions }}</p>
+                <p class="micro-label mt-1.5">Doctor Responses</p>
             </div>
-            <div class="stat-card">
-                <p class="stat-value">{{ alert_actions|length }}</p>
-                <p class="stat-label">With Feedback</p>
+            <div class="stat-card accent-navy">
+                <div class="stat-accent" aria-hidden="true"></div>
+                <p class="tnum text-3xl font-extrabold text-navy">{{ alert_actions|length }}</p>
+                <p class="micro-label mt-1.5">With Feedback</p>
             </div>
-        </div>
+        </section>
 
         <!-- Latest Reading -->
         {% if latest_reading %}
-        <div class="card">
-            <h2 class="card-title">📊 Latest Vitals</h2>
-            <p class="text-xs text-slate-400 mb-3">Most recent reading on file</p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <section class="card p-5 sm:p-6 mb-6">
+            <div class="flex items-center gap-2.5 mb-1">
+                <svg width="20" height="20" fill="none" stroke="#1a0a3e" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                <h2 class="text-lg font-bold text-navy">Latest Vitals</h2>
+            </div>
+            <p class="text-sm text-slate-600 mb-4">Most recent reading on file</p>
+
+            <div class="vitals-grid">
                 {% if latest_reading.systolic_bp %}
-                <div class="vital-chip">
-                    <p class="vital-label">💉 Blood Pressure</p>
-                    <p class="vital-value">{{ latest_reading.systolic_bp }}/{{ latest_reading.diastolic_bp }} <span class="vital-unit">mmHg</span></p>
+                <div class="vital-tile {% if latest_reading.systolic_bp >= 130 or latest_reading.diastolic_bp >= 80 %}flagged{% endif %} flex items-start gap-3">
+                    <div class="vital-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-8-5.5-8-11.5A5.5 5.5 0 0112 6.5a5.5 5.5 0 018 3A5.5 5.5 0 0112 21z"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="micro-label {% if latest_reading.systolic_bp >= 130 or latest_reading.diastolic_bp >= 80 %}text-crimson-700{% endif %}">
+                            Blood Pressure
+                            {% if latest_reading.systolic_bp >= 130 or latest_reading.diastolic_bp >= 80 %}
+                            <span class="flag-pill ml-1">HIGH</span>
+                            {% endif %}
+                        </p>
+                        <p class="tnum text-xl font-bold text-navy mt-1">{{ latest_reading.systolic_bp }}/{{ latest_reading.diastolic_bp }}<span class="text-xs font-medium text-slate-600 ml-1">mmHg</span></p>
+                    </div>
                 </div>
                 {% endif %}
+
                 {% if latest_reading.pulse_rate %}
-                <div class="vital-chip">
-                    <p class="vital-label">❤️ Heart Rate</p>
-                    <p class="vital-value">{{ latest_reading.pulse_rate }} <span class="vital-unit">bpm</span></p>
+                <div class="vital-tile flex items-start gap-3">
+                    <div class="vital-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l2-8 4 16 2-8h6"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="micro-label">Heart Rate</p>
+                        <p class="tnum text-xl font-bold text-navy mt-1">{{ latest_reading.pulse_rate }}<span class="text-xs font-medium text-slate-600 ml-1">bpm</span></p>
+                    </div>
                 </div>
                 {% endif %}
+
                 {% if latest_reading.oxygen_saturation %}
-                <div class="vital-chip">
-                    <p class="vital-label">🫁 Oxygen Saturation</p>
-                    <p class="vital-value">{{ latest_reading.oxygen_saturation }} <span class="vital-unit">% SpO2</span></p>
+                <div class="vital-tile flex items-start gap-3">
+                    <div class="vital-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v9m0 0a3.5 3.5 0 106.5 1.8M12 13.5A3.5 3.5 0 015.5 15.3"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="micro-label">Oxygen Saturation</p>
+                        <p class="tnum text-xl font-bold text-navy mt-1">{{ latest_reading.oxygen_saturation }}<span class="text-xs font-medium text-slate-600 ml-1">% SpO&#8322;</span></p>
+                    </div>
                 </div>
                 {% endif %}
+
                 {% if latest_reading.fasting_blood_sugar %}
-                <div class="vital-chip">
-                    <p class="vital-label">🍬 Blood Sugar</p>
-                    <p class="vital-value">{{ latest_reading.fasting_blood_sugar }} <span class="vital-unit">mg/dL</span></p>
+                <div class="vital-tile {% if latest_reading.fasting_blood_sugar >= 126 %}flagged{% endif %} flex items-start gap-3">
+                    <div class="vital-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="micro-label {% if latest_reading.fasting_blood_sugar >= 126 %}text-crimson-700{% endif %}">
+                            Blood Sugar
+                            {% if latest_reading.fasting_blood_sugar >= 126 %}
+                            <span class="flag-pill ml-1">HIGH</span>
+                            {% endif %}
+                        </p>
+                        <p class="tnum text-xl font-bold text-navy mt-1">{{ latest_reading.fasting_blood_sugar }}<span class="text-xs font-medium text-slate-600 ml-1">mg/dL</span></p>
+                    </div>
                 </div>
                 {% endif %}
             </div>
-        </div>
+        </section>
         {% endif %}
 
-        <!-- Feedback Timeline -->
-        <div class="card">
-            <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
-                <h2 class="card-title mb-0">💬 Doctor's Feedback</h2>
-                <span class="text-xs text-slate-400 font-mono">{{ total_actions }} response{{ total_actions|pluralize }}</span>
+        <!-- Clinical Timeline -->
+        <section class="card p-5 sm:p-6 mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
+                <div class="flex items-center gap-2.5">
+                    <svg width="20" height="20" fill="none" stroke="#1a0a3e" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    <h2 class="text-lg font-bold text-navy">Doctor's Feedback</h2>
+                </div>
+                <span class="tnum text-xs font-semibold text-slate-600">{{ total_actions }} response{{ total_actions|pluralize }}</span>
             </div>
-            <p class="text-xs text-slate-400 mb-5">Most recent alerts and how your care team responded</p>
+            <p class="text-sm text-slate-600 mb-6">Most recent alerts and how your care team responded</p>
 
             {% if alert_actions %}
             <div class="timeline">
                 {% for item in alert_actions %}
                 <div class="timeline-entry {% if item.alert.severity == 'critical' %}critical{% elif item.alert.severity == 'warning' %}warning{% else %}stable{% endif %}">
-                    <div class="timeline-dot">
-                        {% if item.alert.severity == 'critical' %}🚨{% elif item.alert.severity == 'warning' %}⚠️{% else %}✅{% endif %}
+                    <div class="timeline-dot" aria-hidden="true">
+                        {% if item.alert.severity == 'critical' %}
+                        <svg fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        {% elif item.alert.severity == 'warning' %}
+                        <svg fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 3l9 16H3l9-16z"/></svg>
+                        {% else %}
+                        <svg fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        {% endif %}
                     </div>
-                    <div class="feedback-card">
-                        <div class="feedback-head">
-                            <div>
-                                <span class="feedback-title">{{ item.alert.title }}</span>
-                                <div class="feedback-badges">
-                                    <span class="status-badge {% if item.alert.severity == 'critical' %}critical{% elif item.alert.severity == 'warning' %}warning{% else %}stable{% endif %}">
+
+                    <div class="alert-card">
+                        <div class="flex items-start justify-between gap-3 flex-wrap">
+                            <div class="min-w-0">
+                                <h3 class="wrap-safe font-bold text-[15.5px] text-navy">{{ item.alert.title }}</h3>
+                                <div class="flex gap-2 flex-wrap mt-2">
+                                    <span class="badge {% if item.alert.severity == 'critical' %}critical{% elif item.alert.severity == 'warning' %}warning{% else %}stable{% endif %}">
                                         {{ item.alert.get_severity_display }}
                                     </span>
-                                    <span class="status-badge {% if item.alert.status == 'unreviewed' %}open{% else %}stable{% endif %}">
+                                    <span class="badge {% if item.alert.status == 'unreviewed' %}open{% else %}stable{% endif %}">
                                         {{ item.alert.get_status_display }}
                                     </span>
                                 </div>
                             </div>
-                            <span class="feedback-date">{{ item.alert.created_at|date:"F j, Y" }}</span>
+                            <span class="tnum text-xs font-semibold text-slate-600 whitespace-nowrap">{{ item.alert.created_at|date:"F j, Y" }}</span>
                         </div>
 
-                        <p class="feedback-message">{{ item.alert.message }}</p>
+                        <p class="wrap-safe text-[14px] text-slate-700 mt-3 leading-relaxed">{{ item.alert.message }}</p>
 
-                        <div class="doctor-response">
-                            <p class="doctor-response-label">🩺 Doctor's Response</p>
+                        <!-- Nested doctor directive card(s) -->
+                        <div class="mt-4 pt-4 border-t border-dashed border-slate-200">
+                            <p class="micro-label mb-2.5 flex items-center gap-1.5">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5c-4 0-7 2.5-7 6 0 2 1 3.7 2.5 4.8V19l3-1.5c.5.1 1 .1 1.5.1 4 0 7-2.5 7-6s-3-6-7-6z"/></svg>
+                                Doctor's Response
+                            </p>
                             {% for action in item.actions %}
-                            <div class="response-card">
-                                <div class="response-avatar">{{ action.doctor.get_full_name|default:action.doctor.username|slice:":1"|upper }}</div>
-                                <div class="response-body">
-                                    <div class="response-top">
-                                        <span class="response-type">{{ action.get_action_type_display }}</span>
-                                        <span class="response-time">{{ action.created_at|date:"M d, Y H:i" }}</span>
+                            <div class="directive-card">
+                                <div class="directive-avatar" aria-hidden="true">{{ action.doctor.get_full_name|default:action.doctor.username|slice:":1"|upper }}</div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                                        <span class="font-semibold text-[13.5px] text-navy">{{ action.get_action_type_display }}</span>
+                                        <span class="tnum text-[11px] text-slate-500">{{ action.created_at|date:"M d, Y H:i" }}</span>
                                     </div>
-                                    <p class="response-desc">{{ action.description }}</p>
+                                    <p class="wrap-safe text-[13.5px] text-slate-700 mt-1.5 leading-relaxed">{{ action.description }}</p>
+
                                     {% if action.notes %}
-                                    <p class="response-notes">{{ action.notes }}</p>
+                                    <div class="directive-block notes wrap-safe">
+                                        <span class="block-label">Doctor Notes</span>
+                                        {{ action.notes }}
+                                    </div>
                                     {% endif %}
+
                                     {% if action.plan %}
-                                    <p class="response-plan"><strong>Plan:</strong> {{ action.plan }}</p>
+                                    <div class="directive-block plan wrap-safe">
+                                        <span class="block-label">Care Plan / Recommendations</span>
+                                        {{ action.plan }}
+                                    </div>
                                     {% endif %}
+
                                     {% if action.follow_up_needed %}
-                                    <p class="response-followup">🔄 Follow-up required{% if action.follow_up_date %} by {{ action.follow_up_date|date:"F j, Y" }}{% endif %}</p>
+                                    <p class="followup-note wrap-safe">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M4.5 9a8 8 0 0113.5-4.5L20 7M19.5 15a8 8 0 01-13.5 4.5L4 17"/></svg>
+                                        Follow-up required{% if action.follow_up_date %} by {{ action.follow_up_date|date:"F j, Y" }}{% endif %}
+                                    </p>
                                     {% endif %}
-                                    <p class="response-doctor">👨‍⚕️ Dr. {{ action.doctor.get_full_name|default:action.doctor.username }}</p>
+
+                                    <p class="wrap-safe text-[12px] text-slate-600 mt-2.5">Reviewed by <strong class="text-navy font-semibold">Dr. {{ action.doctor.get_full_name|default:action.doctor.username }}</strong></p>
                                 </div>
                             </div>
                             {% endfor %}
@@ -639,39 +720,40 @@
                 {% endfor %}
             </div>
             {% else %}
-                <div class="empty-state">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                    </svg>
-                    <p class="title">No feedback from doctors yet.</p>
-                    <p class="sub">When your doctor responds to your vitals, it will appear here.</p>
-                </div>
+            <!-- Empty state -->
+            <div class="text-center py-12 px-5">
+                <svg width="52" height="52" fill="none" stroke="#94a3b8" stroke-width="1.5" viewBox="0 0 24 24" class="mx-auto mb-4" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <p class="text-slate-700 font-semibold text-base">No feedback from doctors yet.</p>
+                <p class="text-slate-500 text-sm mt-1">When your doctor responds to your vitals, it will appear here.</p>
+            </div>
             {% endif %}
-        </div>
+        </section>
 
         <!-- Quick Actions (desktop / tablet) -->
-        <div class="quick-actions">
+        <div class="quick-actions flex gap-3 justify-center flex-wrap">
             <a href="{% url 'add_vital_reading' %}" class="btn-primary">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 Add New Vitals
             </a>
             <a href="{% url 'caregiver_dashboard' %}" class="btn-secondary">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Back to Dashboard
             </a>
         </div>
-    </div>
+    </main>
 
     <!-- ============================================ -->
     <!-- MOBILE DOCK -->
     <!-- ============================================ -->
     <nav class="mobile-dock" aria-label="Quick actions">
         <a href="{% url 'caregiver_dashboard' %}" class="secondary">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Dashboard
         </a>
         <a href="{% url 'add_vital_reading' %}" class="primary">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.25" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             Add Vitals
         </a>
     </nav>

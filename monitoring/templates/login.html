@@ -1,786 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="min-h-screen bg-slate-900">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RGMS Portal · Secure Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>RGMS Portal · Secure Clinical Access</title>
     {% load static %}
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#211568',
+                            900: '#150d48',
+                            950: '#0c072e',
+                        },
+                        crimson: {
+                            500: '#dc3545',
+                            600: '#b02a37',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        /* ----- GLOBAL DESIGN SYSTEM ----- */
-        :root {
-            --white: #FFFFFF;
-            --bg: #f8f9fa;
-            --navy: #211568;
-            --navy-light: #3a2a8a;
-            --red: #DC3545;
-            --red-glow: rgba(220, 53, 69, 0.25);
-            --red-pale: #fde8ea;
-            --sky-blue: #AED9F6;
-            --cyan: #00A3E0;
-            --cyan-glow: rgba(0, 163, 224, 0.2);
-            --text: #1a1a2e;
-            --muted: #6c757d;
-            --border: #e9ecef;
-            --sans: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --montserrat: 'Montserrat', 'Lato', sans-serif;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        html {
-            height: 100%;
-            -webkit-font-smoothing: antialiased;
-        }
-
         body {
-            font-family: var(--sans);
-            background: var(--navy);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            line-height: 1.5;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* ----- ANIMATED BACKGROUND ----- */
-        .bg-ambient {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .bg-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-            animation: orbDrift 28s ease-in-out infinite alternate;
-        }
-        .bg-orb:nth-child(1) {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(220, 53, 69, 0.25), transparent 70%);
-            top: -200px;
-            right: -100px;
-            animation-duration: 32s;
-        }
-        .bg-orb:nth-child(2) {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(0, 163, 224, 0.15), transparent 70%);
-            bottom: -150px;
-            left: -100px;
-            animation-duration: 26s;
-            animation-delay: -8s;
-        }
-        @keyframes orbDrift {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-            100% {
-                transform: translate(40px, -20px) scale(1.1);
-            }
-        }
-
-        /* ----- HEADER ----- */
-        header {
-            position: relative;
-            z-index: 10;
-            padding: 20px 48px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            border-bottom: 2px solid var(--red);
-            animation: fadeDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        @keyframes fadeDown {
-            from {
-                opacity: 0;
-                transform: translateY(-12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .header-logo {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            text-decoration: none;
-        }
-        .header-logo img {
-            height: 44px;
-            width: auto;
-            border-radius: 10px;
-        }
-        .logo-mark {
-            width: 44px;
-            height: 44px;
-            background: var(--red);
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            color: var(--white);
-            font-size: 20px;
-            font-weight: 800;
-            box-shadow: 0 4px 20px var(--red-glow);
-            flex-shrink: 0;
-            letter-spacing: -0.5px;
-            font-family: var(--montserrat);
-        }
-        .logo-text {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--white);
-            letter-spacing: 1px;
-            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.20);
-            font-family: var(--montserrat);
-            text-transform: uppercase;
-        }
-        .logo-text span {
-            color: var(--cyan);
-        }
-
-        .header-nav {
-            display: flex;
-            align-items: center;
-            gap: 36px;
-        }
-        .header-nav a {
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            transition: color 0.3s ease;
-            position: relative;
-            font-family: var(--montserrat);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .header-nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--red);
-            border-radius: 2px;
-            transition: width 0.4s ease;
-        }
-        .header-nav a:hover {
-            color: var(--white);
-        }
-        .header-nav a:hover::after {
-            width: 100%;
-        }
-        .header-nav a.active {
-            color: var(--white);
-        }
-        .header-nav a.active::after {
-            width: 100%;
-            background: var(--cyan);
-        }
-
-        .header-home-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 24px;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            color: var(--white);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-family: var(--montserrat);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .header-home-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--red);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-        }
-
-        /* ----- PAGE BODY ----- */
-        .page-body {
-            position: relative;
-            z-index: 5;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 20px 40px;
-        }
-
-        /* ----- LOGIN SHELL ----- */
-        .login-shell {
-            width: 100%;
-            max-width: 520px;
-            background: var(--white);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 20px;
-            padding: 48px 44px 40px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.40);
-            border: 2px solid var(--red);
-            animation: slideReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-            animation-delay: 0.2s;
-        }
-        @keyframes slideReveal {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* ----- LOGO & BRANDING ----- */
-        .login-brand {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .login-brand .brand-logo {
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-        .login-brand .brand-logo img {
-            height: 64px;
-            width: auto;
-            border-radius: 12px;
-        }
-        .login-brand .brand-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 56px;
-            height: 56px;
-            background: var(--red);
-            border-radius: 16px;
-            color: var(--white);
-            font-size: 26px;
-            font-weight: 800;
-            box-shadow: 0 4px 20px var(--red-glow);
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
-            font-family: var(--montserrat);
-        }
-        .login-brand h1 {
-            font-family: var(--montserrat);
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--navy);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .login-brand .tagline {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            color: var(--red);
-            margin-top: 4px;
-            font-family: var(--montserrat);
-        }
-        .login-brand .sub-text {
-            font-size: 13px;
-            color: var(--muted);
-            margin-top: 4px;
-            font-family: var(--sans);
-            font-weight: 400;
-        }
-
-        /* ----- ROLE SELECTOR ----- */
-        .role-selector {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 28px;
-            background: #f1f5f9;
-            padding: 4px;
-            border-radius: 12px;
-        }
-        .role-btn {
-            flex: 1;
-            padding: 10px 16px;
-            border: none;
-            background: transparent;
-            border-radius: 10px;
-            font-family: var(--montserrat);
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .role-btn.active {
-            background: var(--white);
-            color: var(--navy);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            border: 2px solid var(--red);
-        }
-        .role-btn:hover:not(.active) {
-            color: var(--navy);
-        }
-
-        /* ----- FORM FIELDS ----- */
-        .field-group {
-            margin-bottom: 18px;
-        }
-        .field-label {
-            display: block;
-            font-size: 10.5px;
-            font-weight: 700;
-            color: var(--navy);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            font-family: var(--montserrat);
-        }
-        .field-input {
-            width: 100%;
-            background: #f8fafc;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            padding: 12px 16px;
-            font-family: var(--sans);
-            font-size: 14px;
-            color: var(--text);
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        .field-input::placeholder {
-            color: #94a3b8;
-            font-weight: 400;
-        }
-        .field-input:focus {
-            border-color: var(--red);
-            background: var(--white);
-            box-shadow: 0 0 0 4px var(--red-glow);
-        }
-
-        /* password field with toggle */
-        .pwd-wrap {
-            position: relative;
-        }
-        .pwd-wrap .field-input {
-            padding-right: 44px;
-        }
-        .pwd-toggle {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            color: #94a3b8;
-            transition: color 0.3s ease;
-            padding: 4px;
-            border-radius: 6px;
-            font-family: var(--sans);
-        }
-        .pwd-toggle:hover {
-            color: var(--navy);
-            background: rgba(0, 0, 0, 0.04);
-        }
-
-        /* ----- OPTIONS ROW ----- */
-        .options-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 20px 0 24px;
-        }
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--navy);
-            cursor: pointer;
-            font-family: var(--sans);
-        }
-        .remember-me input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--red);
-            cursor: pointer;
-        }
-        .reset-link {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--red);
-            text-decoration: none;
-            transition: color 0.3s ease;
-            font-family: var(--montserrat);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .reset-link:hover {
-            color: var(--navy);
-        }
-
-        /* ----- SUBMIT BUTTON ----- */
-        .submit-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px;
-            background: var(--red);
-            color: var(--white);
-            border: none;
-            border-radius: 10px;
-            font-family: var(--montserrat);
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 20px var(--red-glow);
-            transition: all 0.35s ease;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px var(--red-glow);
-        }
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-        .submit-btn .arrow {
-            font-size: 18px;
-            transition: transform 0.3s ease;
-        }
-        .submit-btn:hover .arrow {
-            transform: translateX(4px);
-        }
-
-        /* ----- FOOTER TEXT ----- */
-        .login-footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: var(--muted);
-            text-transform: uppercase;
-            font-family: var(--montserrat);
-        }
-
-        /* error message */
-        .msg-error {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--red-pale);
-            border: 1px solid var(--red);
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--red);
-            margin-bottom: 18px;
-            font-family: var(--sans);
-            animation: errorShake 0.5s ease;
-        }
-        @keyframes errorShake {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            20% {
-                transform: translateX(-5px);
-            }
-            40% {
-                transform: translateX(5px);
-            }
-            60% {
-                transform: translateX(-3px);
-            }
-            80% {
-                transform: translateX(3px);
-            }
-        }
-
-        /* ----- FOOTER (global) ----- */
-        footer {
-            position: relative;
-            z-index: 10;
-            padding: 16px 48px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            border-top: 2px solid var(--red);
-            animation: fadeDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-            animation-delay: 0.3s;
-        }
-        .footer-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .footer-left img {
-            height: 28px;
-            width: auto;
-            border-radius: 6px;
-        }
-        .footer-mark {
-            width: 28px;
-            height: 28px;
-            background: var(--red);
-            border-radius: 8px;
-            display: grid;
-            place-items: center;
-            color: var(--white);
-            font-size: 12px;
-            font-weight: 900;
-            font-family: var(--montserrat);
-        }
-        .footer-brand {
-            font-size: 13px;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.45);
-            font-family: var(--montserrat);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .footer-copy {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.22);
-            font-family: var(--sans);
-            font-weight: 400;
-        }
-        .footer-links {
-            display: flex;
-            gap: 24px;
-        }
-        .footer-links a {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.28);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-            font-family: var(--montserrat);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .footer-links a:hover {
-            color: rgba(255, 255, 255, 0.55);
-        }
-
-        /* ----- RESPONSIVE ----- */
-        @media (max-width: 600px) {
-            header {
-                padding: 16px 20px;
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            .header-nav {
-                display: none;
-            }
-            .header-home-btn {
-                padding: 6px 16px;
-                font-size: 11px;
-            }
-            .page-body {
-                padding: 16px 12px 32px;
-            }
-            .login-shell {
-                padding: 32px 20px 28px;
-                max-width: 100%;
-            }
-            .login-brand .brand-logo img {
-                height: 48px;
-            }
-            .login-brand .brand-icon {
-                width: 48px;
-                height: 48px;
-                font-size: 22px;
-            }
-            .login-brand h1 {
-                font-size: 20px;
-            }
-            .role-btn {
-                font-size: 12px;
-                padding: 8px 12px;
-            }
-            .options-row {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            footer {
-                padding: 12px 20px;
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-            .footer-links {
-                display: none;
-            }
-            .footer-copy:last-child {
-                display: none;
-            }
+            font-family: 'Inter', sans-serif;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
         }
     </style>
 </head>
+<body class="min-h-screen text-slate-100 bg-navy-950 flex flex-col justify-between antialiased selection:bg-crimson-500 selection:text-white">
 
-<body>
+    <!-- TOP HEADER -->
+    <header class="w-full z-20 px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex items-center justify-between border-b border-white/10 bg-navy-950/80 backdrop-blur-md">
+        <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+            <!-- IMAGE LOGO -->
+            <img src="{% static 'images/logo.png' %}" 
+                 alt="RGMS Logo" 
+                 class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
 
-    <!-- ══ AMBIENT BACKGROUND ══ -->
-    <div class="bg-ambient">
-        <div class="bg-orb"></div>
-        <div class="bg-orb"></div>
-    </div>
+            <!-- FALLBACK ICON -->
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-crimson-500 hidden items-center justify-center font-heading font-black text-white text-lg shadow-lg shadow-crimson-500/30 group-hover:scale-105 transition-transform">
+                R
+            </div>
 
-    <!-- ══ HEADER ══ -->
-    <header>
-        <a href="{% url 'home' %}" class="header-logo">
-            <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'">
-            <span class="logo-text">RG<span>MS</span></span>
+            <span class="font-heading font-extrabold text-lg sm:text-xl tracking-wider text-white">
+                RG<span class="text-sky-400">MS</span>
+            </span>
         </a>
 
-        <nav class="header-nav">
-            <a href="{% url 'home' %}">Home</a>
-            <li><a href="{% url 'admin:index' %}">Admin Login</a></li>
-                  <li><a href="https://genesismedevac.com/" target="_blank">Genesis Medivac</a></li>
-            <a href="{% url 'login' %}" class="active">Login</a>
+        <nav class="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <a href="{% url 'home' %}" class="hover:text-white transition-colors">Home</a>
+            <a href="{% url 'admin:index' %}" class="hover:text-white transition-colors">Admin Portal</a>
+            <a href="https://genesismedevac.com/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Genesis Medivac</a>
         </nav>
 
-        <a href="{% url 'home' %}" class="header-home-btn">← Back</a>
+        <!-- HEADER BUTTON WITH RESPONSIVE TEXT FIX -->
+        <a href="{% url 'home' %}" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 px-3 sm:px-4 py-2 rounded-full border border-white/10 transition-all shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+            <span class="hidden sm:inline">Back to Home</span>
+        </a>
     </header>
 
-    <!-- ══ PAGE BODY ══ -->
-    <div class="page-body">
-
-        <div class="login-shell">
-
-            <!-- BRAND -->
-            <div class="login-brand">
-                <div class="brand-logo">
-                    <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'">
-                </div>
-                <h1>RGMS Portal</h1>
-                <div class="tagline">Secure Login</div>
-                <p class="sub-text">Access your medical monitoring environment</p>
+    <!-- MAIN BODY: SPLIT VIEW -->
+    <main class="flex-1 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center px-4 sm:px-6 lg:px-12 py-8 sm:py-12">
+        
+        <!-- LEFT: BRANDING / VALUE PROP -->
+        <div class="lg:col-span-6 space-y-6 hidden lg:block">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-crimson-500/10 border border-crimson-500/20 text-crimson-500 text-xs font-bold uppercase tracking-widest">
+                <span class="w-2 h-2 rounded-full bg-crimson-500 animate-pulse"></span>
+                Secure Telehealth Gateway
             </div>
 
-            <!-- ROLE SELECTOR -->
-            <div class="role-selector">
-                <button class="role-btn active" data-role="doctor">Doctor</button>
-                <button class="role-btn" data-role="caregiver">Client/Caregiver</button>
+            <h1 class="font-heading text-4xl xl:text-5xl font-black text-white leading-tight tracking-tight">
+                Remote Geriatric <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">Monitoring System</span>
+            </h1>
+
+            <p class="text-slate-400 text-sm xl:text-base leading-relaxed max-w-lg">
+                Continuous clinical oversight, real-time vital telemetry, and direct caregiver communication designed specifically for geriatric patient care.
+            </p>
+
+            <div class="grid grid-cols-2 gap-4 pt-4 max-w-md">
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                    <span class="text-2xl font-extrabold text-white block">24/7</span>
+                    <span class="text-xs text-slate-400 font-medium">Vital Telemetry</span>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                    <span class="text-2xl font-extrabold text-sky-400 block">Encrypted</span>
+                    <span class="text-xs text-slate-400 font-medium">HIPAA Compliant</span>
+                </div>
             </div>
+        </div>
 
-            <!-- ERROR MESSAGES -->
-            {% if messages %}
-            {% for message in messages %}
-            <div class="msg-error">⚠️ {{ message }}</div>
-            {% endfor %}
-            {% endif %}
-
-            <!-- LOGIN FORM -->
-            <form method="POST" autocomplete="on">
-                {% csrf_token %}
-
-                <!-- Username -->
-                <div class="field-group">
-                    <label class="field-label" for="username">Account Username</label>
-                    <input id="username" type="text" name="username" required autocomplete="username" placeholder="username" class="field-input" />
+        <!-- RIGHT: LOGIN CARD -->
+        <div class="lg:col-span-6 flex justify-center lg:justify-end">
+            <div class="w-full max-w-md bg-white rounded-2xl p-6 sm:p-10 text-slate-900 shadow-2xl shadow-navy-950/50 border border-slate-100">
+                
+                <div class="text-center mb-6">
+                    <h2 class="font-heading text-xl sm:text-2xl font-extrabold text-navy-800 uppercase tracking-tight">Secure Portal Login</h2>
+                    <p class="text-xs text-slate-500 mt-1">Select your access role to proceed</p>
                 </div>
 
-                <!-- Password -->
-                <div class="field-group">
-                    <label class="field-label" for="password">Security Password</label>
-                    <div class="pwd-wrap">
-                        <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••••••" class="field-input" />
-                        <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Toggle password visibility">👁</button>
+                <!-- ROLE TAB SELECTOR (DISTINCT COLORS) -->
+                <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-xl mb-6">
+                    <button type="button" id="btnDoctor" onclick="setRole('doctor')" 
+                            class="py-2.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all bg-crimson-500 text-white shadow-md shadow-crimson-500/20">
+                        Doctor / Clinician
+                    </button>
+                    <button type="button" id="btnCaregiver" onclick="setRole('caregiver')" 
+                            class="py-2.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-navy-800">
+                        Client / Caregiver
+                    </button>
+                </div>
+
+                <!-- ERROR MESSAGES -->
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+                        <svg class="w-4 h-4 shrink-0 fill-red-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                        <span>{{ message }}</span>
                     </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- LOGIN FORM -->
+                <form method="POST" action="{% url 'login' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="role" id="roleInput" value="doctor" />
+
+                    <!-- Username -->
+                    <div>
+                        <label for="username" class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 font-heading">Account Username</label>
+                        <input id="username" type="text" name="username" required autocomplete="username" placeholder="Enter your username" 
+                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-crimson-500 focus:bg-white transition-all placeholder:text-slate-400"/>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5 font-heading">Security Password</label>
+                        <div class="relative">
+                            <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••••••" 
+                                   class="w-full px-4 py-3 pr-11 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-crimson-500 focus:bg-white transition-all placeholder:text-slate-400"/>
+                            <button type="button" id="pwdToggle" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                                <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="flex items-center justify-between text-xs pt-1">
+                        <label class="flex items-center gap-2 cursor-pointer text-slate-600 font-medium">
+                            <input type="checkbox" name="remember" class="w-4 h-4 text-crimson-500 rounded border-slate-300 focus:ring-crimson-500 accent-crimson-500" />
+                            <span>Remember Me</span>
+                        </label>
+                        <a href="#" class="font-bold uppercase tracking-wider text-crimson-500 hover:text-navy-800 transition-colors font-heading text-[11px]">Forgot Password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn" class="w-full py-3.5 bg-crimson-500 hover:bg-crimson-600 text-white rounded-xl font-heading font-bold text-xs uppercase tracking-wider shadow-lg shadow-crimson-500/30 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-2">
+                        <span>Enter Dashboard</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 font-heading">Authorized Clinical Access System V2.0</span>
                 </div>
 
-                <!-- Options -->
-                <div class="options-row">
-                    <label class="remember-me">
-                        <input type="checkbox" name="remember" />
-                        Remember Me
-                    </label>
-                    <a href="#" class="reset-link">Reset Password</a>
-                </div>
-
-                <!-- Submit -->
-                <button type="submit" class="submit-btn">
-                    Enter Dashboard
-                    <span class="arrow">→</span>
-                </button>
-            </form>
-
-            <!-- Footer -->
-            <div class="login-footer">
-                Authorized Clinical Access System V2.0
             </div>
-
         </div>
 
-    </div>
+    </main>
 
-    <!-- ══ FOOTER ══ -->
-    <footer>
-        <div class="footer-left">
-            <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'" style="height:28px; width:auto; border-radius:6px;">
-            <span class="footer-brand">RGMS</span>
-            <span class="footer-copy">— Remote Geriatric Monitoring System</span>
+    <!-- FOOTER -->
+    <footer class="w-full border-t border-white/10 py-4 px-4 sm:px-6 lg:px-12 bg-navy-950/80 backdrop-blur-md text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-slate-300">
+            <span>RGMS</span>
+            <span class="text-slate-600">—</span>
+            <span class="font-normal text-slate-400 text-xs normal-case font-sans">Remote Geriatric Monitoring System</span>
         </div>
-        <nav class="footer-links">
-            <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'home' %}#features">Features</a>
-            <a href="{% url 'home' %}#oversight">Clinical Oversight</a>
-        </nav>
-        <span class="footer-copy">© 2025 RGMS · Clinical intelligence</span>
+        <div class="flex items-center gap-4 sm:gap-6">
+            <a href="{% url 'home' %}" class="hover:text-white transition-colors">Home</a>
+            <a href="{% url 'home' %}#features" class="hover:text-white transition-colors">Features</a>
+            <a href="{% url 'home' %}#oversight" class="hover:text-white transition-colors">Clinical Oversight</a>
+        </div>
+        <span class="text-slate-500">© {% now "Y" %} RGMS · Clinical Intelligence</span>
     </footer>
 
+    <!-- INTERACTIVE SCRIPTS -->
     <script>
-        // Password toggle
+        // Password Visibility Toggle
         const pwdInput = document.getElementById('password');
         const pwdToggle = document.getElementById('pwdToggle');
+        const eyeIcon = document.getElementById('eyeIcon');
+
         pwdToggle.addEventListener('click', () => {
-            const show = pwdInput.type === 'password';
-            pwdInput.type = show ? 'text' : 'password';
-            pwdToggle.textContent = show ? '🙈' : '👁';
+            const isPwd = pwdInput.type === 'password';
+            pwdInput.type = isPwd ? 'text' : 'password';
+            
+            eyeIcon.innerHTML = isPwd 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />'
+                : '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
         });
 
-        // Role selector
-        document.querySelectorAll('.role-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+        // Role Selector Handler
+        function setRole(role) {
+            const btnDoc = document.getElementById('btnDoctor');
+            const btnCare = document.getElementById('btnCaregiver');
+            const roleInput = document.getElementById('roleInput');
+            const submitBtn = document.getElementById('submitBtn');
+
+            roleInput.value = role;
+
+            if (role === 'doctor') {
+                btnDoc.className = "py-2.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all bg-crimson-500 text-white shadow-md shadow-crimson-500/20";
+                btnCare.className = "py-2.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-navy-800 font-medium";
+                submitBtn.className = "w-full py-3.5 bg-crimson-500 hover:bg-crimson-600 text-white rounded-xl font-heading font-bold text-xs uppercase tracking-wider shadow-lg shadow-crimson-500/30 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-2";
+            } else {
+                btnCare.className = "py-2.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-extrabold uppercase tracking-wider transition-all bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20";
+                btnDoc.className = "py-2.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-navy-800 font-medium";
+                submitBtn.className = "w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-heading font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/30 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-2";
+            }
+        }
     </script>
 
 </body>

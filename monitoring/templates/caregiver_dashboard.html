@@ -4,84 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %} · RHMS</title>
+    <title>{% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %} · Genesis Seniors Hub</title>
 
-    <!-- Add favicon -->
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
 
-    <!-- Google Fonts: Lora (clinical serif display) + Inter (body/nav) + DM Mono (vitals/data) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap" rel="stylesheet">
 
-    <!-- Custom Dashboard CSS -->
-    <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
+    <!-- Tailwind (CDN build) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    colors: {
+                        genesis: {
+                            indigo: '#3B2E92',
+                            crimson: '#E32626',
+                            cyan: '#19A3DF',
+                            amber: '#F59E0B',
+                            canvas: '#F8FAFC',
+                            sidebar: '#0F172A',
+                        },
+                    },
+                    boxShadow: {
+                        card: '0 1px 2px 0 rgba(15, 23, 42, 0.04)',
+                        'card-hover': '0 10px 28px -8px rgba(59, 46, 146, 0.18)',
+                    },
+                },
+            },
+        };
+    </script>
 
     <style>
-        /* ============================================ */
-        /* OVERRIDE STYLES - Genesis Medevac, clinical pass */
-        /* Palette unchanged — same navy / red / gold system. */
-        /* Typography moved to a serif display + mono data   */
-        /* read-out, closer to a bedside monitor.             */
-        /* ============================================ */
+        html { scroll-behavior: smooth; }
+        html, body { max-width: 100%; overflow-x: hidden; }
+        body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+
         :root {
-            --navy: #1a0a3e;
-            --navy-dark: #0a0518;
-            --navy-light: #2d1a5e;
-            --red: #DC3545;
-            --red-dark: #b02a37;
-            --red-glow: rgba(220, 53, 69, 0.25);
-            --red-pale: #fde8ea;
-            --red-gradient: linear-gradient(135deg, #DC3545 0%, #b02a37 100%);
-            --yellow: #FFD700;
-            --yellow-glow: rgba(255, 215, 0, 0.25);
-            --white: #FFFFFF;
-            --bg: #f8fafc;
-            --text: #1a1a2e;
-            --muted: #6c757d;
-            --border: #e9ecef;
-            --montserrat: 'Lora', Georgia, serif;
-            --lato: 'Inter', -apple-system, sans-serif;
-            --inter: 'Inter', -apple-system, sans-serif;
-            --mono: 'DM Mono', 'SFMono-Regular', Consolas, monospace;
-            --shadow: 0 4px 20px rgba(26, 10, 62, 0.08);
-            --shadow-lg: 0 20px 60px rgba(26, 10, 62, 0.12);
-            --shadow-xl: 0 30px 80px rgba(26, 10, 62, 0.16);
-            --shadow-red: 0 4px 20px rgba(220, 53, 69, 0.15);
-            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Comfortable minimum touch target on any device */
+        .tap-target { min-height: 44px; min-width: 44px; }
 
-        html {
-            height: 100%;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            font-family: var(--lato);
-            background-color: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            line-height: 1.6;
-        }
-
-        .font-display {
-            font-family: var(--montserrat);
-        }
-
-        a:focus-visible,
-        button:focus-visible,
-        .nav-item:focus-visible {
-            outline: 2px solid var(--yellow);
+        a:focus-visible, button:focus-visible, .nav-item:focus-visible {
+            outline: 2px solid #F59E0B;
             outline-offset: 2px;
             border-radius: 8px;
         }
@@ -94,1474 +67,189 @@
             }
         }
 
-        /* ============================================ */
-        /* MODERN GRADIENT SIDEBAR - White Text & Yellow Accents */
-        /* ============================================ */
-        .gradient-sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 280px;
-            background: linear-gradient(180deg, #0a0518 0%, #1a0a3e 50%, #0a0518 100%);
-            border-right: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            transition: transform 0.3s ease;
-            overflow: hidden;
-        }
+        .safe-top { padding-top: var(--safe-top); }
+        .safe-bottom { padding-bottom: var(--safe-bottom); }
 
-        .gradient-sidebar::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 200%;
-            background: radial-gradient(circle at 70% 30%, rgba(255, 215, 0, 0.06), transparent 70%);
-            pointer-events: none;
-        }
+        .scroll-area { max-height: 360px; overflow-y: auto; }
+        .scroll-area::-webkit-scrollbar { width: 4px; }
+        .scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .scroll-area::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
 
-        /* Brand Section */
-        .gradient-sidebar .sidebar-brand {
-            padding: calc(24px + var(--safe-top)) 24px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .gradient-sidebar .sidebar-brand .brand-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: var(--red-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 19px;
-            font-weight: 700;
-            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
-            position: relative;
-            font-family: var(--montserrat);
-        }
-
-        .gradient-sidebar .sidebar-brand .brand-icon::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .gradient-sidebar .sidebar-brand .brand-text {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--white);
-            font-family: var(--montserrat);
-            letter-spacing: -0.2px;
-            line-height: 1.2;
-        }
-
-        .gradient-sidebar .sidebar-brand .brand-text span {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .sidebar-brand .brand-sub {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            font-weight: 600;
-            display: block;
-            margin-top: 2px;
-            font-family: var(--inter);
-        }
-
-        /* Signature element: quiet vitals trace under the brand mark */
-        .vitals-trace {
-            padding: 0 24px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-            z-index: 1;
-        }
-        .vitals-trace svg {
-            width: 100%;
-            height: 22px;
-            display: block;
-            overflow: visible;
-        }
-        .vitals-trace path {
+        /* ---- ECG heartbeat pulse trace ---- */
+        .ecg-trace svg { width: 100%; height: 26px; display: block; overflow: visible; }
+        .ecg-trace path {
             fill: none;
-            stroke: var(--yellow);
-            stroke-width: 1.4;
+            stroke: #E32626;
+            stroke-width: 1.6;
             stroke-linecap: round;
             stroke-linejoin: round;
-            opacity: 0.55;
-            stroke-dasharray: 300;
-            stroke-dashoffset: 300;
-            animation: trace-draw 3.2s ease-in-out infinite;
+            filter: drop-shadow(0 0 3px rgba(227, 38, 38, 0.45));
+            stroke-dasharray: 260;
+            stroke-dashoffset: 260;
+            animation: ecg-draw 2.6s ease-in-out infinite;
         }
-        @keyframes trace-draw {
-            0% { stroke-dashoffset: 300; opacity: 0; }
-            15% { opacity: 0.6; }
-            55% { stroke-dashoffset: 0; opacity: 0.6; }
-            75% { opacity: 0; }
-            100% { stroke-dashoffset: 0; opacity: 0; }
+        @keyframes ecg-draw {
+            0%   { stroke-dashoffset: 260; opacity: 0.15; }
+            8%   { opacity: 0.9; }
+            45%  { stroke-dashoffset: 0; opacity: 0.9; }
+            65%  { opacity: 0.25; }
+            100% { stroke-dashoffset: 0; opacity: 0.15; }
         }
-
-        /* Role Badges in Sidebar */
-        .gradient-sidebar .role-badges-sidebar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            padding: 12px 20px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-            z-index: 1;
+        .heartbeat-dot {
+            animation: heartbeat 1.4s ease-in-out infinite;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            25% { transform: scale(1.35); opacity: 0.85; }
+            40% { transform: scale(0.9); opacity: 1; }
         }
 
-        .gradient-sidebar .role-badge-side {
-            font-size: 9px;
-            font-weight: 600;
-            padding: 3px 12px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            font-family: var(--inter);
-        }
-        .gradient-sidebar .role-badge-side.patient {
-            background: rgba(220, 53, 69, 0.15);
-            color: var(--red);
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-        .gradient-sidebar .role-badge-side.caregiver {
-            background: rgba(255, 215, 0, 0.12);
-            color: var(--yellow);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-        .gradient-sidebar .role-badge-side.client {
-            background: rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        /* Navigation */
-        .gradient-sidebar .sidebar-nav {
-            padding: 12px 12px;
-            flex: 1;
-            position: relative;
-            z-index: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .gradient-sidebar .nav-label {
-            font-size: 10px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            padding: 12px 12px 6px 12px;
-            font-family: var(--inter);
-        }
-
-        .gradient-sidebar .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
-            margin: 2px 0;
-            border-radius: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: var(--transition-bounce);
-            position: relative;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            font-family: var(--inter);
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-            min-height: 48px;
-        }
-
-        .gradient-sidebar .nav-item .icon-wrapper {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.04);
-            transition: var(--transition-bounce);
-            flex-shrink: 0;
-        }
-
-        .gradient-sidebar .nav-item .icon-wrapper svg {
-            width: 20px;
-            height: 20px;
-            transition: var(--transition);
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .gradient-sidebar .nav-item .nav-label {
-            flex: 1;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.8);
-            padding: 0;
-        }
-
-        .gradient-sidebar .nav-item .badge {
-            font-size: 10px;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-weight: 700;
-            background: rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: var(--transition);
-            font-family: var(--mono);
-        }
-
-        .gradient-sidebar .nav-item .badge-red {
-            background: rgba(220, 53, 69, 0.15);
-            color: var(--red);
-            border: 1px solid rgba(220, 53, 69, 0.15);
-        }
-
-        .gradient-sidebar .nav-item .badge-yellow {
-            background: rgba(255, 215, 0, 0.15);
-            color: var(--yellow);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-        }
-
-        /* Hover State */
-        .gradient-sidebar .nav-item:hover {
-            color: var(--white);
-            transform: translateX(6px);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .gradient-sidebar .nav-item:hover .icon-wrapper {
-            background: rgba(255, 215, 0, 0.12);
-            transform: scale(1.05) rotate(-2deg);
-        }
-
-        .gradient-sidebar .nav-item:hover .icon-wrapper svg {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .nav-item:hover .nav-label {
-            color: var(--white);
-        }
-
-        .gradient-sidebar .nav-item:hover .badge {
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* Active State */
-        .gradient-sidebar .nav-item.active {
-            color: var(--white);
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.02));
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.06);
-        }
-
-        .gradient-sidebar .nav-item.active .icon-wrapper {
-            background: rgba(255, 215, 0, 0.15);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.08);
-        }
-
-        .gradient-sidebar .nav-item.active .icon-wrapper svg {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .nav-item.active .nav-label {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .nav-item.active .badge {
-            background: rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* Add New Reading - Special Style */
-        .gradient-sidebar .nav-item.add-reading {
-            color: var(--yellow);
-            opacity: 1;
-            border: 1px solid rgba(255, 215, 0, 0.15);
-        }
-
-        .gradient-sidebar .nav-item.add-reading .icon-wrapper {
-            background: rgba(255, 215, 0, 0.08);
-        }
-
-        .gradient-sidebar .nav-item.add-reading .icon-wrapper svg {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .nav-item.add-reading .nav-label {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .nav-item.add-reading:hover {
-            border-color: var(--yellow);
-            background: rgba(255, 215, 0, 0.08);
-        }
-
-        /* ============================================ */
-        /* FEEDBACK BUTTON IN SIDEBAR */
-        /* ============================================ */
-        .gradient-sidebar .nav-item.feedback-nav {
-            color: var(--yellow);
-            border: 1px solid rgba(255, 215, 0, 0.12);
-            margin-top: 4px;
-        }
-
-        .gradient-sidebar .nav-item.feedback-nav .icon-wrapper {
-            background: rgba(255, 215, 0, 0.06);
-        }
-
-        .gradient-sidebar .nav-item.feedback-nav .icon-wrapper svg {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .nav-item.feedback-nav .nav-label {
-            color: var(--yellow);
-        }
-
-        .gradient-sidebar .nav-item.feedback-nav:hover {
-            border-color: var(--yellow);
-            background: rgba(255, 215, 0, 0.08);
-        }
-
-        /* User Section */
-        .gradient-sidebar .sidebar-user {
-            padding: 16px 20px calc(20px + var(--safe-bottom));
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
-            position: relative;
-            z-index: 1;
-        }
-
-        .gradient-sidebar .sidebar-user .user-card {
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: var(--transition);
-            cursor: default;
-        }
-
-        .gradient-sidebar .sidebar-user .user-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.06);
-        }
-
-        .gradient-sidebar .sidebar-user .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--red-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 13px;
-            flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
-            font-family: var(--montserrat);
-        }
-
-        .gradient-sidebar .sidebar-user .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .gradient-sidebar .sidebar-user .user-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--white);
-            font-family: var(--inter);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .gradient-sidebar .sidebar-user .user-role {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 600;
-            font-family: var(--inter);
-        }
-
-        .gradient-sidebar .sidebar-user .user-status {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
-            box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
-            animation: pulse-dot 2s infinite;
-            flex-shrink: 0;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
+        /* Mobile sidebar (matches Tailwind's lg breakpoint: below 1024px) */
+        @media (max-width: 1023.98px) {
+            #sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+                width: min(288px, 84vw);
+                z-index: 100;
             }
-            50% {
-                transform: scale(1.3);
-                opacity: 0.7;
-            }
+            #sidebar.open { transform: translateX(0); }
         }
 
-        .gradient-sidebar .logout-btn {
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 10px 16px;
-            background: rgba(220, 53, 69, 0.08);
-            color: var(--red);
-            border: 1px solid rgba(220, 53, 69, 0.08);
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: var(--transition);
-            cursor: pointer;
-            font-family: var(--inter);
-            text-decoration: none;
-            min-height: 44px;
-        }
-
-        .gradient-sidebar .logout-btn:hover {
-            background: rgba(220, 53, 69, 0.15);
-            border-color: rgba(220, 53, 69, 0.15);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 20px rgba(220, 53, 69, 0.08);
-        }
-
-        .gradient-sidebar .logout-btn svg {
-            width: 16px;
-            height: 16px;
-            transition: var(--transition);
-        }
-
-        .gradient-sidebar .logout-btn:hover svg {
-            transform: translateX(2px) rotate(2deg);
-        }
-
-        /* ============================================ */
-        /* MAIN CONTENT */
-        /* ============================================ */
-        .main-content {
-            margin-left: 280px;
-            flex: 1;
-            position: relative;
-            z-index: 5;
-            min-height: 100vh;
-            background: var(--bg);
-            padding: calc(24px + var(--safe-top)) 32px 32px 32px;
-        }
-
-        /* TOP BAR */
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--red);
-            margin-bottom: 28px;
-            gap: 16px;
-        }
-
-        .topbar-left h1 {
-            font-size: 22px;
-            font-weight: 600;
-            color: var(--navy);
-            font-family: var(--montserrat);
-            letter-spacing: 0.2px;
-        }
-        .topbar-left p {
-            font-size: 13px;
-            color: var(--muted);
-            font-family: var(--inter);
-            margin-top: 2px;
-        }
-        .topbar-left .role-tags {
-            display: flex;
-            gap: 6px;
-            margin-top: 4px;
-            flex-wrap: wrap;
-        }
-        .topbar-left .role-tag {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 12px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            font-family: var(--inter);
-        }
-        .role-tag.patient { background: var(--red-pale); color: var(--red); border: 1px solid var(--red); }
-        .role-tag.caregiver { background: rgba(255, 215, 0, 0.15); color: #b8960f; border: 1px solid rgba(255, 215, 0, 0.3); }
-        .role-tag.client { background: rgba(26, 10, 62, 0.08); color: var(--navy); border: 1px solid var(--navy); }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-shrink: 0;
-        }
-        .topbar-right .avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: var(--red-gradient);
-            display: grid;
-            place-items: center;
-            color: var(--white);
-            font-weight: 700;
-            font-size: 13px;
-            font-family: var(--montserrat);
-            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.2);
-        }
-        .topbar-right .welcome {
-            font-size: 13px;
-            color: var(--muted);
-            font-family: var(--inter);
-        }
-
-        /* Mobile Hamburger */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            gap: 5px;
-            width: 40px;
-            height: 40px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .hamburger:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
         .hamburger span {
             display: block;
-            width: 22px;
+            width: 20px;
             height: 2px;
-            background: var(--navy);
+            background: #1e293b;
             border-radius: 2px;
-            transition: transform 0.25s ease, opacity 0.2s ease;
-        }
-        .hamburger.is-open span:nth-child(1) {
-            transform: translateY(7px) rotate(45deg);
-        }
-        .hamburger.is-open span:nth-child(2) {
-            opacity: 0;
-        }
-        .hamburger.is-open span:nth-child(3) {
-            transform: translateY(-7px) rotate(-45deg);
-        }
-
-        /* Sidebar Overlay (Mobile) */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(26, 10, 62, 0.5);
-            z-index: 90;
-        }
-        .sidebar-overlay.open {
-            display: block;
-        }
-
-        /* ============================================ */
-        /* CARDS & STATS */
-        /* ============================================ */
-        .msg-success {
-            background: #f0fdf4;
-            border: 1px solid #22c55e;
-            border-radius: 12px;
-            padding: 12px 18px;
-            color: #16a34a;
-            font-weight: 500;
-            font-family: var(--lato);
-            margin-bottom: 24px;
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px 20px;
-            transition: var(--transition);
-            box-shadow: var(--shadow);
-        }
-        .stat-card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-4px);
-            border-color: var(--red);
-        }
-
-        .stat-card .label {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-family: var(--inter);
-        }
-        .stat-card .value {
-            font-size: 30px;
-            font-weight: 500;
-            color: var(--navy);
-            margin-top: 4px;
-            font-family: var(--mono);
-            letter-spacing: -0.5px;
-            font-variant-numeric: tabular-nums;
-        }
-        .stat-card .value.red {
-            color: var(--red);
-        }
-        .stat-card .sub {
-            font-size: 11px;
-            color: var(--muted);
-            font-family: var(--inter);
-            margin-top: 4px;
-        }
-        .stat-card .sub.has-alerts {
-            color: var(--red);
-            font-weight: 600;
-        }
-
-        .quick-action-card {
-            background: linear-gradient(135deg, var(--navy), var(--navy-light));
-            border: 2px solid var(--red);
-            border-radius: 14px;
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: var(--transition);
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 0 4px 20px rgba(26, 10, 62, 0.15);
-            min-height: 48px;
-        }
-        .quick-action-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(26, 10, 62, 0.25);
-        }
-        .quick-action-card .label {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-family: var(--inter);
-        }
-        .quick-action-card .value {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--white);
-            font-family: var(--montserrat);
-        }
-        .quick-action-card .arrow {
-            font-size: 20px;
-            color: var(--white);
-            transition: transform 0.3s ease;
-        }
-        .quick-action-card:hover .arrow {
-            transform: translateX(6px);
-        }
-
-        /* Feedback Card */
-        .feedback-card {
-            background: linear-gradient(135deg, #fef9e7, #fef3c7);
-            border: 2px solid var(--yellow);
-            border-radius: 14px;
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: var(--transition);
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
-            min-height: 48px;
-        }
-        .feedback-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.25);
-        }
-        .feedback-card .label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #b8960f;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-family: var(--inter);
-        }
-        .feedback-card .value {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--navy);
-            font-family: var(--montserrat);
-        }
-        .feedback-card .arrow {
-            font-size: 20px;
-            color: var(--navy);
-            transition: transform 0.3s ease;
-        }
-        .feedback-card:hover .arrow {
-            transform: translateX(6px);
-        }
-        .feedback-card .badge-count {
-            background: var(--red);
-            color: white;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-family: var(--mono);
-        }
-
-        /* GRID 2 */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            margin-top: 24px;
-        }
-
-        .card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px 22px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-        .card:hover {
-            border-color: var(--red);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        .card-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--navy);
-            font-family: var(--montserrat);
-            letter-spacing: 0.1px;
-        }
-
-        .card-badge {
-            background: #f1f5f9;
-            padding: 2px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-            font-family: var(--mono);
-        }
-        .card-badge.alert-badge {
-            background: var(--red-pale);
-            color: var(--red);
-            border: 1px solid var(--red);
-        }
-        .card-badge.feedback-badge {
-            background: #fef3c7;
-            color: #b8960f;
-            border: 1px solid var(--yellow);
-        }
-
-        /* Scroll Area */
-        .scroll-area {
-            max-height: 340px;
-            overflow-y: auto;
-            padding-right: 4px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .scroll-area::-webkit-scrollbar {
-            width: 4px;
-        }
-        .scroll-area::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .scroll-area::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        .empty-state {
-            color: var(--muted);
-            font-family: var(--lato);
-            font-size: 13px;
-            text-align: center;
-            padding: 32px 0;
-        }
-
-        /* Patient Items */
-        .patient-item {
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-            transition: var(--transition);
-            background: #fafbfc;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 48px;
-        }
-        .patient-item:last-child {
-            margin-bottom: 0;
-        }
-        .patient-item:hover {
-            background: #f1f5f9;
-            border-color: var(--red);
-        }
-        .patient-item .name {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text);
-            font-family: var(--inter);
-        }
-        .patient-item .status {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--muted);
-            font-family: var(--inter);
-        }
-        .patient-item .status.active {
-            color: var(--cyan);
-        }
-        .patient-item .status.critical {
-            color: var(--red);
-        }
-
-        /* Reading Items */
-        .reading-item {
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 10px;
-            transition: var(--transition);
-            background: #fafbfc;
-        }
-        .reading-item:last-child {
-            margin-bottom: 0;
-        }
-        .reading-item:hover {
-            background: #f1f5f9;
-            border-color: var(--red);
-        }
-        .reading-item .name {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text);
-            font-family: var(--inter);
-            margin-bottom: 4px;
-        }
-        .reading-item .meta {
-            font-size: 12.5px;
-            color: var(--muted);
-            font-family: var(--mono);
-        }
-        .reading-item .meta .self-tag {
-            background: var(--red-pale);
-            color: var(--red);
-            padding: 1px 8px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 600;
-            border: 1px solid var(--red);
-            font-family: var(--inter);
-        }
-
-        /* Alert Items */
-        .alert-item {
-            border: 1px solid var(--red);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-            background: var(--red-pale);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .alert-item:last-child {
-            margin-bottom: 0;
-        }
-        .alert-item .alert-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-        .alert-item .alert-title {
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--red);
-            font-family: var(--inter);
-        }
-        .alert-item .alert-patient {
-            font-size: 12px;
-            color: var(--muted);
-            font-family: var(--inter);
-        }
-        .alert-item .alert-time {
-            font-size: 10px;
-            color: var(--muted);
-            font-family: var(--mono);
-        }
-        .alert-item .alert-severity {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 10px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            font-family: var(--inter);
-            flex-shrink: 0;
-        }
-        .alert-item .alert-severity.critical {
-            background: var(--red);
-            color: var(--white);
-        }
-        .alert-item .alert-severity.warning {
-            background: #f97316;
-            color: var(--white);
-        }
-
-        /* ============================================ */
-        /* CARE TEAM SECTION - IMPROVED */
-        /* ============================================ */
-        .care-team-section {
-            margin-top: 24px;
-            padding: 20px 24px;
-            background: var(--white);
-            border-radius: 14px;
-            border: 2px solid var(--red);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-        .care-team-section:hover {
-            box-shadow: var(--shadow-lg);
-        }
-        .care-team-section .team-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-family: var(--inter);
-            margin-bottom: 12px;
-        }
-
-        .care-team-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .care-team-card {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: #fafbfc;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            transition: all 0.2s ease;
-            min-height: 68px;
-        }
-        .care-team-card:hover {
-            border-color: var(--red);
-            background: #f8fafc;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-            transform: translateY(-2px);
-        }
-
-        .care-team-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 15px;
-            flex-shrink: 0;
-            font-family: var(--inter);
-        }
-        .care-team-avatar.doctor {
-            background: linear-gradient(135deg, #DC3545, #b02a37);
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
-        }
-        .care-team-avatar.caregiver {
-            background: linear-gradient(135deg, #0d9488, #14b8a6);
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
-        }
-        .care-team-avatar.unassigned {
-            background: #e2e8f0;
-            color: #94a3b8;
-            box-shadow: none;
-        }
-
-        .care-team-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .care-team-name {
-            font-family: Georgia, 'Times New Roman', serif;
-            font-weight: 700;
-            color: #1a0a3e;
-            font-size: 15px;
-            letter-spacing: 0.3px;
-        }
-        .care-team-name .dr-title {
-            color: #DC3545;
-            font-weight: 600;
-        }
-        .care-team-name .not-assigned {
-            color: #94a3b8;
-            font-style: italic;
-            font-family: var(--inter);
-            font-weight: 400;
-            font-size: 14px;
-        }
-
-        .care-team-role {
-            font-family: var(--inter);
-            font-size: 12px;
-            color: #6c757d;
-            margin-top: 2px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .care-team-status-badge {
-            font-family: var(--mono);
-            font-size: 9px;
-            background: #dcfce7;
-            color: #16a34a;
-            padding: 2px 10px;
-            border-radius: 12px;
-            border: 1px solid #86efac;
-        }
-        .care-team-status-badge.inactive {
-            background: #f1f5f9;
-            color: #94a3b8;
-            border-color: #e2e8f0;
-        }
-
-        .care-team-type {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: #fafbfc;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            font-family: var(--inter);
-            font-size: 13px;
-            color: var(--text);
-            grid-column: span 2;
-        }
-        .care-team-type .care-team-type-label {
-            font-weight: 600;
-            color: var(--navy);
-        }
-        .care-team-type .care-team-type-value {
-            color: #475569;
-        }
-
-        /* ============================================ */
-        /* MOBILE QUICK-ACTION DOCK */
-        /* ============================================ */
-        .mobile-dock {
-            display: none;
-        }
-
-        /* ============================================ */
-        /* RESPONSIVE */
-        /* ============================================ */
-        @media (max-width: 1024px) {
-            .stats-row {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .care-team-grid {
-                grid-template-columns: 1fr;
-            }
-            .care-team-type {
-                grid-column: span 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .gradient-sidebar {
-                transform: translateX(-100%);
-                width: min(280px, 84vw);
-            }
-            .gradient-sidebar.open {
-                transform: translateX(0);
-            }
-
-            .hamburger {
-                display: flex;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: calc(16px + var(--safe-top)) 16px calc(96px + var(--safe-bottom));
-            }
-
-            .topbar {
-                flex-wrap: wrap;
-                gap: 10px;
-                padding-bottom: 14px;
-                margin-bottom: 18px;
-            }
-            .topbar-left h1 {
-                font-size: 18px;
-            }
-            .topbar-right .welcome {
-                display: none;
-            }
-
-            .stats-row {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                margin-bottom: 18px;
-            }
-            .stat-card {
-                padding: 14px 16px;
-            }
-            .stat-card .value {
-                font-size: 24px;
-            }
-
-            .grid-2 {
-                grid-template-columns: 1fr;
-                gap: 16px;
-                margin-top: 16px;
-            }
-
-            .card {
-                padding: 16px;
-            }
-
-            .quick-action-card {
-                padding: 14px 16px;
-            }
-            .quick-action-card .value {
-                font-size: 15px;
-            }
-
-            .feedback-card {
-                padding: 14px 16px;
-            }
-            .feedback-card .value {
-                font-size: 15px;
-            }
-
-            .care-team-section {
-                padding: 16px;
-            }
-            .care-team-grid {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            .care-team-card {
-                padding: 10px 14px;
-                min-height: 60px;
-            }
-            .care-team-avatar {
-                width: 38px;
-                height: 38px;
-                font-size: 13px;
-            }
-            .care-team-name {
-                font-size: 14px;
-            }
-            .care-team-type {
-                grid-column: span 1;
-                flex-wrap: wrap;
-            }
-
-            /* Mobile Dock */
-            .mobile-dock {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                position: fixed;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 80;
-                padding: 10px 14px calc(10px + var(--safe-bottom));
-                background: rgba(255, 255, 255, 0.92);
-                backdrop-filter: blur(10px);
-                border-top: 1px solid var(--border);
-                box-shadow: 0 -8px 24px rgba(26, 10, 62, 0.08);
-            }
-            .mobile-dock a {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 2px;
-                padding: 8px 4px;
-                min-height: 52px;
-                border-radius: 12px;
-                text-decoration: none;
-                font-family: var(--inter);
-                font-size: 10.5px;
-                font-weight: 600;
-                color: var(--muted);
-                transition: var(--transition);
-            }
-            .mobile-dock a svg {
-                width: 20px;
-                height: 20px;
-            }
-            .mobile-dock a.primary {
-                background: var(--red-gradient);
-                color: var(--white);
-                box-shadow: var(--shadow-red);
-            }
-            .mobile-dock a.feedback-dock {
-                background: #fef3c7;
-                color: #b8960f;
-                border: 1px solid var(--yellow);
-            }
-            .mobile-dock a:active {
-                transform: scale(0.96);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-row {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-            .stat-card {
-                padding: 12px 14px;
-            }
-            .stat-card .value {
-                font-size: 20px;
-            }
-            .stat-card .label {
-                font-size: 10px;
-            }
-            .stat-card .sub {
-                font-size: 10px;
-            }
-            .topbar-left h1 {
-                font-size: 16px;
-            }
-            .card-title {
-                font-size: 15px;
-            }
-        }
-
-        /* Very small phones: stat strip scroll horizontally */
-        @media (max-width: 380px) {
-            .stats-row {
-                display: flex;
-                overflow-x: auto;
-                scroll-snap-type: x proximity;
-                gap: 10px;
-                padding-bottom: 4px;
-                -webkit-overflow-scrolling: touch;
-            }
-            .stats-row > * {
-                flex: 0 0 78%;
-                scroll-snap-align: start;
-            }
-        }
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        .hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        .hamburger.is-open span:nth-child(2) { opacity: 0; }
+        .hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
     </style>
 </head>
 
-<body>
+<body class="min-h-screen bg-genesis-canvas text-slate-800 antialiased flex">
+
+    <!-- Mobile overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-950/50 z-[90] hidden"></div>
 
     <!-- ============================================ -->
-    <!-- SIDEBAR OVERLAY (Mobile) -->
+    <!-- DARK SIDEBAR -->
     <!-- ============================================ -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside id="sidebar" class="w-72 shrink-0 bg-genesis-sidebar flex flex-col">
 
-    <!-- ============================================ -->
-    <!-- MODERN GRADIENT SIDEBAR -->
-    <!-- ============================================ -->
-    <aside class="gradient-sidebar" id="sidebar">
-        <!-- Brand Section -->
-        <div class="sidebar-brand">
-            <div class="brand-icon">RG</div>
-            <div>
-                <div class="brand-text">RGMS <span>Portal</span></div>
-                <span class="brand-sub">{% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %}</span>
+        <!-- Brand -->
+        <div class="safe-top px-6 pt-6 pb-5 border-b border-white/5 flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-genesis-crimson text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-genesis-crimson/30">GS</div>
+            <div class="leading-tight">
+                <div class="text-base font-bold text-white">Genesis <span class="text-genesis-amber">Seniors Hub</span></div>
+                <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mt-0.5">
+                    {% if client.is_caregiver %}Caregiver Dashboard{% else %}Client Portal{% endif %}
+                </div>
             </div>
         </div>
 
-        <!-- Signature vitals trace -->
-        <div class="vitals-trace" aria-hidden="true">
-            <svg viewBox="0 0 240 22" preserveAspectRatio="none">
-                <path d="M0,11 L60,11 L70,3 L80,19 L90,11 L104,11 L112,7 L120,15 L128,11 L240,11" />
+        <!-- Animated ECG heartbeat trace -->
+        <div class="ecg-trace px-6 py-3 border-b border-white/5 flex items-center gap-2" aria-hidden="true">
+            <span class="w-1.5 h-1.5 rounded-full bg-genesis-crimson heartbeat-dot shrink-0"></span>
+            <svg viewBox="0 0 220 26" preserveAspectRatio="none">
+                <path d="M0,13 L52,13 L60,4 L70,23 L80,13 L96,13 L104,8 L112,18 L120,13 L220,13" />
             </svg>
         </div>
 
-        <!-- Role Badges -->
-        <div class="role-badges-sidebar">
+        <!-- Role badges -->
+        <div class="px-6 py-3 border-b border-white/5 flex flex-wrap gap-1.5">
             {% if client.is_patient %}
-            <span class="role-badge-side patient">🧑‍⚕️ Patient</span>
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-genesis-crimson/15 text-red-300 border border-genesis-crimson/25">Patient</span>
             {% endif %}
             {% if client.is_caregiver %}
-            <span class="role-badge-side caregiver">👩‍⚕️ Caregiver</span>
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-genesis-cyan/15 text-sky-300 border border-genesis-cyan/25">Caregiver</span>
             {% endif %}
             {% if client.is_client %}
-            <span class="role-badge-side client">📋 Client</span>
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-white/10">Client</span>
             {% endif %}
         </div>
 
-        <!-- Navigation -->
-        <nav class="sidebar-nav">
-            <div class="nav-label">Main</div>
+        <!-- Nav -->
+        <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+            <div class="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Main</div>
 
-            <a href="#" class="nav-item active">
-                <div class="icon-wrapper">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
-                    </svg>
-                </div>
-                <span class="nav-label">Dashboard</span>
+            <a href="#" class="nav-item tap-target flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-r-lg border-l-4 border-genesis-indigo bg-slate-800 text-white font-medium">
+                <svg class="w-5 h-5 text-genesis-cyan shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                </svg>
+                <span class="flex-1">Dashboard</span>
             </a>
 
-            <a href="#" class="nav-item">
-                <div class="icon-wrapper">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                </div>
-                <span class="nav-label">
-                    {% if client.is_caregiver %}
-                    Patients I Care For
-                    {% else %}
-                    My Records
-                    {% endif %}
-                </span>
-                <span class="badge">{{ total_my_readings }}</span>
+            <a href="#" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span class="flex-1 truncate">{% if client.is_caregiver %}Patients I Care For{% else %}My Records{% endif %}</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/5 text-slate-300 shrink-0">{{ total_my_readings }}</span>
             </a>
 
-            <a href="#" class="nav-item">
-                <div class="icon-wrapper">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
-                </div>
-                <span class="nav-label">Health Records</span>
-                <span class="badge">{{ total_my_readings }}</span>
+            <a href="{% url 'add_vital_reading' %}" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-genesis-amber bg-amber-500/10 hover:bg-amber-500/15 transition-colors duration-200">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 4v16M4 12h16"/>
+                </svg>
+                <span class="flex-1 font-medium">Add New Reading</span>
             </a>
 
-            <a href="{% url 'add_vital_reading' %}" class="nav-item add-reading">
-                <div class="icon-wrapper">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M12 4v16M4 12h16"/>
-                    </svg>
-                </div>
-                <span class="nav-label">Add New Reading</span>
+            <a href="{% url 'patient_feedback' %}" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+                </svg>
+                <span class="flex-1 truncate">Doctor's Feedback</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-genesis-cyan/15 text-sky-300 shrink-0">New</span>
             </a>
 
-            <!-- ✅ FEEDBACK NAV LINK - Added to Sidebar -->
-            <a href="{% url 'patient_feedback' %}" class="nav-item feedback-nav">
-                <div class="icon-wrapper">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                        <path d="M8 10h.01M12 10h.01M16 10h.01"/>
-                    </svg>
-                </div>
-                <span class="nav-label">💬 Doctor's Feedback</span>
-                <span class="badge badge-yellow">New</span>
+            <div class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Overview</div>
+
+            <a href="#healthRecords" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200"
+               onclick="document.getElementById('healthRecords').scrollIntoView({behavior:'smooth'}); return false;">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                <span class="flex-1 truncate">Recent Readings</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/5 text-slate-300 shrink-0">{{ total_my_readings }}</span>
             </a>
 
-            <div class="nav-label">Overview</div>
-
-            <a href="#" class="nav-item">
-                <div class="icon-wrapper">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                    </svg>
-                </div>
-                <span class="nav-label">Recent Readings</span>
-                <span class="badge">{{ total_my_readings }}</span>
+            <a href="#alertsCard" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200"
+               onclick="document.getElementById('alertsCard').scrollIntoView({behavior:'smooth'}); return false;">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span class="flex-1 truncate">Alerts</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-genesis-crimson/20 text-red-300 shrink-0">{{ total_alerts }}</span>
             </a>
 
-            <a href="#" id="alertsNavLink" class="nav-item">
-                <div class="icon-wrapper">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
-                <span class="nav-label">Alerts</span>
-                <span class="badge badge-red">{{ total_alerts }}</span>
+            <a href="#careTeamSection" class="nav-item tap-target flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 border-transparent text-slate-300 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200"
+               onclick="document.getElementById('careTeamSection').scrollIntoView({behavior:'smooth'}); return false;">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <span class="flex-1 truncate">My Care Team</span>
             </a>
         </nav>
 
-        <!-- User Section -->
-        <div class="sidebar-user">
-            <div class="user-card">
-                <div class="user-avatar">{{ client.full_name|slice:":2"|upper }}</div>
-                <div class="user-info">
-                    <div class="user-name">{{ client.full_name }}</div>
-                    <div class="user-role">{% if client.is_caregiver %}Caregiver Portal{% else %}Client Portal{% endif %}</div>
+        <!-- User / logout -->
+        <div class="safe-bottom px-4 pt-3 pb-4 border-t border-white/5 space-y-2">
+            <div class="flex items-center gap-3 px-2 py-2 rounded-lg">
+                <div class="w-9 h-9 rounded-full bg-genesis-indigo text-white flex items-center justify-center text-xs font-semibold shrink-0">
+                    {{ client.full_name|slice:":2"|upper }}
                 </div>
-                <div class="user-status"></div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-sm font-medium text-white truncate">{{ client.full_name }}</div>
+                    <div class="text-[11px] text-slate-400">{% if client.is_caregiver %}Caregiver Portal{% else %}Client Portal{% endif %}</div>
+                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
             </div>
-            <a href="{% url 'logout' %}" class="logout-btn">
+            <a href="{% url 'logout' %}" class="flex items-center gap-2 p-2 rounded-lg text-sm text-slate-400 hover:text-genesis-amber hover:bg-slate-800/60 transition-colors duration-200">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                 </svg>
@@ -1573,306 +261,352 @@
     <!-- ============================================ -->
     <!-- MAIN CONTENT -->
     <!-- ============================================ -->
-    <main class="main-content">
+    <main id="mainContent" class="flex-1 min-h-screen w-full min-w-0 bg-genesis-canvas safe-top px-4 sm:px-6 lg:px-10 py-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-10">
 
-        <!-- TOP BAR -->
-        <header class="topbar">
-            <div class="topbar-left">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle sidebar" aria-expanded="false">
-                        <span></span><span></span><span></span>
+        <!-- Top bar -->
+        <header class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pb-5 mb-6 border-b border-slate-200">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <button id="hamburgerBtn" class="hamburger tap-target flex lg:hidden items-center justify-center rounded-lg hover:bg-slate-200/60 active:bg-slate-200 shrink-0" aria-label="Toggle sidebar" aria-expanded="false">
+                    <span class="sr-only">Menu</span>
+                    <span class="flex flex-col gap-[5px]"><span></span><span></span><span></span></span>
+                </button>
+                <div class="min-w-0">
+                    <h1 class="text-lg sm:text-xl font-bold text-genesis-indigo truncate">
+                        {% if client.is_caregiver %}Caregiver Dashboard{% else %}Dashboard Overview{% endif %}
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 truncate">Welcome back, {{ client.full_name }}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <a href="{% url 'add_vital_reading' %}"
+                   class="hidden sm:inline-flex items-center gap-2 bg-genesis-indigo hover:bg-genesis-amber text-white transition-colors duration-200 px-4 py-2 rounded-lg font-medium shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>
+                    Add Reading
+                </a>
+
+                <!-- Profile dropdown -->
+                <div class="relative" id="profileMenuWrap">
+                    <button id="profileMenuBtn" type="button"
+                            class="tap-target flex items-center gap-2 pl-1 pr-2.5 rounded-full border border-slate-200 hover:border-genesis-amber/60 transition-colors duration-200"
+                            aria-haspopup="true" aria-expanded="false">
+                        <span class="w-8 h-8 rounded-full bg-genesis-indigo text-white flex items-center justify-center text-xs font-semibold shrink-0">
+                            {{ client.full_name|slice:":2"|upper }}
+                        </span>
+                        <span class="hidden md:inline text-sm font-medium text-slate-700 max-w-[9rem] truncate">{{ client.full_name }}</span>
+                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </button>
-                    <div>
-                        <h1>{% if client.is_caregiver %}Caregiver Dashboard{% else %}RGMS Client Portal{% endif %}</h1>
-                        <p>Welcome, {{ client.full_name }}</p>
-                        <div class="role-tags">
-                            {% if client.is_patient %}
-                            <span class="role-tag patient">🧑‍⚕️ Patient</span>
-                            {% endif %}
-                            {% if client.is_caregiver %}
-                            <span class="role-tag caregiver">👩‍⚕️ Caregiver</span>
-                            {% endif %}
-                            {% if client.is_client %}
-                            <span class="role-tag client">📋 Client</span>
-                            {% endif %}
+                    <div id="profileMenu" class="hidden absolute right-0 mt-2 w-[min(12rem,85vw)] bg-white border border-slate-200 rounded-lg shadow-card-hover py-1 z-20">
+                        <div class="px-3.5 py-2 border-b border-slate-100">
+                            <div class="text-sm font-medium text-slate-800 truncate">{{ client.full_name }}</div>
+                            <div class="text-xs text-slate-400">{% if client.is_caregiver %}Caregiver{% else %}Client{% endif %}</div>
                         </div>
+                        <a href="#careTeamSection" class="block px-3.5 py-2 text-sm text-slate-600 hover:bg-slate-50">My Care Team</a>
+                        <a href="{% url 'logout' %}" class="block px-3.5 py-2 text-sm text-genesis-crimson hover:bg-red-50">End Session</a>
                     </div>
                 </div>
             </div>
-            <div class="topbar-right">
-                <span class="welcome">Welcome, {{ client.full_name }}</span>
-                <div class="avatar">{{ client.full_name|slice:":2"|upper }}</div>
-            </div>
         </header>
 
-        <!-- MESSAGES -->
+        <!-- Messages -->
         {% if messages %}
         {% for message in messages %}
-        <div class="msg-success">✓ {{ message }}</div>
+        <div class="mb-4 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium">
+            ✓ {{ message }}
+        </div>
         {% endfor %}
         {% endif %}
 
         <!-- ============================================ -->
-        <!-- STATS ROW - UPDATED WITH PROFESSIONAL DOCTOR NAME -->
+        <!-- METRIC CARDS -->
         <!-- ============================================ -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="label">{% if client.is_caregiver %}Patient Records{% else %}My Health Records{% endif %}</div>
-                <div class="value">{{ total_my_readings }}</div>
-                <div class="sub">Total readings</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+
+            <!-- Health records -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:border-genesis-amber hover:shadow-md transition-all duration-200">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    {% if client.is_caregiver %}Patient Records{% else %}My Health Records{% endif %}
+                </div>
+                <div class="mt-2 text-2xl sm:text-3xl font-bold text-genesis-indigo tabular-nums">{{ total_my_readings }}</div>
+                <div class="mt-1 text-xs text-slate-500">Total readings</div>
             </div>
-            <div class="stat-card">
-                <div class="label">Active Alerts</div>
-                <div class="value red">{{ total_alerts }}</div>
-                <div class="sub {% if total_alerts > 0 %}has-alerts{% endif %}">
+
+            <!-- Active alerts -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:border-genesis-amber hover:shadow-md transition-all duration-200">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Active Alerts</div>
+                <div class="mt-2 text-2xl sm:text-3xl font-bold tabular-nums {% if total_alerts > 0 %}text-genesis-crimson{% else %}text-genesis-indigo{% endif %}">{{ total_alerts }}</div>
+                <div class="mt-2">
                     {% if total_alerts > 0 %}
-                    ⚠️ Needs attention
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">Needs attention</span>
                     {% else %}
-                    ✅ All clear
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">All clear</span>
                     {% endif %}
                 </div>
             </div>
-            <!-- ✅ UPDATED: My Care Team with Professional Doctor Name -->
-            <div class="stat-card">
-                <div class="label">My Care Team</div>
-                <div class="value" style="font-family: Georgia, 'Times New Roman', serif; font-weight: 700; color: #1a0a3e; font-size: 17px; letter-spacing: 0.2px; line-height: 1.3;">
+
+            <!-- Care team -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm hover:border-genesis-amber hover:shadow-md transition-all duration-200">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">My Care Team</div>
+                <div class="mt-2 text-lg font-bold text-genesis-indigo leading-snug">
                     {% if client.is_caregiver %}
-                        {{ patients_caring_for.count }}
+                        {{ patients_caring_for.count }} <span class="text-sm font-normal text-slate-500">patients</span>
                     {% else %}
                         {% if client.assigned_doctor %}
-                            <span style="color: #DC3545; font-weight: 600; font-family: 'Inter', sans-serif; font-size: 14px;">Dr.</span> 
-                            {{ client.assigned_doctor.user.get_full_name|default:client.assigned_doctor.user.username|truncatechars:15 }}
+                            <span class="text-genesis-crimson font-semibold">Dr.</span> {{ client.assigned_doctor.user.get_full_name|default:client.assigned_doctor.user.username|truncatechars:16 }}
                         {% elif client.assigned_caregiver %}
-                            {{ client.assigned_caregiver.user.get_full_name|default:client.assigned_caregiver.user.username|truncatechars:15 }}
+                            {{ client.assigned_caregiver.user.get_full_name|default:client.assigned_caregiver.user.username|truncatechars:16 }}
                         {% else %}
-                            <span style="color: #94a3b8; font-family: 'Inter', sans-serif; font-size: 22px;">—</span>
+                            <span class="text-slate-300">—</span>
                         {% endif %}
                     {% endif %}
                 </div>
-                <div class="sub" style="margin-top: 6px;">
+                <div class="mt-2">
                     {% if client.is_caregiver %}
-                        Patients under your care
+                    <span class="text-xs text-slate-500">Patients under your care</span>
                     {% else %}
                         {% if client.assigned_doctor %}
-                            <span style="display: inline-block; font-family: 'DM Mono', monospace; font-size: 9px; background: #dcfce7; color: #16a34a; padding: 2px 12px; border-radius: 12px; border: 1px solid #86efac;">● Active</span>
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Active</span>
                         {% elif client.assigned_caregiver %}
-                            👩‍⚕️ Caregiver assigned
+                        <span class="text-xs text-slate-500">Caregiver assigned</span>
                         {% else %}
-                            <span style="color: #94a3b8;">No care team assigned</span>
+                        <span class="text-xs text-slate-400">No care team assigned</span>
                         {% endif %}
                     {% endif %}
                 </div>
             </div>
-            <!-- ✅ FEEDBACK QUICK ACTION CARD -->
-            <a href="{% url 'patient_feedback' %}" class="feedback-card">
-                <div>
-                    <div class="label">💬 Doctor's Feedback</div>
-                    <div class="value">View Responses</div>
+
+            <!-- Doctor's feedback CTA -->
+            <a href="{% url 'patient_feedback' %}"
+               class="group bg-red-50 border border-red-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                <div class="text-xs font-semibold uppercase tracking-wide text-genesis-crimson">Doctor's Feedback</div>
+                <div class="mt-2 flex items-end justify-between gap-3">
+                    <span class="text-lg font-bold text-slate-800">View responses</span>
+                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-genesis-crimson group-hover:bg-genesis-amber text-white transition-colors duration-200 shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </span>
                 </div>
-                <span class="arrow">→</span>
             </a>
         </div>
 
-        <!-- GRID 2 -->
-        <div class="grid-2">
+        <!-- ============================================ -->
+        <!-- HEALTH RECORDS + ALERTS -->
+        <!-- ============================================ -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            <!-- MY HEALTH RECORDS -->
-            <section class="card">
-                <div class="card-header">
-                    <h2 class="card-title">📊 {% if client.is_caregiver %}Patient Records{% else %}My Health Records{% endif %}</h2>
-                    <span class="card-badge">{{ total_my_readings }}</span>
+            <!-- Health records -->
+            <section id="healthRecords" class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-base font-bold text-genesis-indigo">
+                        {% if client.is_caregiver %}Patient Records{% else %}My Health Records{% endif %}
+                    </h2>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">{{ total_my_readings }}</span>
                 </div>
 
-                <div class="scroll-area">
+                <div class="scroll-area space-y-3 pr-1">
                     {% if my_readings %}
                     {% for reading in my_readings %}
-                    <div class="reading-item">
-                        <div class="name">
-                            {{ reading.patient.full_name }}
-                            <span class="self-tag">Me</span>
-                        </div>
-                        <div class="meta">
-                            BP {{ reading.systolic_bp }}/{{ reading.diastolic_bp }} ·
-                            Pulse {{ reading.pulse_rate }} bpm ·
-                            SpO2 {{ reading.oxygen_saturation|default:"—" }}%
-                        </div>
-                        <div class="meta" style="font-size:11px;margin-top:4px;color:#94a3b8;font-family:var(--inter);">
-                            {{ reading.created_at }}
+                    <div class="border border-slate-200 rounded-lg p-3.5 hover:bg-amber-50/50 hover:border-genesis-amber/40 transition-colors duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="text-sm font-semibold text-slate-800 truncate">{{ reading.patient.full_name }}</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-genesis-indigo/10 text-genesis-indigo shrink-0">Me</span>
+                            </div>
                             {% if reading.is_abnormal %}
-                            <span style="color:var(--red);font-weight:600;margin-left:8px;">⚠️ Review</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 shrink-0">Needs review</span>
                             {% else %}
-                            <span style="color:#16a34a;font-weight:600;margin-left:8px;">✅ Normal</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">Normal</span>
                             {% endif %}
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                            <span class="text-[11px] font-semibold px-2 py-1 rounded-md border
+                                {% if reading.is_abnormal %}bg-red-50 text-genesis-crimson border-red-200{% else %}bg-slate-100 text-slate-700 border-slate-200{% endif %}">
+                                BP {{ reading.systolic_bp }}/{{ reading.diastolic_bp }}
+                            </span>
+                            <span class="text-[11px] font-semibold px-2 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                                Pulse {{ reading.pulse_rate }} bpm
+                            </span>
+                            <span class="text-[11px] font-semibold px-2 py-1 rounded-md bg-sky-50 text-genesis-cyan border border-sky-200">
+                                SpO2 {{ reading.oxygen_saturation|default:"—" }}%
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] text-slate-400">{{ reading.created_at }}</span>
+                            <!-- Trend sparkline placeholder -->
+                            <svg class="w-16 h-5 {% if reading.is_abnormal %}text-genesis-crimson{% else %}text-genesis-cyan{% endif %}" viewBox="0 0 64 20" fill="none">
+                                <polyline points="0,14 10,16 20,9 30,12 40,4 50,8 64,2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </div>
                     </div>
                     {% endfor %}
                     {% else %}
-                    <div class="empty-state">
-                        No readings yet.<br>
-                        <span style="font-size:12px;color:#94a3b8;">Start by recording your vitals.</span>
+                    <div class="text-center py-10">
+                        <p class="text-sm text-slate-500">No readings yet.</p>
+                        <p class="text-xs text-slate-400 mt-1">Start by recording your vitals.</p>
                     </div>
                     {% endif %}
                 </div>
             </section>
 
-            <!-- PATIENTS I CARE FOR & ALERTS -->
-            <section class="card" id="alertsCard">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        {% if client.is_caregiver %}
-                        👩‍⚕️ Patients I Care For
-                        {% else %}
-                        🔔 My Alerts
-                        {% endif %}
+            <!-- Alerts / patients -->
+            <section id="alertsCard" class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-base font-bold text-genesis-indigo">
+                        {% if client.is_caregiver %}Patients I Care For{% else %}My Alerts{% endif %}
                     </h2>
-                    <span class="card-badge {% if total_alerts > 0 %}alert-badge{% endif %}">
-                        {% if client.is_caregiver %}
-                        {{ patients_caring_for.count }}
-                        {% else %}
-                        {{ total_alerts }}
-                        {% endif %}
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                        {% if not client.is_caregiver and total_alerts > 0 %}bg-red-100 text-genesis-crimson{% else %}bg-slate-100 text-slate-500{% endif %}">
+                        {% if client.is_caregiver %}{{ patients_caring_for.count }}{% else %}{{ total_alerts }}{% endif %}
                     </span>
                 </div>
 
-                <div class="scroll-area">
+                <div class="scroll-area space-y-3 pr-1">
                     {% if client.is_caregiver and patients_caring_for %}
                         {% for patient in patients_caring_for %}
-                        <div class="patient-item">
-                            <span class="name">{{ patient.full_name }}</span>
-                            <span class="status active">{{ patient.get_care_type_display }}</span>
+                        <div class="flex items-center justify-between border border-slate-200 rounded-lg px-3.5 py-3 hover:bg-amber-50/50 hover:border-genesis-amber/40 transition-colors duration-200">
+                            <span class="text-sm font-semibold text-slate-800">{{ patient.full_name }}</span>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-genesis-cyan border border-sky-200">{{ patient.get_care_type_display }}</span>
                         </div>
                         {% endfor %}
                     {% elif total_alerts > 0 %}
                         {% for alert in urgent_alerts %}
-                        <div class="alert-item">
-                            <div class="alert-info">
-                                <span class="alert-title">⚠️ {{ alert.title }}</span>
-                                <span class="alert-patient">
-                                    {% if alert.patient == client %}
-                                    You
-                                    {% else %}
-                                    {{ alert.patient.full_name }}
-                                    {% endif %}
+                        <div class="border border-slate-200 rounded-lg p-3.5 hover:bg-amber-50/50 hover:border-genesis-amber/40 transition-colors duration-200">
+                            <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+                                <div class="flex items-start gap-2.5 min-w-0">
+                                    <span class="mt-0.5 w-7 h-7 rounded-full flex items-center justify-center shrink-0
+                                        {% if alert.severity == 'critical' %}bg-red-100 text-genesis-crimson{% else %}bg-amber-100 text-amber-700{% endif %}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                        </svg>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-semibold text-slate-800 break-words">{{ alert.title }}</div>
+                                        <div class="text-xs text-slate-500">
+                                            {% if alert.patient == client %}You{% else %}{{ alert.patient.full_name }}{% endif %}
+                                            · {{ alert.created_at|timesince }} ago
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase shrink-0
+                                    {% if alert.severity == 'critical' %}bg-red-100 text-genesis-crimson{% else %}bg-amber-100 text-amber-800{% endif %}">
+                                    {{ alert.severity }}
                                 </span>
-                                <span class="alert-time">{{ alert.created_at|timesince }} ago</span>
                             </div>
-                            <span class="alert-severity {{ alert.severity }}">{{ alert.severity }}</span>
+                            <div class="flex items-center justify-between gap-3 pl-0 sm:pl-9">
+                                <button type="button" class="tap-target inline-flex items-center text-xs font-semibold text-slate-500 hover:text-genesis-amber transition-colors duration-200">Dismiss</button>
+                                <a href="#" class="tap-target inline-flex items-center gap-1 text-xs font-semibold text-genesis-indigo hover:text-genesis-amber transition-colors duration-200">
+                                    View Details
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                            </div>
                         </div>
                         {% endfor %}
                     {% else %}
-                        <div class="empty-state">
-                            No alerts.<br>
-                            <span style="font-size:12px;color:#94a3b8;">All readings are normal.</span>
+                        <div class="text-center py-10">
+                            <p class="text-sm text-slate-500">No alerts.</p>
+                            <p class="text-xs text-slate-400 mt-1">All readings are normal.</p>
                         </div>
                     {% endif %}
                 </div>
             </section>
-
         </div>
 
         <!-- ============================================ -->
-        <!-- CARE TEAM SECTION - IMPROVED                  -->
+        <!-- CARE TEAM -->
         <!-- ============================================ -->
-        <div class="care-team-section">
-            <div class="team-label">👨‍⚕️ My Care Team</div>
+        <section id="careTeamSection" class="mt-6 bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm scroll-mt-6">
+            <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-4">My Care Team</h2>
 
-            <div class="care-team-grid">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <!-- Doctor -->
-                <div class="care-team-card">
-                    <div class="care-team-avatar doctor">
+                <div class="flex items-center gap-3.5 border border-slate-200 rounded-lg p-4 hover:bg-amber-50/50 hover:border-genesis-amber/40 transition-colors duration-200">
+                    <div class="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0
+                        {% if client.assigned_doctor %}bg-genesis-crimson text-white{% else %}bg-slate-100 text-slate-400{% endif %}">
                         {% if client.assigned_doctor %}
                             {{ client.assigned_doctor.user.first_name|first|upper }}{{ client.assigned_doctor.user.last_name|first|upper }}
-                        {% else %}
-                            ?
-                        {% endif %}
+                        {% else %}?{% endif %}
                     </div>
-                    <div class="care-team-info">
-                        <div class="care-team-name">
+                    <div class="min-w-0">
+                        <div class="text-sm font-semibold text-slate-800 truncate">
                             {% if client.assigned_doctor %}
-                                <span class="dr-title">Dr.</span> 
-                                {{ client.assigned_doctor.user.get_full_name|default:client.assigned_doctor.user.username }}
+                                <span class="text-genesis-crimson">Dr.</span> {{ client.assigned_doctor.user.get_full_name|default:client.assigned_doctor.user.username }}
                             {% else %}
-                                <span class="not-assigned">No doctor assigned</span>
+                                <span class="text-slate-400 italic font-normal">No doctor assigned</span>
                             {% endif %}
                         </div>
-                        <div class="care-team-role">
+                        <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
                             {% if client.assigned_doctor %}
-                                {{ client.assigned_doctor.specialty|default:"Primary Care Physician" }}
-                                <span class="care-team-status-badge">● Active</span>
+                                <span>{{ client.assigned_doctor.specialty|default:"Primary Care Physician" }}</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Active</span>
                             {% else %}
-                                <span style="color:#94a3b8;">Not assigned</span>
+                                <span class="text-slate-400">Not assigned</span>
                             {% endif %}
                         </div>
                     </div>
                 </div>
 
                 <!-- Caregiver -->
-                <div class="care-team-card">
-                    <div class="care-team-avatar caregiver">
+                <div class="flex items-center gap-3.5 border border-slate-200 rounded-lg p-4 hover:bg-amber-50/50 hover:border-genesis-amber/40 transition-colors duration-200">
+                    <div class="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold shrink-0
+                        {% if client.assigned_caregiver %}bg-genesis-cyan text-white{% else %}bg-slate-100 text-slate-400{% endif %}">
                         {% if client.assigned_caregiver %}
                             {{ client.assigned_caregiver.user.first_name|first|upper }}{{ client.assigned_caregiver.user.last_name|first|upper }}
-                        {% else %}
-                            ?
-                        {% endif %}
+                        {% else %}?{% endif %}
                     </div>
-                    <div class="care-team-info">
-                        <div class="care-team-name">
+                    <div class="min-w-0">
+                        <div class="text-sm font-semibold text-slate-800 truncate">
                             {% if client.assigned_caregiver %}
                                 {{ client.assigned_caregiver.user.get_full_name|default:client.assigned_caregiver.user.username }}
                             {% else %}
-                                <span class="not-assigned">No caregiver assigned</span>
+                                <span class="text-slate-400 italic font-normal">No caregiver assigned</span>
                             {% endif %}
                         </div>
-                        <div class="care-team-role">
+                        <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5 flex-wrap">
                             {% if client.assigned_caregiver %}
-                                Caregiver
-                                <span class="care-team-status-badge">● Active</span>
+                                <span>Caregiver</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Active</span>
                             {% else %}
-                                <span style="color:#94a3b8;">Not assigned</span>
+                                <span class="text-slate-400">Not assigned</span>
                             {% endif %}
                         </div>
                     </div>
                 </div>
 
-                <!-- Care Type -->
-                <div class="care-team-type">
-                    <span class="care-team-type-label">📋 Care Type:</span>
-                    <span class="care-team-type-value">{{ client.get_care_type_display|default:"Not specified" }}</span>
+                <!-- Care type -->
+                <div class="sm:col-span-2 flex items-center gap-2 border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 flex-wrap">
+                    <span class="text-sm font-semibold text-genesis-indigo">Care type:</span>
+                    <span class="text-sm text-slate-500">{{ client.get_care_type_display|default:"Not specified" }}</span>
                 </div>
-
             </div>
-        </div>
+        </section>
 
     </main>
 
     <!-- ============================================ -->
     <!-- MOBILE QUICK-ACTION DOCK -->
     <!-- ============================================ -->
-    <nav class="mobile-dock" aria-label="Quick actions">
-        <a href="#alertsCard">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-[80] safe-bottom bg-white/90 backdrop-blur border-t border-slate-200 flex items-stretch px-3 py-2 gap-1.5" aria-label="Quick actions">
+        <a href="#alertsCard" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-slate-500 hover:text-genesis-amber hover:bg-slate-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <span>Alerts</span>
         </a>
-        <a href="{% url 'patient_feedback' %}" class="feedback-dock">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
+        <a href="{% url 'patient_feedback' %}" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-genesis-crimson bg-red-50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
             <span>Feedback</span>
         </a>
-        <a href="{% url 'add_vital_reading' %}" class="primary">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>
+        <a href="{% url 'add_vital_reading' %}" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-white bg-genesis-indigo">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>
             <span>Add Reading</span>
         </a>
-        <a href="#" id="mobileDockMenuBtn">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <a href="#" id="mobileDockMenuBtn" class="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10.5px] font-semibold text-slate-500 hover:text-genesis-amber hover:bg-slate-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
             <span>Menu</span>
         </a>
     </nav>
 
-    <!-- ============================================ -->
-    <!-- MOBILE MENU JAVASCRIPT -->
-    <!-- ============================================ -->
     <script>
-        // Mobile sidebar toggle
         const hamburger = document.getElementById('hamburgerBtn');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -1880,7 +614,7 @@
 
         function toggleSidebar(open) {
             sidebar.classList.toggle('open', open);
-            overlay.classList.toggle('open', open);
+            overlay.classList.toggle('hidden', !open);
             hamburger.classList.toggle('is-open', open);
             hamburger.setAttribute('aria-expanded', open);
             document.body.style.overflow = open ? 'hidden' : '';
@@ -1896,22 +630,41 @@
             });
         }
 
-        // Close sidebar on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && sidebar.classList.contains('open')) toggleSidebar(false);
         });
 
-        // Close sidebar on nav item click (mobile)
-        document.querySelectorAll('.nav-item, .logout-btn').forEach(item => {
+        document.querySelectorAll('#sidebar a').forEach(item => {
             item.addEventListener('click', () => {
-                if (window.innerWidth <= 768) toggleSidebar(false);
+                if (window.innerWidth < 1024) toggleSidebar(false);
             });
         });
 
-        // Handle window resize
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 768 && sidebar.classList.contains('open')) {
+            if (window.innerWidth >= 1024 && sidebar.classList.contains('open')) {
                 toggleSidebar(false);
+            }
+        });
+
+        // Profile dropdown
+        const profileBtn = document.getElementById('profileMenuBtn');
+        const profileMenu = document.getElementById('profileMenu');
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = !profileMenu.classList.contains('hidden');
+            profileMenu.classList.toggle('hidden', isOpen);
+            profileBtn.setAttribute('aria-expanded', !isOpen);
+        });
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('profileMenuWrap').contains(e.target)) {
+                profileMenu.classList.add('hidden');
+                profileBtn.setAttribute('aria-expanded', false);
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                profileMenu.classList.add('hidden');
+                profileBtn.setAttribute('aria-expanded', false);
             }
         });
     </script>
