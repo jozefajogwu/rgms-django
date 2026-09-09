@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RHMS | Remote Health Monitoring System</title>
-     <!-- Add favicon -->
+    <!-- Add favicon -->
 
     {% load static %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,6 +16,7 @@
             --bg: #f8f9fa;
             --navy: #211568;
             --navy-light: #3a2a8a;
+            --navy-glow: rgba(33, 21, 104, 0.15);
             --red: #DC3545;
             --red-glow: rgba(220, 53, 69, 0.25);
             --red-pale: #fde8ea;
@@ -25,10 +26,24 @@
             --text: #1a1a2e;
             --muted: #6c757d;
             --border: #e9ecef;
-            --sans: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            /* Updated font fallback priority to prioritize Inter */
+            --sans: 'Inter', 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
             --montserrat: 'Montserrat', 'Lato', sans-serif;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
+            /* Bouncy, springy easing for tactile micro-interactions */
+            --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --bounce-soft: cubic-bezier(0.22, 1.15, 0.36, 1);
+            --snap: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
         }
 
         *,
@@ -58,7 +73,7 @@
             background: var(--navy);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 2px solid var(--red);
+            border-bottom: 2px solid var(--navy-light);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -85,27 +100,13 @@
             border-radius: 8px;
         }
 
-        .logo-mark {
-            width: 38px;
-            height: 38px;
-            background: var(--red);
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            color: var(--white);
-            font-size: 18px;
-            font-weight: 900;
-            box-shadow: 0 4px 14px var(--red-glow);
-            font-family: var(--montserrat);
-        }
-
-        /* Logo text fallback */
+        /* Logo text */
         .logo-text {
             display: flex;
             align-items: baseline;
             gap: 4px;
         }
-        .logo-text .rgms {
+        .logo-text .rhms {
             font-weight: 800;
             font-size: 20px;
             color: var(--white);
@@ -128,12 +129,13 @@
         }
 
         .nav-links a {
-            font-size: 14px;
+            font-size: clamp(12px, 1vw, 14px);
             font-weight: 600;
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            transition: color 0.2s;
+            transition: color 0.2s var(--snap), transform 0.35s var(--bounce);
             position: relative;
+            display: inline-block;
             font-family: var(--montserrat);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -146,7 +148,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: var(--red);
+            background: var(--cyan);
             border-radius: 2px;
             transform: scaleX(0);
             transition: transform 0.2s;
@@ -154,6 +156,10 @@
 
         .nav-links a:hover {
             color: var(--white);
+            transform: translateY(-2px) scale(1.06);
+        }
+        .nav-links a:active {
+            transform: translateY(0) scale(0.94);
         }
         .nav-links a:hover::after {
             transform: scaleX(1);
@@ -166,39 +172,131 @@
             background: var(--cyan);
         }
 
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
         .access-btn {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 24px;
+            padding: clamp(8px, 1.4vw, 10px) clamp(16px, 2.4vw, 22px);
             background: var(--red);
             color: var(--white);
             border: none;
             border-radius: 999px;
             font-family: var(--montserrat);
-            font-size: 13px;
+            font-size: clamp(12px, 1vw, 13px);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             text-decoration: none;
             cursor: pointer;
             box-shadow: 0 4px 18px var(--red-glow);
-            transition: box-shadow 0.2s, transform 0.2s;
+            transition: box-shadow 0.3s var(--snap), transform 0.4s var(--bounce);
+            will-change: transform;
         }
 
         .access-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.05);
             box-shadow: 0 8px 28px var(--red-glow);
         }
 
+        .access-btn:active {
+            transform: translateY(0) scale(0.94);
+            transition: transform 0.15s var(--snap);
+        }
+
         .access-btn .arrow-circle {
-            width: 28px;
-            height: 28px;
+            transition: transform 0.4s var(--bounce);
+        }
+        .access-btn:hover .arrow-circle {
+            transform: translateX(3px) rotate(-8deg) scale(1.1);
+        }
+
+        .access-btn .arrow-circle {
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             display: grid;
             place-items: center;
-            font-size: 14px;
+            font-size: 13px;
+        }
+
+        /* Mobile Hamburger Icon */
+        .mobile-menu-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            transition: transform 0.35s var(--bounce);
+        }
+
+        .mobile-menu-toggle:hover {
+            transform: scale(1.15) rotate(-8deg);
+        }
+        .mobile-menu-toggle:active {
+            transform: scale(0.9);
+            transition: transform 0.15s var(--snap);
+        }
+
+        /* Mobile Dropdown Drawer */
+        .mobile-nav-drawer {
+            display: block;
+            position: fixed;
+            top: 72px;
+            left: 0;
+            right: 0;
+            background: var(--navy);
+            border-bottom: 2px solid var(--navy-light);
+            padding: 24px;
+            z-index: 99;
+            box-shadow: var(--shadow-lg);
+            transform-origin: top center;
+            transform: scaleY(0) translateY(-8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.5s var(--bounce), opacity 0.3s var(--snap);
+        }
+
+        .mobile-nav-drawer.open {
+            transform: scaleY(1) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .mobile-nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-family: var(--montserrat);
+            font-size: clamp(14px, 4vw, 15px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            transition: transform 0.35s var(--bounce), color 0.2s;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--sky-blue);
+            transform: translateX(6px);
+        }
+        .mobile-nav-links a:active {
+            transform: translateX(3px) scale(0.97);
+            transition: transform 0.15s var(--snap);
         }
 
         /* ── HERO ── */
@@ -245,17 +343,17 @@
             pointer-events: none;
         }
 
+        /* Refined heading: Normal case for improved legibility */
         .hero-left h1 {
             font-family: var(--montserrat);
-            font-size: clamp(36px, 4vw, 58px);
-            line-height: 1.12;
+            font-size: clamp(34px, 3.8vw, 54px);
+            line-height: 1.15;
             color: var(--white);
             margin-bottom: 22px;
             position: relative;
             z-index: 1;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            text-transform: none;
         }
 
         .hero-left h1 em {
@@ -265,10 +363,10 @@
         }
 
         .hero-left p {
-            font-size: 16px;
+            font-size: clamp(14px, 1.4vw, 16px);
             line-height: 1.8;
             color: rgba(255, 255, 255, 0.7);
-            max-width: 440px;
+            max-width: 460px;
             margin-bottom: 36px;
             position: relative;
             z-index: 1;
@@ -286,37 +384,44 @@
         }
 
         .btn-outline {
-            height: 48px;
-            padding: 0 28px;
+            height: clamp(42px, 5vw, 48px);
+            padding: 0 clamp(20px, 3vw, 28px);
             border: 2px solid rgba(255, 255, 255, 0.25);
             background: transparent;
             border-radius: 999px;
             font-family: var(--montserrat);
-            font-size: 13px;
+            font-size: clamp(12px, 1vw, 13px);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--white);
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
+            transition: background 0.25s var(--snap), border-color 0.25s var(--snap), transform 0.4s var(--bounce);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
+            will-change: transform;
         }
 
         .btn-outline:hover {
             background: rgba(255, 255, 255, 0.05);
             border-color: var(--cyan);
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .btn-outline:active {
+            transform: translateY(0) scale(0.94);
+            transition: transform 0.15s var(--snap);
         }
 
         .btn-red {
-            height: 48px;
-            padding: 0 28px;
+            height: clamp(42px, 5vw, 48px);
+            padding: 0 clamp(20px, 3vw, 28px);
             border: none;
             background: var(--red);
             border-radius: 999px;
             font-family: var(--montserrat);
-            font-size: 13px;
+            font-size: clamp(12px, 1vw, 13px);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -326,13 +431,19 @@
             align-items: center;
             gap: 10px;
             box-shadow: 0 4px 18px var(--red-glow);
-            transition: box-shadow 0.2s, transform 0.2s;
+            transition: box-shadow 0.3s var(--snap), transform 0.4s var(--bounce);
             text-decoration: none;
+            will-change: transform;
         }
 
         .btn-red:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.05);
             box-shadow: 0 8px 28px var(--red-glow);
+        }
+
+        .btn-red:active {
+            transform: translateY(0) scale(0.94);
+            transition: transform 0.15s var(--snap);
         }
 
         .btn-red .arrow-circ {
@@ -343,6 +454,11 @@
             display: grid;
             place-items: center;
             font-size: 13px;
+            transition: transform 0.4s var(--bounce);
+        }
+
+        .btn-red:hover .arrow-circ {
+            transform: translateX(3px) rotate(-8deg) scale(1.1);
         }
 
         /* trust row */
@@ -405,6 +521,11 @@
             object-fit: cover;
             object-position: top center;
             display: block;
+            transition: transform 0.6s var(--bounce-soft);
+        }
+
+        .hero-right:hover img {
+            transform: scale(1.04);
         }
 
         /* floating pills */
@@ -413,13 +534,13 @@
             background: rgba(33, 21, 104, 0.92);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 999px;
             padding: 12px 20px;
             font-size: 13px;
             font-weight: 700;
             color: var(--white);
-            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -428,6 +549,13 @@
             font-family: var(--montserrat);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            transition: transform 0.4s var(--bounce);
+            cursor: default;
+        }
+
+        .pill:hover {
+            animation-play-state: paused;
+            transform: scale(1.08) translateY(-4px) !important;
         }
 
         .pill-icon {
@@ -478,8 +606,9 @@
         /* ── STATS BAR ── */
         .stats-bar {
             background: var(--white);
-            border-top: 2px solid var(--navy);
-            border-bottom: 2px solid var(--navy);
+            /* Clean, light neutral borders instead of heavy navy bands */
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -491,9 +620,15 @@
             display: flex;
             align-items: center;
             gap: 18px;
-            padding: 28px 40px;
+            padding: clamp(20px, 2.5vw, 28px) clamp(20px, 3.5vw, 40px);
             border-right: 1px solid var(--border);
             max-width: 280px;
+            transition: transform 0.4s var(--bounce), background 0.25s var(--snap);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-4px) scale(1.03);
+            background: var(--bg);
         }
 
         .stat-item:last-child {
@@ -508,6 +643,18 @@
             place-items: center;
             font-size: 22px;
             flex-shrink: 0;
+            transition: transform 0.45s var(--bounce);
+        }
+
+        .stat-item:hover .stat-icon {
+            transform: scale(1.15) rotate(-6deg);
+        }
+
+        .stat-num {
+            transition: transform 0.35s var(--bounce);
+        }
+        .stat-item:hover .stat-num {
+            transform: scale(1.05);
         }
 
         .stat-icon.red {
@@ -537,7 +684,7 @@
         }
 
         .stat-num span {
-            color: var(--red);
+            color: var(--navy);
         }
 
         .stat-desc {
@@ -560,24 +707,23 @@
             font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: var(--red);
+            color: var(--cyan);
             margin-bottom: 12px;
             font-family: var(--montserrat);
         }
 
         .section-title {
             font-family: var(--montserrat);
-            font-size: clamp(28px, 3vw, 42px);
+            font-size: clamp(26px, 2.8vw, 38px);
             color: var(--navy);
             margin-bottom: 14px;
-            max-width: 520px;
+            max-width: 540px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-transform: none;
         }
 
         .section-sub {
-            font-size: 15px;
+            font-size: clamp(13px, 1.2vw, 15px);
             color: var(--muted);
             line-height: 1.8;
             max-width: 500px;
@@ -596,16 +742,22 @@
             background: var(--white);
             border: 1px solid var(--border);
             border-radius: 22px;
-            padding: 32px 28px;
+            padding: clamp(24px, 3vw, 32px) clamp(20px, 2.6vw, 28px);
             position: relative;
             overflow: hidden;
-            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            transition: transform 0.45s var(--bounce), box-shadow 0.35s var(--snap), border-color 0.35s var(--snap);
+            will-change: transform;
         }
 
         .feat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 40px var(--red-glow);
-            border-color: var(--red);
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 16px 40px var(--navy-glow);
+            border-color: var(--navy-light);
+        }
+
+        .feat-card:active {
+            transform: translateY(-4px) scale(0.99);
+            transition: transform 0.15s var(--snap);
         }
 
         .feat-card-glow {
@@ -629,6 +781,11 @@
             margin-bottom: 20px;
             position: relative;
             z-index: 1;
+            transition: transform 0.45s var(--bounce);
+        }
+
+        .feat-card:hover .feat-icon {
+            transform: scale(1.15) rotate(-6deg);
         }
 
         .feat-icon.red {
@@ -650,18 +807,17 @@
 
         .feat-card h3 {
             font-family: var(--montserrat);
-            font-size: 18px;
+            font-size: clamp(16px, 1.6vw, 18px);
             color: var(--navy);
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-transform: none;
         }
 
         .feat-card p {
-            font-size: 14px;
+            font-size: clamp(13px, 1.1vw, 14px);
             line-height: 1.75;
             color: var(--muted);
             position: relative;
@@ -696,7 +852,7 @@
             left: calc(16.6% + 24px);
             right: calc(16.6% + 24px);
             height: 2px;
-            background: linear-gradient(90deg, var(--red), var(--cyan));
+            background: linear-gradient(90deg, var(--navy), var(--cyan));
             border-radius: 2px;
             z-index: 0;
         }
@@ -711,25 +867,31 @@
             z-index: 1;
         }
 
+        /* Step circle colors updated to brand navy/cyan hierarchy */
         .step-num {
             width: 72px;
             height: 72px;
             border-radius: 50%;
-            background: var(--red);
+            background: var(--navy);
             color: var(--white);
             font-size: 22px;
             font-weight: 800;
             display: grid;
             place-items: center;
             margin-bottom: 28px;
-            box-shadow: 0 8px 24px var(--red-glow);
+            box-shadow: 0 8px 24px var(--navy-glow);
             position: relative;
             font-family: var(--montserrat);
+            transition: transform 0.45s var(--bounce), box-shadow 0.35s var(--snap);
+        }
+
+        .step-item:hover .step-num {
+            transform: scale(1.12) translateY(-4px);
         }
 
         .step-item:nth-child(2) .step-num {
-            background: var(--navy);
-            box-shadow: 0 8px 24px rgba(33, 21, 104, 0.28);
+            background: var(--navy-light);
+            box-shadow: 0 8px 24px rgba(58, 42, 138, 0.28);
         }
 
         .step-item:nth-child(3) .step-num {
@@ -739,16 +901,15 @@
 
         .step-item h3 {
             font-family: var(--montserrat);
-            font-size: 20px;
+            font-size: clamp(17px, 1.8vw, 20px);
             color: var(--navy);
             margin-bottom: 10px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-transform: none;
         }
 
         .step-item p {
-            font-size: 14px;
+            font-size: clamp(13px, 1.1vw, 14px);
             color: var(--muted);
             line-height: 1.75;
             font-family: var(--sans);
@@ -767,16 +928,15 @@
 
         .alert-copy h2 {
             font-family: var(--montserrat);
-            font-size: clamp(28px, 3vw, 42px);
+            font-size: clamp(26px, 2.8vw, 38px);
             color: var(--navy);
             margin-bottom: 16px;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-transform: none;
         }
 
         .alert-copy p {
-            font-size: 15px;
+            font-size: clamp(13px, 1.2vw, 15px);
             color: var(--muted);
             line-height: 1.8;
             margin-bottom: 32px;
@@ -848,15 +1008,20 @@
             gap: 14px;
             padding: 16px 22px;
             border-bottom: 1px solid var(--border);
-            transition: background 0.18s;
-            cursor: default;
+            transition: background 0.2s var(--snap), transform 0.35s var(--bounce);
+            cursor: pointer;
         }
 
         .alert-row:last-child {
             border-bottom: none;
         }
         .alert-row:hover {
-            background: var(--bg);
+            background: #f1f5f9;
+            transform: translateX(4px) scale(1.01);
+        }
+        .alert-row:active {
+            transform: translateX(2px) scale(0.98);
+            transition: transform 0.15s var(--snap);
         }
 
         .alert-indicator {
@@ -883,13 +1048,13 @@
             flex: 1;
         }
         .alert-patient {
-            font-size: 13px;
+            font-size: clamp(12px, 1vw, 13px);
             font-weight: 700;
             color: var(--text);
             font-family: var(--montserrat);
         }
         .alert-detail {
-            font-size: 12px;
+            font-size: clamp(11px, 0.9vw, 12px);
             color: var(--muted);
             margin-top: 2px;
             font-family: var(--sans);
@@ -939,7 +1104,7 @@
             position: relative;
             overflow: hidden;
             box-shadow: var(--shadow-lg);
-            border: 2px solid var(--red);
+            border: 1px solid var(--navy-light);
         }
 
         .cta-banner::before {
@@ -948,7 +1113,7 @@
             width: 400px;
             height: 400px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 163, 224, 0.06) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(0, 163, 224, 0.08) 0%, transparent 70%);
             top: -150px;
             right: -100px;
         }
@@ -966,18 +1131,17 @@
 
         .cta-banner h2 {
             font-family: var(--montserrat);
-            font-size: clamp(26px, 2.8vw, 40px);
+            font-size: clamp(24px, 2.6vw, 36px);
             color: var(--white);
             margin-bottom: 12px;
             position: relative;
             z-index: 1;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-transform: none;
         }
 
         .cta-banner p {
-            font-size: 15px;
+            font-size: clamp(13px, 1.2vw, 15px);
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.75;
             max-width: 500px;
@@ -1001,57 +1165,70 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            padding: 14px 32px;
+            padding: clamp(12px, 1.6vw, 14px) clamp(24px, 3vw, 32px);
             background: var(--white);
             color: var(--navy);
             border: none;
             border-radius: 999px;
             font-family: var(--montserrat);
-            font-size: 13px;
+            font-size: clamp(12px, 1vw, 13px);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             text-decoration: none;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.4s var(--bounce), box-shadow 0.3s var(--snap);
             white-space: nowrap;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            will-change: transform;
         }
 
         .btn-white:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.05);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-white:active {
+            transform: translateY(0) scale(0.94);
+            transition: transform 0.15s var(--snap);
         }
 
         .btn-white-outline {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 14px 32px;
+            padding: clamp(12px, 1.6vw, 14px) clamp(24px, 3vw, 32px);
             background: transparent;
             color: var(--white);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 999px;
             font-family: var(--montserrat);
-            font-size: 13px;
+            font-size: clamp(12px, 1vw, 13px);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             text-decoration: none;
             cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
+            transition: border-color 0.25s var(--snap), background 0.25s var(--snap), transform 0.4s var(--bounce);
             white-space: nowrap;
+            will-change: transform;
         }
 
         .btn-white-outline:hover {
-            border-color: var(--red);
+            border-color: var(--cyan);
             background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .btn-white-outline:active {
+            transform: translateY(0) scale(0.94);
+            transition: transform 0.15s var(--snap);
         }
 
         /* ── FOOTER ── */
         footer {
             background: var(--navy);
-            border-top: 2px solid var(--red);
+            border-top: 1px solid var(--navy-light);
             padding: 28px 72px;
             display: flex;
             align-items: center;
@@ -1139,20 +1316,22 @@
             .nav-links {
                 display: none;
             }
+            .mobile-menu-toggle {
+                display: block;
+            }
             .hero {
                 grid-template-columns: 1fr;
                 max-height: none;
             }
             .hero-right {
-                height: 340px;
+                height: 320px;
             }
             .hero-left {
                 padding: 52px 24px;
             }
             .features-section,
             .how-section,
-            .alert-section,
-            .how-section {
+            .alert-section {
                 padding: 60px 24px;
             }
             .features-grid {
@@ -1184,8 +1363,12 @@
                 text-align: center;
             }
             .pill {
-                display: none;
+                padding: 8px 14px;
+                font-size: 11px;
             }
+            .pill.p1 { top: 10%; left: 4%; }
+            .pill.p2 { top: 40%; right: 4%; }
+            .pill.p3 { bottom: 10%; right: 6%; }
         }
 
         @media (max-width: 480px) {
@@ -1221,40 +1404,55 @@
     <!-- ── NAVBAR ── -->
     <nav>
         <a href="#" class="logo">
-            <img src="{% static 'admin/img/logo.png' %}" alt="RGMS Logo" onerror="this.style.display='none'">
+            <img src="{% static 'admin/img/logo.png' %}" alt="RHMS Logo" onerror="this.style.display='none'">
             <div class="logo-text">
-                <span class="rgms">RHMS</span>
+                <span class="rhms">RHMS</span>
                 <span class="portal">Portal</span>
             </div>
         </a>
 
         <ul class="nav-links">
             <li><a href="#" class="active">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#workflow">Workflow</a></li>
             <li><a href="{% url 'admin:index' %}">Admin Login</a></li>
-            <li><a href="#users">Patients</a></li>
             <li><a href="https://genesismedevac.com/" target="_blank">Genesis Medevac</a></li>
         </ul>
 
-        <a href="{% url 'login' %}" class="access-btn">
-            Access Portal
-            <span class="arrow-circle">→</span>
-        </a>
+        <div class="nav-right">
+            <a href="{% url 'login' %}" class="access-btn">
+                Access Portal
+                <span class="arrow-circle">→</span>
+            </a>
+            <button class="mobile-menu-toggle" id="menuToggle" aria-label="Toggle navigation menu">☰</button>
+        </div>
     </nav>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-drawer" id="mobileDrawer">
+        <ul class="mobile-nav-links">
+            <li><a href="#" onclick="toggleMobileMenu()">Home</a></li>
+            <li><a href="#features" onclick="toggleMobileMenu()">Features</a></li>
+            <li><a href="#workflow" onclick="toggleMobileMenu()">Workflow</a></li>
+            <li><a href="{% url 'admin:index' %}">Admin Login</a></li>
+            <li><a href="https://genesismedevac.com/" target="_blank">Genesis Medevac</a></li>
+        </ul>
+    </div>
 
     <!-- ── HERO ── -->
     <section class="hero">
         <div class="hero-left">
             <h1>Remote Health Monitoring, <em>Simplified.</em></h1>
             <p>
-                Faster clinical action from home health monitoring reports. RHMS connects patients and caregivers to doctors who actively monitor and act on abnormal values from one clear command centre- in real time
+                Faster clinical action from home health monitoring reports. RHMS connects patients and caregivers to doctors who actively monitor and act on abnormal values from one clear command centre in real time.
             </p>
 
             <div class="hero-actions">
-                <a href="{% url 'admin:index' %}" class="btn-outline">Admin Login</a>
                 <a href="{% url 'login' %}" class="btn-red">
                     Access Portal
                     <span class="arrow-circ">→</span>
                 </a>
+                <a href="#features" class="btn-outline">Explore Features</a>
             </div>
 
             <div class="trust-row">
@@ -1271,7 +1469,7 @@
         </div>
 
         <div class="hero-right">
-            <img src="https://images.unsplash.com/photo-1638202993928-7267aad84c31?auto=format&fit=crop&w=900&q=80" alt="Doctor reviewing patient vitals" />
+            <img src="https://images.pexels.com/photos/19963130/pexels-photo-19963130.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Doctor reviewing patient vitals" />
 
             <div class="pill p1">
                 <div class="pill-icon" style="background:rgba(220,53,69,0.15); color:var(--red);">💓</div>
@@ -1334,7 +1532,7 @@
         <div class="features-grid">
 
             <div class="feat-card">
-                <div class="feat-card-glow" style="background:rgba(220,53,69,0.06);"></div>
+                <div class="feat-card-glow" style="background:rgba(0,163,224,0.06);"></div>
                 <div class="feat-icon red">📋</div>
                 <h3>Caregiver Entry</h3>
                 <p>Simple, guided form for BP, blood sugar, pulse rate, symptoms, and free-text notes — from any device, any time.</p>
@@ -1365,7 +1563,7 @@
     </section>
 
     <!-- ── HOW IT WORKS ── -->
-    <section class="how-section">
+    <section class="how-section" id="workflow">
         <div class="header">
             <div class="section-eyebrow">Workflow</div>
             <h2 class="section-title" style="max-width:100%; text-align:center;">Three steps. One closed care loop.</h2>
@@ -1381,7 +1579,7 @@
             <div class="step-item">
                 <div class="step-num">2</div>
                 <h3>System Flags Abnormals</h3>
-                <p>RGMS analyses each submission against clinical thresholds and instantly flags critical or elevated readings for review.</p>
+                <p>RHMS analyses each submission against clinical thresholds and instantly flags critical or elevated readings for review.</p>
             </div>
             <div class="step-item">
                 <div class="step-num">3</div>
@@ -1466,8 +1664,8 @@
     <!-- ── CTA BANNER ── -->
     <div class="cta-banner">
         <div>
-            <h2>Ready to bring Health care closer?</h2>
-            <p>Join clinicians and caregivers already using RHMS to keep every patients safer — from wherever they are.</p>
+            <h2>Ready to bring healthcare closer?</h2>
+            <p>Join clinicians and caregivers already using RHMS to keep every patient safer — from wherever they are.</p>
         </div>
         <div class="cta-btns">
             <a href="{% url 'login' %}" class="btn-white">
@@ -1486,5 +1684,17 @@
         <span class="footer-copy">© 2026 Health Monitoring System. Clinical monitoring, simplified.</span>
     </footer>
 
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileDrawer = document.getElementById('mobileDrawer');
+
+        function toggleMobileMenu() {
+            mobileDrawer.classList.toggle('open');
+        }
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', toggleMobileMenu);
+        }
+    </script>
 </body>
 </html>
