@@ -7,21 +7,69 @@ from pathlib import Path
 from decouple import config
 import dj_database_url
 from dotenv import load_dotenv
-load_dotenv()
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-w%@jjq5-c(-h4_k7_t2b2pm^i0#wih^#e!t9zkfljw)b6$77av')
-DEBUG = config('DEBUG', default=True, cast=bool)
+# ============================================
+# LOAD .ENV FILE - Explicitly from project root
+# ============================================
+env_path = BASE_DIR / '.env'
+print(f"🔍 Loading .env from: {env_path}")
+print(f"🔍 .env exists: {env_path.exists()}")
+load_dotenv(dotenv_path=env_path, override=True)
 
+# ============================================
+# SECURITY WARNING
+# ============================================
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-w%@jjq5-c(-h4_k7_t2b2pm^i0#wih^#e!t9zkfljw)b6$77av')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+# ============================================
+# ALLOWED HOSTS
+# ============================================
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='127.0.0.1,localhost,remote-geriatric-monitoring-system.onrender.com'
+    default='127.0.0.1,localhost,remotehealthmonitor.com.ng,www.remotehealthmonitor.com.ng'
 ).split(',')
 
-# Application definition
+# ============================================
+# CSRF TRUSTED ORIGINS
+# ============================================
+CSRF_TRUSTED_ORIGINS = [
+    'https://remotehealthmonitor.com.ng',
+    'https://www.remotehealthmonitor.com.ng',
+    'http://remotehealthmonitor.com.ng',
+    'http://www.remotehealthmonitor.com.ng',
+]
+
+# ============================================
+# DATABASE CONFIGURATION
+# ============================================
+DATABASE_URL = os.environ.get('DATABASE_URL')
+print(f"🔍 DEBUG: DATABASE_URL = {DATABASE_URL}")
+
+if DATABASE_URL and DATABASE_URL.startswith('postgres'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+    print("✅ Using PostgreSQL database")
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    print("⚠️ Falling back to SQLite (DATABASE_URL not set or invalid)")
+
+# ============================================
+# APPLICATION DEFINITION
+# ============================================
 INSTALLED_APPS = [
     'jazzmin',  # MUST BE FIRST
     
@@ -65,37 +113,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'rgms_core.wsgi.application'
 
 # ============================================
-# DATABASE CONFIGURATION - SQLITE FOR DEVELOPMENT
+# PASSWORD VALIDATION
 # ============================================
-
-# ✅ SQLite Database (Default for local development)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# ❌ POSTGRESQL CONFIGURATION - COMMENTED OUT
-# ============================================
-# # PostgreSQL from environment (for Render.com deployment)
-# DATABASE_URL = os.environ.get('DATABASE_URL')
-# 
-# if DATABASE_URL:
-#     # Use PostgreSQL from DATABASE_URL
-#     DATABASES['default'] = dj_database_url.config(
-#         default=DATABASE_URL,
-#         conn_max_age=600,
-#         conn_health_checks=True,
-#     )
-#     print(f"✅ Using PostgreSQL database")
-# else:
-#     # If no DATABASE_URL, use SQLite (for local development)
-#     print("ℹ️ Using SQLite database (set DATABASE_URL for PostgreSQL)")
-
-print("✅ Using SQLite database for development")
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -111,22 +130,46 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# ============================================
+# INTERNATIONALIZATION
+# ============================================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# ============================================
+# STATIC FILES
+# ============================================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Default primary key field type
+# ============================================
+# MEDIA FILES
+# ============================================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# ============================================
+# DEFAULT PRIMARY KEY FIELD TYPE
+# ============================================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-## rgms_core/settings.py
+# ============================================
+# SECURITY SETTINGS - Enable once SSL is working
+# ============================================
+# Uncomment these after SSL is set up:
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# X_FRAME_OPTIONS = 'DENY'
+# SECURE_HSTS_SECONDS = 31536000  # 1 year
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
 
 # ============================================
 # JAZZMIN CONFIGURATION
@@ -138,28 +181,12 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Welcome to RHMS Admin",
     "copyright": "RHMS © 2026",
     
-    # ============================================
-    # LOGO SETTINGS - TRY THESE OPTIONS
-    # ============================================
-    
-    # Option 1: Try with leading slash (RECOMMENDED)
+    # Logo Settings
     "site_logo": "images/logo.png",
-    "site_logo_classes": "img-fluid",  # Changed from img-circle
+    "site_logo_classes": "img-fluid",
     "site_icon": "/static/admin/img/favicon.ico",
     "login_logo": "images/logo.png",
     "login_logo_classes": "img-fluid",
-    
-    # Option 2: If Option 1 doesn't work, try using images folder
-    # "site_logo": "/static/images/logo.png",
-    # "login_logo": "/static/images/logo.png",
-    
-    # Option 3: If Option 2 doesn't work, try without leading slash
-    # "site_logo": "admin/img/logo.png",
-    # "login_logo": "admin/img/logo.png",
-    
-    # Option 4: Try using STATIC_URL
-    # "site_logo": "img/logo.png",
-    # "login_logo": "img/logo.png",
     
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -236,7 +263,8 @@ JAZZMIN_UI_TWEAKS = {
     }
 }
 
-# Email Configuration
+# ============================================
+# EMAIL CONFIGURATION
 # ============================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -246,14 +274,44 @@ EMAIL_HOST_USER = os.getenv('GMAIL_EMAIL')
 EMAIL_HOST_PASSWORD = os.getenv('GMAIL_APP_PASSWORD')
 DEFAULT_FROM_EMAIL = f'RGMS System <{os.getenv("GMAIL_EMAIL")}>'
 
-# Logout redirect URL
-LOGOUT_REDIRECT_URL = 'home'  # Redirect to homepage after logout
-
-# Site URL for email links and other absolute URLs
-SITE_URL = 'http://127.0.0.1:8000'  # Development URL
-
-
-# Also add this for consistency
+# ============================================
+# URL CONFIGURATION
+# ============================================
+SITE_URL = 'https://remotehealthmonitor.com.ng'
 BASE_URL = SITE_URL
 
+# ============================================
+# AUTHENTICATION & LOGIN
+# ============================================
+LOGOUT_REDIRECT_URL = 'home'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/caregiver/dashboard/'
 
+# ============================================
+# LOGGING (Optional - for debugging)
+# ============================================
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'monitoring': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
