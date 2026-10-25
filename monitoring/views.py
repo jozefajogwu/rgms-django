@@ -93,7 +93,8 @@ def get_patient_chart_data(patient, days=7):
     }
     
     for reading in readings:
-        chart_data['labels'].append(reading.created_at.strftime('%Y-%m-%d %H:%M'))
+        # ✅ UPDATED: Cleaner date format for X-axis
+        chart_data['labels'].append(reading.created_at.strftime('%b %d, %H:%M'))
         chart_data['systolic'].append(float(reading.systolic_bp))
         chart_data['diastolic'].append(float(reading.diastolic_bp))
         chart_data['pulse'].append(float(reading.pulse_rate))
@@ -997,7 +998,7 @@ def patient_detail(request, patient_id):
     # Get readings for the table (last 20)
     recent_readings = readings[:20]
     
-    # Get actions for alerts
+    # ✅ UPDATED: Get actions for alerts with latest_action
     alert_actions = []
     for alert in active_alerts:
         actions = AlertAction.objects.filter(alert=alert).order_by('-created_at')
@@ -1005,6 +1006,7 @@ def patient_detail(request, patient_id):
             'alert': alert,
             'actions': actions,
             'action_count': actions.count(),
+            'latest_action': actions.first(), # <--- ADDED: Fetches the most recent feedback
         })
     
     context = {
