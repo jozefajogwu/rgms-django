@@ -101,12 +101,16 @@ def get_patient_chart_data(patient, days=7):
         chart_data['spo2'].append(float(reading.oxygen_saturation) if reading.oxygen_saturation else None)
         chart_data['sugar'].append(float(reading.fasting_blood_sugar) if reading.fasting_blood_sugar else None)
     
+    # ✅ FIXED: Safely calculate averages (prevents ZeroDivisionError if data is missing)
+    spo2_values = [s for s in chart_data['spo2'] if s is not None]
+    sugar_values = [s for s in chart_data['sugar'] if s is not None]
+    
     stats = {
         'avg_systolic': round(sum(chart_data['systolic']) / len(chart_data['systolic']), 1) if chart_data['systolic'] else 0,
         'avg_diastolic': round(sum(chart_data['diastolic']) / len(chart_data['diastolic']), 1) if chart_data['diastolic'] else 0,
         'avg_pulse': round(sum(chart_data['pulse']) / len(chart_data['pulse']), 1) if chart_data['pulse'] else 0,
-        'avg_spo2': round(sum([s for s in chart_data['spo2'] if s]) / len([s for s in chart_data['spo2'] if s]), 1) if chart_data['spo2'] else 0,
-        'avg_sugar': round(sum([s for s in chart_data['sugar'] if s]) / len([s for s in chart_data['sugar'] if s]), 1) if chart_data['sugar'] else 0,
+        'avg_spo2': round(sum(spo2_values) / len(spo2_values), 1) if spo2_values else 0,
+        'avg_sugar': round(sum(sugar_values) / len(sugar_values), 1) if sugar_values else 0,
         'trend': 'up' if chart_data['systolic'] and chart_data['systolic'][-1] > chart_data['systolic'][0] else 'down' if chart_data['systolic'] and chart_data['systolic'][-1] < chart_data['systolic'][0] else 'stable',
         'readings_count': len(readings),
         'latest_reading': readings.first() if readings else None,
