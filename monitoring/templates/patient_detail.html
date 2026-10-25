@@ -18,7 +18,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
         /* ============================================ */
@@ -1117,155 +1117,109 @@
     <!-- ============================================ -->
     <!-- CHARTS SCRIPTS -->
     <!-- ============================================ -->
+    {{ chart_data|json_script:"chart-data" }}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const chartData = {
-                labels: {{ chart_data.labels|safe }},
-                systolic: {{ chart_data.systolic|safe }},
-                diastolic: {{ chart_data.diastolic|safe }},
-                pulse: {{ chart_data.pulse|safe }},
-                spo2: {{ chart_data.spo2|safe }},
-                sugar: {{ chart_data.sugar|safe }}
-            };
+    document.addEventListener('DOMContentLoaded', function () {
+        const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+        const single = chartData.labels.length === 1;
+        const hasValues = (arr) => Array.isArray(arr) && arr.some(v => v !== null && v !== undefined);
+        const mono = { size: 9, family: "'DM Mono', monospace" };
 
-            // Helper to create threshold dashed lines
-            const createThresholdLines = (labels, value, color) => {
-                return {
-                    label: 'Threshold',
-                    data: new Array(labels.length).fill(value),
-                    borderColor: color,
-                    borderWidth: 1.5,
-                    borderDash: [5, 5],
-                    pointRadius: 0,
-                    fill: false,
-                    tension: 0
-                };
-            };
+        const threshold = (value, color) => ({
+            label: 'Threshold',
+            data: new Array(chartData.labels.length).fill(value),
+            borderColor: color, borderWidth: 1.5, borderDash: [5, 5],
+            pointRadius: 0, pointHoverRadius: 0, fill: false, tension: 0
+        });
 
-            function createChart(canvasId, label, data, color, unit, yAxisLabel, thresholds = []) {
-                const canvas = document.getElementById(canvasId);
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) return;
-                
-                // If there's no data at all, show a message
-                if (!data || data.length === 0) {
-                    ctx.fillStyle = '#94a3b8';
-                    ctx.font = '12px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('No data recorded', canvas.width / 2, canvas.height / 2 + 4);
-                    return;
-                }
+        const series = (label, data, color, bg) => ({
+            label, data, borderColor: color, backgroundColor: bg,
+            borderWidth: 2.5, pointRadius: single ? 5 : 3, pointHoverRadius: 7,
+            pointBackgroundColor: color, fill: !single, tension: 0.3, spanGaps: true
+        });
 
-                // Build datasets
-                const datasets = [{
-                    label: label,
-                    data: data,
-                    borderColor: color,
-                    backgroundColor: color + '15',
-                    borderWidth: 2.5,
-                    pointRadius: 4, // ✅ Make dots bigger so single readings are visible
-                    pointHoverRadius: 6,
-                    fill: true,
-                    tension: 0.3,
-                    spanGaps: true // ✅ THIS CONNECTS THE GAPS WHEN DATA IS NULL
-                }];
+        function noData(canvas) {
+            canvas.parentElement.innerHTML =
+                '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px;">No data recorded</div>';
+        }
 
-                // Add thresholds if provided
-                thresholds.forEach(t => {
-                    datasets.push(createThresholdLines(chartData.labels, t.value, t.color));
-                });
-
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: chartData.labels, // ✅ Use the full labels
-                        datasets: datasets
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false, // ✅ Fixes the height issue
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { 
-                                mode: 'index', 
-                                intersect: false,
-                                callbacks: { 
-                                    label: function(context) { 
-                                        if (context.dataset.label === 'Threshold') return null;
-                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + (unit || ''); 
-                                    } 
-                                } 
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: { font: { size: 9, family: "'DM Mono', monospace" }, maxTicksLimit: 5, autoSkip: true }
-                            },
-                            y: {
-                                grid: { color: 'rgba(0,0,0,0.05)' },
-                                ticks: { font: { size: 9, family: "'DM Mono', monospace" } },
-                                title: { display: true, text: yAxisLabel || '', font: { size: 9, family: "'Inter', sans-serif" } }
-                            }
-                        },
-                        interaction: { mode: 'index', intersect: false }
+        function baseOptions(unit, decimals, yTitle, showLegend) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: showLegend
+                        ? { position: 'top', labels: { usePointStyle: true, font: { size: 10 }, filter: i => i.text !== 'Threshold' } }
+                        : { display: false },
+                    tooltip: {
+                        filter: (item) => item.dataset.label !== 'Threshold' && item.parsed.y !== null,
+                        callbacks: {
+                            label: (c) => c.dataset.label + ': ' + c.parsed.y.toFixed(decimals) + unit
+                        }
                     }
-                });
-            }
+                },
+                scales: {
+                    x: { offset: single, grid: { display: false }, ticks: { font: mono, maxTicksLimit: 5, autoSkip: true } },
+                    y: {
+                        grace: '10%',
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { font: mono },
+                        title: { display: !!yTitle, text: yTitle || '', font: { size: 9, family: "'Inter', sans-serif" } }
+                    }
+                }
+            };
+        }
 
-            // 1. Blood Pressure
-            const bpCanvas = document.getElementById('bpChart');
-            if (bpCanvas && chartData.labels.length > 0) {
-                const bpCtx = bpCanvas.getContext('2d');
-                new Chart(bpCtx, {
+        function createChart(canvasId, label, data, color, unit, yTitle, thresholds) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            if (!hasValues(data)) return noData(canvas);
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [series(label, data, color, color + '15'),
+                               ...thresholds.map(t => threshold(t.value, t.color))]
+                },
+                options: baseOptions(unit, 1, yTitle, false)
+            });
+        }
+
+        // 1. Blood Pressure (two series)
+        const bpCanvas = document.getElementById('bpChart');
+        if (bpCanvas) {
+            if (!hasValues(chartData.systolic) && !hasValues(chartData.diastolic)) {
+                noData(bpCanvas);
+            } else {
+                new Chart(bpCanvas, {
                     type: 'line',
                     data: {
                         labels: chartData.labels,
                         datasets: [
-                            { label: 'Systolic', data: chartData.systolic, borderColor: '#DC3545', backgroundColor: 'rgba(220,53,69,0.08)', borderWidth: 2.5, pointRadius: 4, fill: true, tension: 0.3, spanGaps: true },
-                            { label: 'Diastolic', data: chartData.diastolic, borderColor: '#D4A843', backgroundColor: 'rgba(212,168,67,0.08)', borderWidth: 2.5, pointRadius: 4, fill: true, tension: 0.3, spanGaps: true },
-                            // Thresholds
-                            createThresholdLines(chartData.labels, 140, '#DC3545'),
-                            createThresholdLines(chartData.labels, 90, '#D4A843')
+                            series('Systolic', chartData.systolic, '#DC3545', 'rgba(220,53,69,0.08)'),
+                            series('Diastolic', chartData.diastolic, '#D4A843', 'rgba(212,168,67,0.08)'),
+                            threshold(140, '#DC3545'),
+                            threshold(90, '#D4A843')
                         ]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'top', labels: { usePointStyle: true, font: { size: 10 } } },
-                            tooltip: { 
-                                mode: 'index', intersect: false, 
-                                filter: (item) => item.dataset.label !== 'Threshold',
-                                callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y.toFixed(0) + ' mmHg'; } } 
-                            }
-                        },
-                        scales: {
-                            x: { grid: { display: false }, ticks: { font: { size: 9, family: "'DM Mono', monospace" }, maxTicksLimit: 5, autoSkip: true } },
-                            y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 9, family: "'DM Mono', monospace" } } }
-                        },
-                        interaction: { mode: 'index', intersect: false }
-                    }
+                    options: baseOptions(' mmHg', 0, 'mmHg', true)
                 });
             }
+        }
 
-            // 2. Heart Rate
-            createChart('pulseChart', 'Heart Rate', chartData.pulse, '#0d9488', ' bpm', 'bpm', [
-                { value: 100, color: '#DC3545' }, 
-                { value: 60, color: '#0d9488' }
-            ]);
+        // 2. Heart Rate
+        createChart('pulseChart', 'Heart Rate', chartData.pulse, '#0d9488', ' bpm', 'bpm',
+            [{ value: 100, color: '#DC3545' }, { value: 60, color: '#0d9488' }]);
 
-            // 3. SpO2
-            createChart('spo2Chart', 'SpO2', chartData.spo2, '#8b5cf6', '%', '%', [
-                { value: 95, color: '#DC3545' }
-            ]);
+        // 3. SpO2
+        createChart('spo2Chart', 'SpO2', chartData.spo2, '#8b5cf6', '%', '%',
+            [{ value: 95, color: '#DC3545' }]);
 
-            // 4. Blood Sugar
-            createChart('sugarChart', 'Blood Sugar', chartData.sugar, '#f59e0b', ' mg/dL', 'mg/dL', [
-                { value: 126, color: '#DC3545' }
-            ]);
-        });
+        // 4. Blood Sugar
+        createChart('sugarChart', 'Blood Sugar', chartData.sugar, '#f59e0b', ' mg/dL', 'mg/dL',
+            [{ value: 126, color: '#DC3545' }]);
+    });
     </script>
 
 </body>
